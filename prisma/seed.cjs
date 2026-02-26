@@ -1,4 +1,5 @@
 const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcrypt');
 
 const prisma = new PrismaClient();
 
@@ -282,14 +283,17 @@ async function main() {
     console.log('Seeded financial movements successfully!');
 
     // Create default user
+    const adminPassword = await bcrypt.hash('admin123', 10);
     await prisma.usuario.upsert({
-        where: { email: 'admin@sistema.com' },
-        update: {},
+        where: { username: 'admin' },
+        update: {
+            password: adminPassword,
+            role: 'admin'
+        },
         create: {
-            nombre: 'Administrador',
-            email: 'admin@sistema.com',
-            password: 'admin123',
-            rol: 'Administrador'
+            username: 'admin',
+            password: adminPassword,
+            role: 'admin'
         }
     });
 
