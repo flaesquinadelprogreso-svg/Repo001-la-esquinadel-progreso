@@ -7,7 +7,7 @@
     "dev": "vite",
     "server": "node --watch server.cjs",
     "dev:full": "concurrently \"npm run server\" \"npm run dev\"",
-    "start": "npx prisma migrate deploy && node server.cjs",
+    "start": "npx prisma db push && node server.cjs",
     "postinstall": "prisma generate",
     "build": "vite build",
     "lint": "eslint .",
