@@ -1,0 +1,464 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CLIENTES Y PROVEEDORES
+// ═══════════════════════════════════════════════════════════════
+
+model Cliente {
+  id        Int       @id @default(autoincrement())
+  nombre    String
+  documento String    @unique
+  telefono  String?
+  email     String?
+  tipo      String    @default("Regular") // Regular, Frecuente, Empresa
+  direccion String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  // Relaciones
+  cuentasPorCobrar CuentaPorCobrar[]
+  ventas           Venta[]
+  devoluciones     Devolucion[]
+}
+
+model Proveedor {
+  id        Int       @id @default(autoincrement())
+  nombre    String
+  nit       String    @unique
+  telefono  String?
+  email     String?
+  direccion String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  // Relaciones
+  cuentasPorPagar CuentaPorPagar[]
+  compras         Compra[]
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INVENTARIO
+// ═══════════════════════════════════════════════════════════════
+
+model Ubicacion {
+  id        Int       @id @default(autoincrement())
+  nombre    String    @unique
+  createdAt DateTime  @default(now())
+  
+  // Relaciones
+  stockUbicaciones StockUbicacion[]
+  itemsVenta       ItemVenta[]
+  itemsCompra      ItemCompra[]
+}
+
+model Producto {
+  id          Int       @id @default(autoincrement())
+  codigo      String    @unique
+  nombre      String
+  descripcion String?
+  precio      Int       // Precio en centavos para evitar decimales
+  costo       Int       @default(0)
+  stockMinimo Int       @default(5)
+  precioMayor Int?      // Precio al por mayor opcional
+  categoria   String?
+  imagen      String?
+  activo      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relaciones
+  stockUbicaciones StockUbicacion[]
+  itemsVenta       ItemVenta[]
+  itemsCompra      ItemCompra[]
+  itemsDevolucion  ItemDevolucion[]
+}
+
+model StockUbicacion {
+  id          Int      @id @default(autoincrement())
+  productoId  Int
+  ubicacionId Int
+  stock       Int      @default(0)
+  
+  producto   Producto  @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  ubicacion  Ubicacion @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  
+  @@unique([productoId, ubicacionId])
+}
+
+model Servicio {
+  id          Int      @id @default(autoincrement())
+  codigo      String
+  nombre      String
+  descripcion String?
+  precio      Int      // Precio en centavos
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relaciones
+  itemsVenta ItemVenta[]
+}
+
+// ═══════════════════════════════════════════════════════════════
+// VENTAS (POS)
+// ═══════════════════════════════════════════════════════════════
+
+model Venta {
+  id              Int       @id @default(autoincrement())
+  numeroRecibo    String    @unique
+  clienteId       Int?
+  subtotal        Int
+  iva             Int
+  ivaTasa         Int       // 19, 5, 0
+  total           Int
+  metodoPago      String    // efectivo, tarjeta, transferencia, credito, multiple
+  estado          String    @default("completada") // completada, anulada
+  tipo            String    @default("VENTA") // VENTA, DEVOLUCION
+  referencia      String?   // Para devoluciones: número de factura original
+  ventaOriginalId Int?      // Para devoluciones: ID de la venta original
+  fechaVencimiento String?  // Para ventas a crédito
+  createdAt       DateTime  @default(now())
+  
+  cliente         Cliente?  @relation(fields: [clienteId], references: [id])
+  ventaOriginal   Venta?    @relation("DevolucionVenta", fields: [ventaOriginalId], references: [id])
+  devolucionesRef Venta[]   @relation("DevolucionVenta")
+  
+  items           ItemVenta[]
+  pagos             PagoVenta[]
+  movimientosCaja   MovimientoCaja[]
+  devoluciones      Devolucion[]
+}
+
+model ItemVenta {
+  id           Int      @id @default(autoincrement())
+  ventaId      Int
+  productoId   Int?
+  servicioId   Int?
+  nombre       String
+  codigo       String
+  cantidad     Int
+  cantidadDevuelta Int @default(0) // Control de devoluciones para el item
+  precioUnit   Int
+  subtotal     Int
+  esServicio   Boolean  @default(false)
+  locationId   Int?     // Nueva: Para saber de qué ubicación se descontó el stock
+  
+  // Históricos de Rentabilidad
+  costo_unitario_ponderado Int?
+  valor_compra_total       Int?
+  valor_venta_total        Int?
+  ganancia                 Int?
+  
+  venta        Venta     @relation(fields: [ventaId], references: [id], onDelete: Cascade)
+  producto     Producto? @relation(fields: [productoId], references: [id])
+  servicio     Servicio? @relation(fields: [servicioId], references: [id])
+  ubicacion    Ubicacion? @relation(fields: [locationId], references: [id])
+}
+
+model PagoVenta {
+  id         Int     @id @default(autoincrement())
+  ventaId    Int
+  metodo     String  // efectivo, tarjeta, transferencia
+  monto      Int
+  referencia String?
+  
+  venta      Venta   @relation(fields: [ventaId], references: [id], onDelete: Cascade)
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DEVOLUCIONES / RETORNOS
+// ═══════════════════════════════════════════════════════════════
+
+model Devolucion {
+  id              Int       @id @default(autoincrement())
+  ventaId         Int       // Venta original
+  clienteId       Int?
+  numeroDevolucion String   @unique // Número único de devolución
+  tipo            String    // parcial, total
+  motivo          String?
+  subtotal        Int       // Subtotal devuelto
+  iva             Int       // IVA devuelto
+  total           Int       // Total devuelto
+  metodoReembolso String    // efectivo, credito, tarjeta, transferencia
+  estado          String    @default("completada") // completada, anulada
+  createdAt       DateTime  @default(now())
+  
+  venta           Venta     @relation(fields: [ventaId], references: [id])
+  cliente         Cliente?  @relation(fields: [clienteId], references: [id])
+  
+  items           ItemDevolucion[]
+  movimientoCaja  MovimientoCajaDevolucion?
+}
+
+model ItemDevolucion {
+  id             Int      @id @default(autoincrement())
+  devolucionId   Int
+  itemVentaId    Int      // Referencia al item original de la venta
+  productoId     Int?
+  nombre         String
+  codigo         String
+  cantidad       Int      // Cantidad devuelta
+  precioUnit     Int      // Precio unitario original
+  subtotal       Int      // Subtotal devuelto
+  esServicio     Boolean  @default(false)
+  
+  devolucion     Devolucion @relation(fields: [devolucionId], references: [id], onDelete: Cascade)
+  producto       Producto?  @relation(fields: [productoId], references: [id])
+}
+
+model MovimientoCajaDevolucion {
+  id           Int      @id @default(autoincrement())
+  tipo         String   // salida (reembolso), entrada (restauración)
+  categoria    String   // Devolución
+  monto        Int
+  metodo       String   // efectivo, banco
+  referencia   String?  // Número de devolución
+  descripcion  String?
+  fecha        DateTime @default(now())
+  hora         String
+  
+  cuentaId     Int?
+  cuenta       CuentaFinanciera? @relation(fields: [cuentaId], references: [id])
+  
+  devolucionId Int      @unique
+  devolucion   Devolucion @relation(fields: [devolucionId], references: [id])
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COMPRAS
+// ═══════════════════════════════════════════════════════════════
+
+model Compra {
+  id                  Int       @id @default(autoincrement())
+  numeroFactura       String?
+  tipoDocumento       String?   @default("OC - 1 - Orden de compra")
+  fechaElaboracion    DateTime  @default(now())
+  proveedorId         Int?
+  contacto            String?
+  centroCosto         String?
+  moneda              String    @default("COP")
+  proveedorPorItem    Boolean   @default(false)
+  impuestosIncluidos  Boolean   @default(false)
+  descuentoPorcentaje Boolean   @default(false)
+  subtotal            Int
+  descuentoGlobal     Int       @default(0) // Agregado para soportar descuento si aplica general
+  iva                 Int
+  reteIva             Int       @default(0)
+  reteIca             Int       @default(0)
+  total               Int
+  observaciones       String?
+  estado              String    @default("recibida") // recibida, pagada, anulada
+  createdAt           DateTime  @default(now())
+  
+  proveedor      Proveedor? @relation(fields: [proveedorId], references: [id])
+  
+  items          ItemCompra[]
+}
+
+model ItemCompra {
+  id           Int        @id @default(autoincrement())
+  compraId     Int
+  tipoItem     String     @default("Producto") // Producto, Servicio, Gasto, Activo
+  productoId   Int?       // Hacemos opcional para soportar gastos o servicios genéricos
+  ubicacionId  Int?       // Bodega
+  nombre       String
+  codigo       String?
+  cantidad     Int
+  precioUnit   Int
+  descuento    Int        @default(0)
+  baseAiu      Int        @default(0)
+  impCargo     Int        @default(0) // Porcentaje o valor de IVA
+  impoconsumo  Int        @default(0)
+  impRetencion Int        @default(0)
+  subtotal     Int
+  
+  compra       Compra     @relation(fields: [compraId], references: [id], onDelete: Cascade)
+  producto     Producto?  @relation(fields: [productoId], references: [id])
+  ubicacion    Ubicacion? @relation(fields: [ubicacionId], references: [id])
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CUENTAS POR COBRAR Y PAGAR
+// ═══════════════════════════════════════════════════════════════
+
+model CuentaPorCobrar {
+  id               Int       @id @default(autoincrement())
+  clienteId        Int
+  descripcion      String
+  monto            Int
+  abonado          Int       @default(0)
+  fechaCreacion    DateTime  @default(now())
+  fechaVencimiento String
+  estado           String    @default("pendiente") // pendiente, vencida, pagada
+  numeroRecibo     String?   // Referencia a la venta
+  
+  cliente          Cliente   @relation(fields: [clienteId], references: [id])
+  
+  abonos           AbonoCobro[]
+}
+
+model AbonoCobro {
+  id                Int     @id @default(autoincrement())
+  cuentaPorCobrarId Int
+  monto             Int
+  metodo            String  // efectivo, transferencia, tarjeta
+  fecha             DateTime @default(now())
+  hora              String
+  
+  cuenta            CuentaPorCobrar @relation(fields: [cuentaPorCobrarId], references: [id], onDelete: Cascade)
+  movimientoCaja    MovimientoCaja?
+}
+
+model CuentaPorPagar {
+  id               Int       @id @default(autoincrement())
+  proveedorId      Int
+  descripcion      String
+  monto            Int
+  abonado          Int       @default(0)
+  fechaCreacion    DateTime  @default(now())
+  fechaVencimiento String
+  estado           String    @default("pendiente") // pendiente, vencida, pagada
+  numeroFactura    String?
+  
+  proveedor        Proveedor @relation(fields: [proveedorId], references: [id])
+  
+  abonos           AbonoPago[]
+}
+
+model AbonoPago {
+  id               Int     @id @default(autoincrement())
+  cuentaPorPagarId Int
+  monto            Int
+  metodo           String  // efectivo, transferencia, tarjeta
+  fecha            DateTime @default(now())
+  hora             String
+  
+  cuenta           CuentaPorPagar @relation(fields: [cuentaPorPagarId], references: [id], onDelete: Cascade)
+  movimientoCaja   MovimientoCaja?
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CAJA Y BANCOS
+// ═══════════════════════════════════════════════════════════════
+
+model CuentaFinanciera {
+  id           Int      @id @default(autoincrement())
+  nombre       String   @unique // Ej: "Caja Principal", "Bancolombia", "Nequi"
+  tipo         String   // "caja" o "banco"
+  saldoActual  Int      @default(0)
+  bancoNombre  String?  // Opcional, nombre del banco
+  numeroCuenta String?  // Opcional, numero de cuenta
+  activo       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  movimientos  MovimientoCaja[]
+  movimientosDevolucion MovimientoCajaDevolucion[]
+  cierres      CierreCaja[]
+}
+
+model CierreCaja {
+  id            Int       @id @default(autoincrement())
+  cuentaId      Int
+  fechaApertura DateTime  @default(now())
+  fechaCierre   DateTime?
+  saldoInicial  Float     @default(0)
+  saldoTeorico  Float     @default(0)
+  saldoReal     Float     @default(0)
+  diferencia    Float     @default(0)
+  totalIngresos Float     @default(0)
+  totalEgresos  Float     @default(0)
+  observaciones String?
+  estado        String    @default("abierta") // abierta, cerrada
+  
+  cuenta        CuentaFinanciera @relation(fields: [cuentaId], references: [id])
+}
+
+model MovimientoCaja {
+  id           Int      @id @default(autoincrement())
+  tipo         String   // entrada, salida
+  categoria    String   // Venta POS, Cobro cuenta, Pago proveedor, etc.
+  monto        Int
+  metodo       String   // efectivo, banco (antes tarjeta/transferencia)
+  referencia   String?  // Número de recibo o factura
+  descripcion  String?
+  fecha        DateTime @default(now())
+  hora         String
+  
+  cuentaId     Int?     // Referencia a CuentaFinanciera
+  cuenta       CuentaFinanciera? @relation(fields: [cuentaId], references: [id])
+
+  ventaId      Int?
+  venta        Venta?   @relation(fields: [ventaId], references: [id])
+  
+  abonoCobroId Int?     @unique
+  abonoCobro   AbonoCobro? @relation(fields: [abonoCobroId], references: [id])
+  
+  abonoPagoId  Int?     @unique
+  abonoPago    AbonoPago? @relation(fields: [abonoPagoId], references: [id])
+}
+
+// ═══════════════════════════════════════════════════════════════
+// USUARIOS Y PERMISOS
+// ═══════════════════════════════════════════════════════════════
+
+model Usuario {
+  id        Int      @id @default(autoincrement())
+  nombre    String
+  email     String   @unique
+  password  String
+  rol       String   // admin, vendedor, contador, etc.
+  activo    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Rol {
+  id          Int      @id @default(autoincrement())
+  nombre      String   @unique
+  permisos    String   // JSON con los permisos
+  descripcion String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CONFIGURACIÓN
+// ═══════════════════════════════════════════════════════════════
+
+model Configuracion {
+  id          Int      @id @default(1)
+  nombreEmpresa String?
+  nit         String?
+  direccion   String?
+  telefono    String?
+  email       String?
+  logo        String?
+  moneda      String   @default("COP")
+  ivaDefecto  Int      @default(19)
+  updatedAt   DateTime @updatedAt
+}
+
+model Resolucion {
+  id            Int      @id @default(autoincrement())
+  numero        String   @unique
+  prefijo       String?
+  desde         Int
+  hasta         Int
+  actual        Int
+  fechaInicio   DateTime
+  fechaFin      DateTime
+  activo        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

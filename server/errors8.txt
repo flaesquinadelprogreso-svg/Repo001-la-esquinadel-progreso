@@ -1,0 +1,8 @@
+﻿index.ts(87,70): error TS2353: Object literal may only specify known properties, and 'productos' does not exist in type 'ProveedorInclude<DefaultArgs>'.
+index.ts(101,67): error TS2353: Object literal may only specify known properties, and 'proveedor' does not exist in type 'ProductoInclude<DefaultArgs>'.
+index.ts(115,37): error TS2339: Property 'categoria' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+index.ts(120,36): error TS2339: Property 'categoria' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+index.ts(129,31): error TS2339: Property 'caja' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+index.ts(134,31): error TS2339: Property 'caja' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+index.ts(143,33): error TS2339: Property 'gasto' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+index.ts(148,32): error TS2339: Property 'gasto' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.

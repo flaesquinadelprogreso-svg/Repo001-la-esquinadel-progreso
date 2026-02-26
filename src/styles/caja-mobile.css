@@ -1,0 +1,155 @@
+/* =====================================================
+   Caja y Bancos Mobile Responsive Overrides
+   Solo se activa en pantallas ≤767px.
+   Usa !important para sobreescribir los estilos inline.
+   NO afecta desktop (≥768px) en absoluto.
+   ===================================================== */
+
+@media (max-width: 767px) {
+
+    /* ── Header Principal ── */
+    #caja-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 16px !important;
+    }
+
+    #caja-header>div:first-child {
+        width: 100% !important;
+    }
+
+    #caja-actions {
+        width: 100% !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+    }
+
+    #caja-actions>button {
+        flex: 1 1 calc(50% - 4px) !important;
+        /* Dos botones por fila */
+        justify-content: center !important;
+        padding: 8px !important;
+        font-size: 12px !important;
+    }
+
+    /* ── Tarjeta Total Disponible ── */
+    /* El div justo debajo del header cuando viewMode es 'general' */
+    #caja-root>div:nth-child(2)[style*="backgroundColor: '#1E3A5F'"] {
+        padding: 16px !important;
+    }
+
+    #caja-root>div:nth-child(2)[style*="backgroundColor: '#1E3A5F'"] p:nth-child(2) {
+        font-size: 26px !important;
+    }
+
+    /* ── Detalle de Cuenta (viewMode === 'account') ── */
+    #caja-cuenta-detalle {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 16px !important;
+        padding: 16px !important;
+    }
+
+    #caja-cuenta-detalle>div:last-child {
+        text-align: left !important;
+        width: 100% !important;
+    }
+
+    #caja-cuenta-detalle>div:last-child p:nth-child(2) {
+        font-size: 24px !important;
+    }
+
+    /* ── Filtros de Movimientos ── */
+    #caja-filters {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        padding: 12px !important;
+        gap: 12px !important;
+    }
+
+    #caja-filters>div {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+        width: 100% !important;
+    }
+
+    /* Date inputs */
+    #caja-filters>div>div {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        width: 100% !important;
+    }
+
+    #caja-filters input[type="date"] {
+        width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 10px !important;
+        font-size: 14px !important;
+    }
+
+    /* Botones limpiar / exportar */
+    #caja-filters button {
+        width: 100% !important;
+        justify-content: center !important;
+        padding: 10px !important;
+    }
+
+    /* ── Tablas (Movimientos y Cierres) ── */
+    #caja-history table,
+    #caja-cierres-history table {
+        display: block !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+    }
+
+    #caja-history th,
+    #caja-history td,
+    #caja-cierres-history th,
+    #caja-cierres-history td {
+        padding: 10px 12px !important;
+    }
+
+    /* ══════════════════════════════════════════
+       MODALES — Responsive en Móvil
+       ══════════════════════════════════════════ */
+
+    /* Eliminar todos los minWidth / maxWidth fijos de contenido de modales */
+    div[style*="minWidth"],
+    div[style*="min-width"],
+    div[style*="maxWidth: '450px'"],
+    div[style*="maxWidth: '500px'"],
+    div[style*="max-width: 450px"],
+    div[style*="width: '500px'"] {
+        min-width: unset !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Inputs select y textarea más grandes para táctil */
+    div[style*="position: 'fixed'"] input,
+    div[style*="position: 'fixed'"] select,
+    div[style*="position: 'fixed'"] textarea {
+        font-size: 16px !important;
+        /* evita zoom en iOS */
+        padding: 10px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Botones de acción del modal: apilar y full-width */
+    div[style*="justifyContent: 'flex-end'"][style*="gap: '12px'"],
+    div[style*="justify-content: flex-end"][style*="gap: 12px"] {
+        flex-direction: column-reverse !important;
+        gap: 8px !important;
+    }
+
+    div[style*="justifyContent: 'flex-end'"] button,
+    div[style*="justify-content: flex-end"] button {
+        width: 100% !important;
+        text-align: center !important;
+        justify-content: center !important;
+        margin-left: 0 !important;
+    }
+}

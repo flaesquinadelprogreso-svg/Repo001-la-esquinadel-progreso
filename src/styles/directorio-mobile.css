@@ -1,0 +1,111 @@
+/* =====================================================
+   Directorio (Clientes / Proveedores) Mobile Responsive
+   Solo se activa en pantallas ≤767px.
+   Usa !important para sobreescribir los estilos inline.
+   NO afecta desktop (≥768px) en absoluto.
+   ===================================================== */
+
+@media (max-width: 767px) {
+
+    /* ── Header Principal ── */
+    #dir-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 16px !important;
+    }
+
+    /* Título principal */
+    #dir-header>div:first-child h1 {
+        font-size: 20px !important;
+    }
+
+    /* Botón "Nuevo" a ancho completo */
+    #dir-header>button {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+
+    /* ── Buscador ── */
+    #dir-search {
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+
+    #dir-search input {
+        width: 100% !important;
+        box-sizing: border-box !important;
+        font-size: 16px !important;
+        /* Evita auto-zoom en iOS */
+        padding: 12px 12px 12px 40px !important;
+    }
+
+    /* ── Tabla Principal ── */
+    #dir-table {
+        border-radius: 8px !important;
+    }
+
+    #dir-table table {
+        display: block !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+    }
+
+    #dir-table th,
+    #dir-table td {
+        padding: 10px 12px !important;
+        font-size: 13px !important;
+    }
+
+    /* Iconos de acciones en la tabla más grandes para touch */
+    #dir-table td:last-child button {
+        padding: 8px !important;
+    }
+
+    /* ══════════════════════════════════════════
+       MODALES — Responsive en Móvil
+       ══════════════════════════════════════════ */
+
+    /* Eliminar minWidth fijo de los modales (Nuevo/Editar/Detalles) */
+    div[style*="minWidth"],
+    div[style*="min-width"],
+    div[style*="minWidth: '400px'"] {
+        min-width: unset !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Inputs de formulario en modales */
+    div[style*="flexDirection: 'column'"] input {
+        font-size: 16px !important;
+        /* Táctil amigable */
+        padding: 12px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Botones de acción del modal (Guardar, Cancelar): full-width */
+    div[style*="justifyContent: 'flex-end'"][style*="gap: '12px'"],
+    div[style*="justify-content: flex-end"][style*="gap: 12px"] {
+        flex-direction: column-reverse !important;
+        gap: 8px !important;
+    }
+
+    div[style*="justifyContent: 'flex-end'"] button,
+    div[style*="justify-content: flex-end"] button {
+        width: 100% !important;
+        justify-content: center !important;
+        margin-left: 0 !important;
+    }
+
+    /* Modal de Detalles (Icono + Nombre) */
+    div[style*="alignItems: 'center'"][style*="gap: '16px'"][style*="marginBottom: '24px'"] {
+        flex-direction: column !important;
+        text-align: center !important;
+        gap: 8px !important;
+        margin-bottom: 16px !important;
+    }
+
+    /* Modal de Detalles - lista de informacion de contacto */
+    div[style*="display: 'flex'"][style*="alignItems: 'center'"][style*="gap: '12px'"] {
+        flex-wrap: wrap !important;
+    }
+}

@@ -1,0 +1,77 @@
+/* ==========================================================================
+   Módulo Historial Ventas (Responsive Mobile)
+   Aplica a: HistorialVentas.jsx
+   Breakpoint: 767px (Dispositivos Móviles)
+   ========================================================================== */
+
+@media (max-width: 767px) {
+    /* ----------------------------------------------------------------------
+       1. Filtros (HistorialVentas.jsx)
+       ---------------------------------------------------------------------- */
+
+    #historial-ventas-root {
+        padding: 16px !important;
+    }
+
+    #historial-filtros {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+    }
+
+    #historial-filtros>div {
+        flex: 1 1 100% !important;
+    }
+
+    /* ----------------------------------------------------------------------
+       2. Lista Principal de Ventas (Row Header)
+       ---------------------------------------------------------------------- */
+
+    .historial-venta-row-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 12px !important;
+    }
+
+    .historial-venta-row-header>div:last-child {
+        text-align: left !important;
+        width: 100% !important;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid #E5E7EB;
+        padding-top: 8px;
+    }
+
+    /* ----------------------------------------------------------------------
+       3. Detalle de Devolución (Accordion Open)
+       ---------------------------------------------------------------------- */
+
+    .historial-venta-detalle {
+        padding: 12px !important;
+        /* Quitar el padding izquierdo grande (40px) */
+    }
+
+    /* Envoltura de tabla para scroll horizontal */
+    .historial-venta-tabla-container {
+        width: 100% !important;
+        overflow-x: auto !important;
+        margin-bottom: 16px !important;
+    }
+
+    .historial-venta-tabla-container table {
+        min-width: 600px !important;
+        /* Forzar scroll si no cabe */
+    }
+
+    /* Controles de devolución (Selectores de cuenta, motivo) */
+    .historial-devolucion-controles {
+        flex-direction: column !important;
+        gap: 16px !important;
+    }
+
+    /* Botón Confirmar Devolución */
+    .historial-devolucion-totales {
+        width: 100% !important;
+    }
+}

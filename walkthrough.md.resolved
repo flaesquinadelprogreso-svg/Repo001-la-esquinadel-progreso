@@ -1,0 +1,121 @@
+# Manual de Uso: Experti360
+
+Bienvenido al manual de uso de **Experti360**. Esta guía visual te ayudará a entender cada uno de los módulos y funcionalidades disponibles en la plataforma para gestionar tus flujos de comunicación y campañas de WhatsApp de manera eficiente.
+
+---
+
+## 1. Panel de Control (Dashboard)
+
+El Dashboard es el centro neurálgico de la aplicación, diseñado para ofrecer una visión rápida y clara del rendimiento de tus campañas.
+
+![Vista General del Dashboard](/C:/Users/DevjAn/.gemini/antigravity/brain/61a58880-1930-481b-9a30-56e8e56ae335/dashboard_overview_1771909908073.png)
+
+*   **Métricas de Operación:** En la parte superior encontrarás tarjetas informativas que muestran los "Mensajes Enviados Hoy", el "Total de Mensajes Enviados", la "Tasa de Éxito" y el estado de los "Dispositivos Listos".
+*   **Estado del Sistema:** Un panel lateral derecho indica en tiempo real si el "Servidor está Activo" y si "WhatsApp está Conectado".
+*   **Historial de Envíos:** Un gráfico interactivo que permite visualizar el volumen de actividad reciente y el rendimiento de tus campañas a lo largo del tiempo.
+*   **Acciones Rápidas:** Accesos directos convenientes para saltar directamente a iniciar una nueva campaña o gestionar la conexión de tus dispositivos.
+
+---
+
+## 2. Gestión de Dispositivos
+
+Este módulo te permite vincular y administrar las instancias de WhatsApp que enviarán y recibirán los mensajes.
+
+![Módulo de Dispositivos](/C:/Users/DevjAn/.gemini/antigravity/brain/61a58880-1930-481b-9a30-56e8e56ae335/dispositivos_module_1771909918062.png)
+
+*   **Vincular Nuevo Dispositivo:** Para añadir un número, ingresa un "Nombre Identificador" y la aplicación te generará un código QR.
+*   **Instrucciones de Vinculación:** Con tu teléfono móvil a mano, abre WhatsApp, entra a "Dispositivos vinculados" y escanea el código mostrado en pantalla, tal como si abrieras WhatsApp Web.
+*   **Lista de Dispositivos:** Observarás una tabla con todos tus dispositivos conectados. Desde allí puedes ver si están operativos, verificar el estado de conexión o desconectarlos.
+
+---
+
+## 3. Envíos Masivos
+
+Esta es la herramienta principal para la creación, configuración y lanzamiento de tus campañas de comunicación.
+
+![Módulo de Envíos Masivos](/C:/Users/DevjAn/.gemini/antigravity/brain/61a58880-1930-481b-9a30-56e8e56ae335/envios_masivos_module_1771909934305.png)
+
+*   **Gestión de Destinatarios:** Sube tus listas de contactos rápidamente. El sistema identificará los números y te permitirá seleccionar la columna del teléfono.
+*   **Editor de Mensajes:** Un editor completo donde puedes redactar tu mensaje, usar variables de personalización (como `{{Nombre}}`), agregar emoticonos y configurar opciones avanzadas multimedia (imágenes o documentos).
+*   **Configuración de Velocidad:** Ajusta el intervalo de envío (Lento, Normal, Rápido) para adaptar el tráfico a las necesidades operativas de tu cuenta de WhatsApp y evitar bloqueos.
+*   **Botones de Envío:** Al tener todo configurado, puedes pulsar "Empezar Envío" de inmediato, o si prefieres, usar la opción de enviar una "Prueba" a un número en particular.
+
+---
+
+## 4. Campañas Programadas
+
+Este módulo te permite supervisar y administrar todas las tareas automáticas que hayas configurado en la plataforma.
+
+![Campañas Programadas](/C:/Users/DevjAn/.gemini/antigravity/brain/61a58880-1930-481b-9a30-56e8e56ae335/programados_module_1771909950030.png)
+
+*   **Listado de Campañas:** Se te presentará una tabla detallada con todas las campañas en espera, mostrando su fecha y hora programada, el estado actual, y cuántos destinatarios abarcan.
+*   **Advertencias de Ejecución:** Es crucial tener en cuenta el recordatorio del sistema: la aplicación debe permanecer abierta a la hora designada para que los envíos automáticos se procesen.
+*   **Administración:** Mantiene actualizada tu cola de trabajo y te permite cancelar campañas si ha habido algún cambio de planes antes de su ejecución.
+
+---
+
+## 5. Mis Listas de Contactos
+
+Este módulo centraliza tus bases de datos de clientes, permitiendo una segmentación más efectiva.
+
+![Módulo de Contactos](/C:/Users/DevjAn/.gemini/antigravity/brain/61a58880-1930-481b-9a30-56e8e56ae335/contactos_module_real_1771910019947.png)
+
+*   **Carga de Oportunidades:** Utiliza la cómoda zona de "Arrastrar y soltar" para subir tus archivos de **Excel (.xlsx)** o **CSV** repletos de contactos nuevos.
+*   **Listas Guardadas:** Visión general de todas las bases de datos previamente importadas, listas para ser seleccionadas en el módulo de Envíos Masivos.
+
+---
+
+## 6. Gestión de Plantillas
+
+Ahorra tiempo preconfigurando los mensajes que envías con más frecuencia.
+
+![Módulo de Plantillas](/C:/Users/DevjAn/.gemini/antigravity/brain/61a58880-1930-481b-9a30-56e8e56ae335/plantillas_module_real_1771910033367.png)
+
+*   **Botón de Nueva Plantilla:** Crea y guarda formatos recurrentes (saludos iniciales, avisos de promociones, recordatorios de pago).
+*   **Tabla de Gestión:** Visualiza el nombre de tu plantilla, una vista previa de su contenido, y opciones rápidas para editar o eliminar. 
+
+---
+
+## 7. Resultados de Encuestas
+
+El área perfecta para tomar decisiones de negocio basadas en el feedback de tus clientes.
+
+![Módulo de Resultados de Encuestas](/C:/Users/DevjAn/.gemini/antigravity/brain/61a58880-1930-481b-9a30-56e8e56ae335/resultados_encuestas_module_1771910039771.png)
+
+*   **Filtros Inteligentes:** Clasifica o busca encuestas pasadas filtrando por nombre de campaña para encontrar exactamente lo que necesitas.
+*   **Datos Transaccionales:** Muestra una tabla minuciosa donde quedan registradas cada una de las respuestas de los usuarios, dándote visibilidad sobre las preferencias de tu audiencia.
+
+---
+
+## 8. Configuración de Conexión IA
+
+Potencia tu automatización inyectando inteligencia artificial de última generación (OpenAI).
+
+![Módulo de Conexión IA](/C:/Users/DevjAn/.gemini/antigravity/brain/61a58880-1930-481b-9a30-56e8e56ae335/conexion_ia_module_1771910060151.png)
+
+*   **Autenticación de API:** Campo seguro para ingresar y vincular tu "API Key" de OpenAI.
+*   **Selección de Modelo de Red:** Te permite escoger el ecosistema a usar (ej., GPT-4o, GPT-3.5 Turbo) dependiendo de la agilidad que requieras.
+*   **Prompt (Instrucción Global):** Define la personalidad y las reglas que el Bot inteligente seguirá al conversar con tus clientes.
+
+---
+
+## 9. Constructor de Bots (Bot Builder)
+
+La joya de la corona. Un lienzo visual para crear flujos automatizados complejos sin necesidad de saber programar.
+
+![Módulo de Bot Builder](/C:/Users/DevjAn/.gemini/antigravity/brain/61a58880-1930-481b-9a30-56e8e56ae335/bot_builder_module_1771910099188.png)
+
+*   **Lienzo Visual (Canvas):** Dibuja, arrastra y conecta tu estrategia en una cuadrícula interactiva infinita.
+*   **Bloques de Opciones (Nodos):** Usa bloques prefabricados como "Mensaje", "Esperar", "Condición", "Encuesta" o enlázalo con tu "IA".
+*   **Herramientas de Respaldo:** Opciones avanzadas para **Exportar** e **Importar** la estructura de tus flujos (JSON) para compartir y resguardar tu progreso.
+
+---
+
+## 10. Chat Live
+
+Supervisa y toma el control humano de cualquier conversación cuando el bot no sea suficiente.
+
+![Módulo de Chat Live](/C:/Users/DevjAn/.gemini/antigravity/brain/61a58880-1930-481b-9a30-56e8e56ae335/chat_live_module_final_1771910104221.png)
+
+*   **Monitoreo en Tiempo Real:** Observa lo que tu bot está conversando con los usuarios.
+*   **Intervención Manual:** Pausa el flujo automatizado y responde directamente a tus clientes, garantizando la mejor experiencia y atención.

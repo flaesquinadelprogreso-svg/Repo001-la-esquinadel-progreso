@@ -1,0 +1,137 @@
+/* ==========================================================================
+   Módulo Compras (Responsive Mobile)
+   Aplica a: Compras.jsx y NuevaCompra.jsx
+   Breakpoint: 767px (Dispositivos Móviles)
+   ========================================================================== */
+
+@media (max-width: 767px) {
+    /* ----------------------------------------------------------------------
+       1. Listado Principal (Compras.jsx)
+       ---------------------------------------------------------------------- */
+
+    #compras-root {
+        gap: 16px !important;
+    }
+
+    /* Header del Listado */
+    #compras-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 12px !important;
+    }
+
+    #compras-header button {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+
+    /* Transformación de Tabla a Tarjetas (Compras) */
+    #compras-table-container {
+        border: none !important;
+        background-color: transparent !important;
+        border-radius: 0 !important;
+    }
+
+    #compras-table-container table,
+    #compras-table-container tbody {
+        display: block !important;
+        width: 100% !important;
+    }
+
+    #compras-table-container thead {
+        display: none !important;
+        /* Oculta encabezados de tabla real */
+    }
+
+    #compras-table-container tr {
+        display: flex !important;
+        flex-direction: column !important;
+        background-color: #fff !important;
+        border: 1px solid #E5E7EB !important;
+        border-radius: 8px !important;
+        margin-bottom: 12px !important;
+        padding: 16px !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+    }
+
+    #compras-table-container td {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 6px 0 !important;
+        border: none !important;
+        text-align: right !important;
+    }
+
+    #compras-table-container td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #6B7280;
+        text-transform: uppercase;
+        font-size: 11px;
+        text-align: left;
+        margin-right: 12px;
+    }
+
+    /* ----------------------------------------------------------------------
+       2. Formulario de Nueva Compra (NuevaCompra.jsx)
+       ---------------------------------------------------------------------- */
+
+    #nueva-compra-root {
+        padding-bottom: 24px !important;
+    }
+
+    /* Header de Nueva Compra */
+    #nueva-compra-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 16px !important;
+    }
+
+    #nueva-compra-header>div:last-child {
+        width: 100% !important;
+        flex-direction: column !important;
+    }
+
+    #nueva-compra-header>div:last-child button {
+        width: 100% !important;
+    }
+
+    /* Contenedor principal blanco form */
+    #nueva-compra-form-bg {
+        padding: 16px !important;
+    }
+
+    /* Grid cabecera del documento (Inputs) */
+    #nueva-compra-doc-header {
+        grid-template-columns: 1fr !important;
+        gap: 24px !important;
+    }
+
+    #nueva-compra-doc-header>div>div {
+        grid-template-columns: 1fr !important;
+        gap: 4px !important;
+    }
+
+    #nueva-compra-doc-header label {
+        text-align: left !important;
+        margin-bottom: 4px !important;
+    }
+
+    /* Tabla de Detalles de Ítems (Necesita scroll horizontal nativo) */
+    #nueva-compra-table-container {
+        margin-left: -16px !important;
+        margin-right: -16px !important;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+        padding-bottom: 24px !important;
+        /* Espacio para scrollbar nativa */
+    }
+
+    /* Totales Footer */
+    #nueva-compra-footer {
+        grid-template-columns: 1fr !important;
+        gap: 24px !important;
+        margin-top: 24px !important;
+    }
+}

@@ -1,0 +1,41 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Dependencies
+node_modules
+.wwebjs_auth
+
+# Build
+dist
+dist-ssr
+*.local
+
+# SQLite and Local Database
+dev.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Backups
+backups/
+
+# Environment Variables
+.env
+.env.production
+.env.*
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Prisma
+/src/generated/prisma
