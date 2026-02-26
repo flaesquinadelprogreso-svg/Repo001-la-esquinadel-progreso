@@ -13,6 +13,12 @@ export default function WhatsApp() {
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({ sent: 0, templates: 0 });
 
+    const handleConnect = () => {
+        setLoading(true);
+        // Simular intento de conexión por ahora
+        setTimeout(() => setLoading(false), 1000);
+    };
+
     const fetchStatus = async () => {
         try {
             const res = await api.get('/whatsapp/status');

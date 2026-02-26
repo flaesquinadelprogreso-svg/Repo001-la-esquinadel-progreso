@@ -175,6 +175,22 @@ export default function AnalisisFinanciero() {
         XLSX.writeFile(workbook, `reporte_contable_${new Date().toISOString().split('T')[0]}.xlsx`);
     };
 
+    const exportComprasToExcel = () => {
+        const data = filteredCompras.map(compra => ({
+            'Fecha': new Date(compra.fechaElaboracion).toLocaleDateString(),
+            'Documento': compra.numeroFactura || `OC-${compra.id}`,
+            'Proveedor': compra.proveedor?.nombre || 'Desconocido',
+            'Soporte URL': compra.soporteUrl || 'N/A',
+            'Total Invertido': compra.total,
+            'Estado': compra.estado.toUpperCase()
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Compras y Gastos');
+        XLSX.writeFile(workbook, `compras_gastos_${new Date().toISOString().split('T')[0]}.xlsx`);
+    };
+
     if (!data) {
         return (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', flexDirection: 'column', gap: '16px' }}>
