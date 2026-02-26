@@ -10,6 +10,7 @@ const { PrismaClient } = require('@prisma/client');
 const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 8080;
+const path = require('path');
 
 // Helpers para formato en descripciones (Backend)
 const formatPesos = (valor) => {
@@ -2285,6 +2286,16 @@ app.post('/api/compras', async (req, res) => {
 app.use((err, req, res, next) => {
     logger.error(err.stack || err);
     res.status(500).json({ message: 'Error interno del servidor' });
+});
+
+// Servir archivos estáticos del Frontend (Vite build)
+app.use(express.static(path.join(__dirname, 'dist')));
+
+// Catch-all para que el ruteo de React funcione (SPA)
+app.get('*', (req, res) => {
+    if (!req.path.startsWith('/api')) {
+        res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+    }
 });
 
 app.listen(PORT, () => {
