@@ -2292,7 +2292,7 @@ app.use((err, req, res, next) => {
 app.use(express.static(path.join(__dirname, 'dist')));
 
 // Catch-all para que el ruteo de React funcione (SPA)
-app.get('*', (req, res) => {
+app.get('(.*)', (req, res) => {
     if (!req.path.startsWith('/api')) {
         res.sendFile(path.join(__dirname, 'dist', 'index.html'));
     }
