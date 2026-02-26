@@ -39,9 +39,13 @@ if (process.env.NODE_ENV !== 'production') {
     }));
 }
 
+logger.info('=== DEBUG START ===');
+logger.info('Claves de variables de entorno detectadas por Node.js: ' + Object.keys(process.env).join(', '));
+logger.info('=== DEBUG END ===');
+
 if (!process.env.JWT_SECRET) {
-    logger.error('CRITICAL: JWT_SECRET no está definido en el archivo .env');
-    throw new Error('JWT_SECRET no está definido. Verifica tu .env');
+    logger.error('CRITICAL: JWT_SECRET no está definido en el archivo .env o en el sistema (Railway).');
+    throw new Error('JWT_SECRET no está definido. Verifica tu .env o las variables de Railway.');
 }
 
 // Middleware de autenticación global
