@@ -4,6 +4,7 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const jwt = require('jsonwebtoken');
 const winston = require('winston');
+const bcrypt = require('bcrypt');
 const { PrismaClient } = require('@prisma/client');
 
 const app = express();
@@ -37,15 +38,9 @@ if (process.env.NODE_ENV !== 'production') {
     }));
 }
 
-// Validación temprana de variables de entorno críticas
 if (!process.env.JWT_SECRET) {
     logger.error('CRITICAL: JWT_SECRET no está definido en el archivo .env');
     throw new Error('JWT_SECRET no está definido. Verifica tu .env');
-}
-
-if (!process.env.ADMIN_USER || !process.env.ADMIN_PASS) {
-    logger.error('CRITICAL: ADMIN_USER o ADMIN_PASS no están definidos en .env');
-    throw new Error('Faltan credenciales maestras. Verifica tu .env');
 }
 
 // Middleware de autenticación global
@@ -140,20 +135,33 @@ app.use('/api', verifyToken);
 // SISTEMA DE RUTAS PÚBLICAS Y AUTENTICACIÓN
 // ═══════════════════════════════════════════════════════════════
 
-app.post('/api/login', (req, res) => {
+app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
 
-    // Comparación rápida con entorno maestro
-    if (username === process.env.ADMIN_USER && password === process.env.ADMIN_PASS) {
-        // Firma y emisión de un JWT de 12 horas
-        const token = jwt.sign(
-            { id: 1, role: 'admin', username },
-            process.env.JWT_SECRET,
-            { expiresIn: '12h' }
-        );
-        res.json({ success: true, token, user: { username, role: 'admin' } });
-    } else {
-        res.status(401).json({ error: 'Credenciales inválidas' });
+    try {
+        // Buscar el usuario en la base de datos
+        const user = await prisma.usuario.findUnique({
+            where: { username }
+        });
+
+        if (user && user.activo && await bcrypt.compare(password, user.password)) {
+            // Firma y emisión de un JWT de 12 horas
+            const token = jwt.sign(
+                { id: user.id, role: user.role, username: user.username },
+                process.env.JWT_SECRET,
+                { expiresIn: '12h' }
+            );
+            res.json({
+                success: true,
+                token,
+                user: { username: user.username, role: user.role }
+            });
+        } else {
+            res.status(401).json({ error: 'Credenciales inválidas' });
+        }
+    } catch (error) {
+        logger.error('Error en login:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
     }
 });
 

@@ -414,10 +414,9 @@ model MovimientoCaja {
 
 model Usuario {
   id        Int      @id @default(autoincrement())
-  nombre    String
-  email     String   @unique
-  password  String
-  rol       String   // admin, vendedor, contador, etc.
+  username  String   @unique
+  password  String   // bcrypt hash
+  role      String   // admin, cajero
   activo    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
