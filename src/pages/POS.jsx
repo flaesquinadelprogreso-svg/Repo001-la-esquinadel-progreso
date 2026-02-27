@@ -109,7 +109,19 @@ export default function POS() {
 
                 // Default select first 'caja' for cash payments if none selected
                 const defaultCaja = cuentaRes.data.find(c => c.tipo === 'caja');
-                if (defaultCaja) setSelectedAccountId(defaultCaja.id);
+                if (defaultCaja) {
+                    setSelectedAccountId(defaultCaja.id);
+                    // Check if register is open
+                    try {
+                        const cierreRes = await api.get(`/cierres/hoy?cuentaId=${defaultCaja.id}`);
+                        setIsCajaOpen(cierreRes.data && !!cierreRes.data.activo);
+                    } catch (e) {
+                        console.error('Error checking register status', e);
+                        setIsCajaOpen(false);
+                    }
+                } else {
+                    setIsCajaOpen(false); // No register exists
+                }
             }
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -1303,10 +1315,10 @@ export default function POS() {
                     {/* Confirm Button */}
                     <Button
                         onClick={() => setShowConfirm(true)}
-                        disabled={cart.length === 0}
+                        disabled={cart.length === 0 || !isCajaOpen}
                         style={{ width: '100%', padding: '14px', fontSize: '16px' }}
                     >
-                        Confirmar Venta
+                        {isCajaOpen ? 'Confirmar Venta' : 'Caja Cerrada (Abre en Caja y Bancos)'}
                     </Button>
                 </div>
             </div>

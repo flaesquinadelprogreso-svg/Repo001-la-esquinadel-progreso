@@ -97,6 +97,13 @@ export default function Topbar() {
                 />
             </div>
 
+            {/* Navbar Branding */}
+            <div style={{ display: 'none', lg: 'block', marginRight: 'auto', marginLeft: '20px' }} className="topbar-branding">
+                <span style={{ fontSize: '18px', fontWeight: 800, color: '#1E3A5F', letterSpacing: '0.5px' }}>
+                    REFRIELECTRIC
+                </span>
+            </div>
+
             {/* Right side */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '20px' }}>
                 <button style={{

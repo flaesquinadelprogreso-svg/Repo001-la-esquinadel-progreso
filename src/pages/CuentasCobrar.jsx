@@ -26,6 +26,7 @@ export default function CuentasCobrar() {
     const [metodoSeleccionado, setMetodoSeleccionado] = useState('efectivo');
     const [cuentasFinancieras, setCuentasFinancieras] = useState([]);
     const [selectedAccountId, setSelectedAccountId] = useState('');
+    const [isCajaOpen, setIsCajaOpen] = useState(true);
 
     const [nuevaCuenta, setNuevaCuenta] = useState({
         clienteId: '',
@@ -54,7 +55,15 @@ export default function CuentasCobrar() {
 
             // Default select first caja
             const defaultCaja = finData.find(c => c.tipo === 'caja');
-            if (defaultCaja) setSelectedAccountId(defaultCaja.id);
+            if (defaultCaja) {
+                setSelectedAccountId(defaultCaja.id);
+                const cierreRes = await api.get(`/cierres/hoy?cuentaId=${defaultCaja.id}`).catch(() => null);
+                if (cierreRes && cierreRes.data) {
+                    setIsCajaOpen(!!cierreRes.data.cierreActivo);
+                } else {
+                    setIsCajaOpen(false);
+                }
+            }
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
@@ -552,9 +561,9 @@ export default function CuentasCobrar() {
                                             <Button
                                                 onClick={handleRegistrarPago}
                                                 style={{ padding: '0 40px', height: '46px', fontSize: '14px', fontWeight: 800, backgroundColor: '#1A365D' }}
-                                                disabled={!selectedAccountId || !pagoMonto}
+                                                disabled={!selectedAccountId || !pagoMonto || (!isCajaOpen && metodoSeleccionado === 'efectivo')}
                                             >
-                                                Aplicar Abono
+                                                {isCajaOpen || metodoSeleccionado !== 'efectivo' ? 'Aplicar Abono' : 'Caja Cerrada'}
                                             </Button>
                                         </div>
                                     </div>

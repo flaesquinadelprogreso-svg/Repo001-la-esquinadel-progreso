@@ -31,6 +31,7 @@ export default function HistorialVentas() {
     const [refundMethod, setRefundMethod] = useState({}); // mapped by ventaId
     const [selectedAccountId, setSelectedAccountId] = useState({}); // mapped by ventaId
     const [isReturning, setIsReturning] = useState(false);
+    const [isCajaOpen, setIsCajaOpen] = useState(true);
     const [cuentas, setCuentas] = useState([]);
 
     useEffect(() => {
@@ -44,6 +45,17 @@ export default function HistorialVentas() {
             if (response.data) {
                 const data = response.data;
                 setCuentas(data);
+
+                // Check if caja is open
+                const defaultCaja = data.find(c => c.tipo === 'caja');
+                if (defaultCaja) {
+                    const cierreRes = await api.get(`/cierres/hoy?cuentaId=${defaultCaja.id}`).catch(() => null);
+                    if (cierreRes && cierreRes.data) {
+                        setIsCajaOpen(!!cierreRes.data.cierreActivo);
+                    } else {
+                        setIsCajaOpen(false);
+                    }
+                }
             }
         } catch (error) {
             console.error('Error fetching cuentas:', error);
@@ -473,11 +485,11 @@ export default function HistorialVentas() {
 
                                                     <Button
                                                         onClick={() => processReturn(venta)}
-                                                        disabled={isReturning}
+                                                        disabled={isReturning || (!isCajaOpen && refundMethod[venta.id] === 'efectivo')}
                                                         style={{ width: '100%', padding: '8px', fontSize: '13px', display: 'flex', justifyContent: 'center', gap: '6px' }}
                                                     >
                                                         <RotateCcw size={14} />
-                                                        Confirmar Devolución
+                                                        {isCajaOpen || refundMethod[venta.id] !== 'efectivo' ? 'Confirmar Devolución' : 'Caja Cerrada'}
                                                     </Button>
                                                 </div>
 

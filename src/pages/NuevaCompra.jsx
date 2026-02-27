@@ -33,6 +33,7 @@ export default function NuevaCompra() {
     const [ubicaciones, setUbicaciones] = useState([]);
     const [cuentas, setCuentas] = useState([]);
     const [cuentaId, setCuentaId] = useState('');
+    const [isCajaOpen, setIsCajaOpen] = useState(true);
 
     useEffect(() => {
         // Fetch Proveedores
@@ -56,7 +57,21 @@ export default function NuevaCompra() {
         // Fetch Cuentas Financieras
         api.get('/cuentas-financieras')
             .then(res => res.data)
-            .then(data => setCuentas(Array.isArray(data) ? data : []))
+            .then(async data => {
+                const cuentasArray = Array.isArray(data) ? data : [];
+                setCuentas(cuentasArray);
+
+                // Check if caja is open
+                const defaultCaja = cuentasArray.find(c => c.tipo === 'caja');
+                if (defaultCaja) {
+                    const cierreRes = await api.get(`/cierres/hoy?cuentaId=${defaultCaja.id}`).catch(() => null);
+                    if (cierreRes && cierreRes.data) {
+                        setIsCajaOpen(!!cierreRes.data.cierreActivo);
+                    } else {
+                        setIsCajaOpen(false);
+                    }
+                }
+            })
             .catch(console.error);
     }, []);
 
@@ -245,7 +260,12 @@ export default function NuevaCompra() {
                 </div>
                 <div style={{ display: 'flex', gap: '8px' }}>
                     <Button variant="secondary" onClick={() => navigate('/compras')}>Cancelar</Button>
-                    <Button onClick={handleGuardar} disabled={guardando}>{guardando ? 'Guardando...' : 'Guardar y enviar por mail'}</Button>
+                    <Button
+                        onClick={handleGuardar}
+                        disabled={guardando || (!isCajaOpen && (metodoPago === 'efectivo' || (metodoPago === 'multiple' && multiplePayments.some(p => p.metodo === 'efectivo'))))}
+                    >
+                        {guardando ? 'Guardando...' : (!isCajaOpen && (metodoPago === 'efectivo' || (metodoPago === 'multiple' && multiplePayments.some(p => p.metodo === 'efectivo'))) ? 'Caja Cerrada' : 'Guardar y enviar por mail')}
+                    </Button>
                 </div>
             </div>
 

@@ -6,6 +6,7 @@ import {
     ChevronLeft, Store, CreditCard, Banknote, Landmark, ReceiptText
 } from 'lucide-react';
 import api from '../../api/client';
+import logo from '../../Logo/logo.png';
 
 const navItems = [
     { path: '/analisis-financiero', label: 'Análisis Financiero', icon: BarChart3 },
@@ -78,18 +79,19 @@ export default function Sidebar({ collapsed, onToggle, isMobile }) {
                 borderBottom: '1px solid #E2E5EA', flexShrink: 0
             }}>
                 <div style={{
-                    width: '36px', height: '36px', borderRadius: '8px',
-                    backgroundColor: '#1E3A5F', display: 'flex',
-                    alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                    width: '36px', height: '36px', borderRadius: '50%',
+                    backgroundColor: '#fff', border: '1px solid #EEF2FF',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0, overflow: 'hidden'
                 }}>
-                    <Store size={18} color="white" />
+                    <img src={logo} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
                 {!collapsed && (
                     <div style={{ overflow: 'hidden' }}>
                         <h1 style={{ fontSize: '14px', fontWeight: 700, color: '#1A1A2E', whiteSpace: 'nowrap' }}>
-                            {businessName}
+                            REFRIELECTRIC
                         </h1>
-                        <p style={{ fontSize: '11px', color: '#9CA3AF', whiteSpace: 'nowrap' }}>Sistema POS</p>
+                        <p style={{ fontSize: '11px', color: '#9CA3AF', whiteSpace: 'nowrap', fontWeight: 500 }}>THE COMPANY</p>
                     </div>
                 )}
             </div>

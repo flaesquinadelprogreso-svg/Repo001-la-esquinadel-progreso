@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, User, LogIn, AlertCircle } from 'lucide-react';
+import { User, LogIn, AlertCircle } from 'lucide-react';
 import api from '../api/client';
+import logoSrc from '../Logo/logo.png';
 
 export default function Login() {
     const [username, setUsername] = useState('');
@@ -50,21 +51,22 @@ export default function Login() {
                 maxWidth: '400px'
             }}>
                 <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-                    <div style={{
-                        width: '64px',
-                        height: '64px',
-                        backgroundColor: '#1E3A5F',
-                        borderRadius: '16px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        margin: '0 auto 16px auto',
-                        boxShadow: '0 4px 6px -1px rgba(30, 58, 95, 0.2)'
-                    }}>
-                        <Lock size={32} color="#ffffff" />
-                    </div>
-                    <h1 style={{ fontSize: '24px', fontWeight: 800, color: '#1A1A2E', margin: '0 0 8px 0' }}>Experti POS</h1>
-                    <p style={{ fontSize: '14px', color: '#6B7280', margin: 0 }}>Inicia sesión en tu cuenta</p>
+                    <img
+                        src={logoSrc}
+                        alt="Logo REFRIELECTRIC"
+                        style={{
+                            width: '80px',
+                            height: '80px',
+                            borderRadius: '50%',
+                            border: '3px solid #BFDBFE',
+                            objectFit: 'cover',
+                            margin: '0 auto 16px auto',
+                            display: 'block',
+                            boxShadow: '0 4px 6px -1px rgba(30, 58, 95, 0.2)'
+                        }}
+                    />
+                    <h1 style={{ fontSize: '24px', fontWeight: 800, color: '#1A1A2E', margin: '0 0 4px 0' }}>REFRIELECTRIC</h1>
+                    <p style={{ fontSize: '14px', color: '#6B7280', margin: 0, fontWeight: 500, letterSpacing: '0.5px' }}>THE COMPANY</p>
                 </div>
 
                 {error && (
@@ -180,7 +182,7 @@ export default function Login() {
 
             {/* Pequeño footer */}
             <div style={{ position: 'absolute', bottom: '24px', textAlign: 'center', width: '100%', color: '#9CA3AF', fontSize: '12px' }}>
-                Experti POS © {new Date().getFullYear()} - Sistema de Gestión
+                REFRIELECTRIC © {new Date().getFullYear()} - THE COMPANY
             </div>
         </div>
     );
