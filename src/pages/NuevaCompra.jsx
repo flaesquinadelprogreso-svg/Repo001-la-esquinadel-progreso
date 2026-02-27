@@ -228,18 +228,8 @@ export default function NuevaCompra() {
                 }))
             };
 
-            const res = await fetch(`/compras`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (res.ok) {
-                navigate('/compras');
-            } else {
-                const err = res.data;
-                alert(err.error || 'Error al guardar');
-            }
+            await api.post('/compras', payload);
+            navigate('/compras');
         } catch (error) {
             console.error('Error:', error);
             alert('Error de conexión o servidor');

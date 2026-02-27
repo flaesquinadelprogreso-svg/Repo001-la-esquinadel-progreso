@@ -156,28 +156,19 @@ export default function HistorialVentas() {
             const finalMotivo = returnReason.trim() || 'Devolución estándar procesada desde historial';
 
             // Usar el nuevo endpoint que crea Venta con tipo DEVOLUCION y valores negativos
-            const response = await fetch(`/devoluciones-venta`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ventaId: venta.id,
-                    items: itemsToSend,
-                    motivo: finalMotivo,
-                    metodoReembolso: rm,
-                    cuentaId: acc || null,
-                    esDevolucionFisica: true // Restaurar stock al inventario
-                })
+            const response = await api.post('/devoluciones-venta', {
+                ventaId: venta.id,
+                items: itemsToSend,
+                motivo: finalMotivo,
+                metodoReembolso: rm,
+                cuentaId: acc || null,
+                esDevolucionFisica: true // Restaurar stock al inventario
             });
 
-            if (response.data) {
-                const result = response.data;
-                alert(`Devolución procesada exitosamente.\n\nDocumento: ${result.devolucion.numeroRecibo}\nReferencia: ${result.devolucion.referencia}\nTotal devuelto: $${Math.abs(result.resumen.total).toLocaleString('es-CO')}`);
-                fetchHistory(); // Refresh history
-                handleExpandToggle(venta); // Collapse
-            } else {
-                const error = response.data;
-                alert(error.error || 'Error procesando devolución');
-            }
+            const result = response.data;
+            alert(`Devolución procesada exitosamente.\n\nDocumento: ${result.devolucion.numeroRecibo}\nReferencia: ${result.devolucion.referencia}\nTotal devuelto: $${Math.abs(result.resumen.total).toLocaleString('es-CO')}`);
+            fetchHistory(); // Refresh history
+            handleExpandToggle(venta); // Collapse
         } catch (error) {
             console.error('Error generating return:', error);
             alert('Error crítico registrando devolución');

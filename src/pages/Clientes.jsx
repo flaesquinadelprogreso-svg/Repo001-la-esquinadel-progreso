@@ -52,24 +52,14 @@ export default function Clientes() {
         }
 
         try {
-            const response = await fetch(`/clientes`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newClient)
-            });
-
-            if (response.data) {
-                const created = response.data;
-                setClients(prev => [...prev, created]);
-                setShowNew(false);
-                setNewClient({ nombre: '', documento: '', telefono: '', email: '', direccion: '' });
-            } else {
-                const error = response.data;
-                alert(error.error || 'Error al crear cliente');
-            }
+            const response = await api.post('/clientes', newClient);
+            const created = response.data;
+            setClients(prev => [...prev, created]);
+            setShowNew(false);
+            setNewClient({ nombre: '', documento: '', telefono: '', email: '', direccion: '' });
         } catch (error) {
             console.error('Error creating client:', error);
-            alert('Error al crear cliente');
+            alert(error.response?.data?.error || 'Error al crear cliente');
         }
     };
 
@@ -77,30 +67,20 @@ export default function Clientes() {
         if (!selected) return;
 
         try {
-            const response = await fetch(`/clientes/${selected.id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    nombre: selected.nombre,
-                    documento: selected.documento,
-                    telefono: selected.telefono,
-                    email: selected.email,
-                    direccion: selected.direccion
-                })
+            const response = await api.put(`/clientes/${selected.id}`, {
+                nombre: selected.nombre,
+                documento: selected.documento,
+                telefono: selected.telefono,
+                email: selected.email,
+                direccion: selected.direccion
             });
-
-            if (response.data) {
-                const updated = response.data;
-                setClients(prev => prev.map(c => c.id === updated.id ? updated : c));
-                setShowEdit(false);
-                setSelected(updated);
-            } else {
-                const error = response.data;
-                alert(error.error || 'Error al actualizar cliente');
-            }
+            const updated = response.data;
+            setClients(prev => prev.map(c => c.id === updated.id ? updated : c));
+            setShowEdit(false);
+            setSelected(updated);
         } catch (error) {
             console.error('Error updating client:', error);
-            alert('Error al actualizar cliente');
+            alert(error.response?.data?.error || 'Error al actualizar cliente');
         }
     };
 
@@ -108,20 +88,12 @@ export default function Clientes() {
         if (!confirm('¿Está seguro de eliminar este cliente?')) return;
 
         try {
-            const response = await fetch(`/clientes/${id}`, {
-                method: 'DELETE'
-            });
-
-            if (response.data) {
-                setClients(prev => prev.filter(c => c.id !== id));
-                setSelected(null);
-            } else {
-                const error = response.data;
-                alert(error.error || 'Error al eliminar cliente');
-            }
+            await api.delete(`/clientes/${id}`);
+            setClients(prev => prev.filter(c => c.id !== id));
+            setSelected(null);
         } catch (error) {
             console.error('Error deleting client:', error);
-            alert('Error al eliminar cliente');
+            alert(error.response?.data?.error || 'Error al eliminar cliente');
         }
     };
 
