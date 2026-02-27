@@ -1,20 +1,35 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import MainLayout from './components/layout/MainLayout';
-import AnalisisFinanciero from './pages/AnalisisFinanciero';
-import Inventario from './pages/Inventario';
-import POS from './pages/POS';
-import Compras from './pages/Compras';
-import Caja from './pages/Caja';
-import Clientes from './pages/Clientes';
-import Proveedores from './pages/Proveedores';
-import Configuracion from './pages/Configuracion';
-import CuentasCobrar from './pages/CuentasCobrar';
-import CuentasPagar from './pages/CuentasPagar';
-import NuevaCompra from './pages/NuevaCompra';
-import HistorialVentas from './pages/HistorialVentas';
 import Login from './pages/Login';
 import ProtectedRoute from './components/layout/ProtectedRoute';
+
+// Lazy loading de páginas: cada módulo (con sus dependencias como xlsx, qrcode.react, etc.)
+// se carga SOLO cuando el usuario navega a esa ruta, no al inicio.
+// Esto evita el "Illegal constructor" de Vite 7 + React 19 al inicializar
+// módulos CJS pesados (xlsx, qrcode.react, html2pdf) en el bundle inicial.
+const AnalisisFinanciero = lazy(() => import('./pages/AnalisisFinanciero'));
+const Inventario         = lazy(() => import('./pages/Inventario'));
+const POS                = lazy(() => import('./pages/POS'));
+const HistorialVentas    = lazy(() => import('./pages/HistorialVentas'));
+const Compras            = lazy(() => import('./pages/Compras'));
+const NuevaCompra        = lazy(() => import('./pages/NuevaCompra'));
+const Caja               = lazy(() => import('./pages/Caja'));
+const Clientes           = lazy(() => import('./pages/Clientes'));
+const Proveedores        = lazy(() => import('./pages/Proveedores'));
+const CuentasCobrar      = lazy(() => import('./pages/CuentasCobrar'));
+const CuentasPagar       = lazy(() => import('./pages/CuentasPagar'));
+const Configuracion      = lazy(() => import('./pages/Configuracion'));
+
+// Fallback mínimo mientras carga el chunk de la página
+function PageLoader() {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: '200px' }}>
+      <div style={{ width: '32px', height: '32px', border: '3px solid #E2E5EA', borderTopColor: '#1E3A5F', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+}
 
 export default function App() {
   return (
@@ -25,19 +40,19 @@ export default function App() {
         {/* Rutas Privadas: Requieren Token */}
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>
-            <Route path="/" element={<AnalisisFinanciero />} />
-            <Route path="/analisis-financiero" element={<AnalisisFinanciero />} />
-            <Route path="/inventario" element={<Inventario />} />
-            <Route path="/pos" element={<POS />} />
-            <Route path="/historial-ventas" element={<HistorialVentas />} />
-            <Route path="/compras" element={<Compras />} />
-            <Route path="/nueva-compra" element={<NuevaCompra />} />
-            <Route path="/caja" element={<Caja />} />
-            <Route path="/clientes" element={<Clientes />} />
-            <Route path="/proveedores" element={<Proveedores />} />
-            <Route path="/cuentas-cobrar" element={<CuentasCobrar />} />
-            <Route path="/cuentas-pagar" element={<CuentasPagar />} />
-            <Route path="/configuracion" element={<Configuracion />} />
+            <Route path="/" element={<Suspense fallback={<PageLoader />}><AnalisisFinanciero /></Suspense>} />
+            <Route path="/analisis-financiero" element={<Suspense fallback={<PageLoader />}><AnalisisFinanciero /></Suspense>} />
+            <Route path="/inventario" element={<Suspense fallback={<PageLoader />}><Inventario /></Suspense>} />
+            <Route path="/pos" element={<Suspense fallback={<PageLoader />}><POS /></Suspense>} />
+            <Route path="/historial-ventas" element={<Suspense fallback={<PageLoader />}><HistorialVentas /></Suspense>} />
+            <Route path="/compras" element={<Suspense fallback={<PageLoader />}><Compras /></Suspense>} />
+            <Route path="/nueva-compra" element={<Suspense fallback={<PageLoader />}><NuevaCompra /></Suspense>} />
+            <Route path="/caja" element={<Suspense fallback={<PageLoader />}><Caja /></Suspense>} />
+            <Route path="/clientes" element={<Suspense fallback={<PageLoader />}><Clientes /></Suspense>} />
+            <Route path="/proveedores" element={<Suspense fallback={<PageLoader />}><Proveedores /></Suspense>} />
+            <Route path="/cuentas-cobrar" element={<Suspense fallback={<PageLoader />}><CuentasCobrar /></Suspense>} />
+            <Route path="/cuentas-pagar" element={<Suspense fallback={<PageLoader />}><CuentasPagar /></Suspense>} />
+            <Route path="/configuracion" element={<Suspense fallback={<PageLoader />}><Configuracion /></Suspense>} />
           </Route>
         </Route>
       </Routes>

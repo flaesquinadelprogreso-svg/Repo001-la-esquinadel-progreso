@@ -12,7 +12,8 @@ import {
     canAddMorePayments,
     MAX_PAYMENT_AMOUNT
 } from '../utils/currency';
-import html2pdf from 'html2pdf.js';
+// html2pdf se importa de forma dinámica en handleDownloadPDF para evitar
+// el error "Illegal constructor" de Vite 7 al procesar módulos CJS en el bundle inicial
 import api from '../api/client';
 import '../styles/pos-mobile.css';
 import logoSrc from '../Logo/logo.png';
@@ -83,6 +84,9 @@ export default function POS() {
     const [returnMethod, setReturnMethod] = useState('efectivo');
     const [returnAccountId, setReturnAccountId] = useState('');
     const [processingReturn, setProcessingReturn] = useState(false);
+
+    // Register (Caja) State
+    const [isCajaOpen, setIsCajaOpen] = useState(false);
 
     // Fetch data from API
     const fetchData = async (searchQuery = '', isSearch = false) => {
@@ -449,8 +453,8 @@ export default function POS() {
         return "Generando...";
     };
 
-    // Generate PDF receipt
-    const handleDownloadPDF = () => {
+    // Generate PDF receipt — import dinámico para compatibilidad con Vite 7
+    const handleDownloadPDF = async () => {
         const element = document.getElementById('receipt-content');
         const opt = {
             margin: 0,
@@ -459,6 +463,7 @@ export default function POS() {
             html2canvas: { scale: 2 },
             jsPDF: { unit: 'mm', format: [80, 250], orientation: 'portrait' }
         };
+        const { default: html2pdf } = await import('html2pdf.js');
         html2pdf().set(opt).from(element).save();
     };
 

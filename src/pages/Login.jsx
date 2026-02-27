@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, LogIn, AlertCircle } from 'lucide-react';
+import { User, LogIn, AlertCircle, Lock } from 'lucide-react';
 import api from '../api/client';
 import logoSrc from '../Logo/logo.png';
 
