@@ -15,6 +15,7 @@ import {
 import html2pdf from 'html2pdf.js';
 import api from '../api/client';
 import '../styles/pos-mobile.css';
+import logoSrc from '../Logo/logo.png';
 
 // Helper to get total stock from stockUbicaciones
 const getTotalStock = (product) => {
@@ -1492,7 +1493,20 @@ export default function POS() {
                         <div>
                             <div id="receipt-content" style={{ width: '260px', padding: '15px', backgroundColor: '#fff', margin: '0 auto', color: '#000', fontFamily: "'Courier New', Courier, monospace" }}>
                                 <div style={{ textAlign: 'center', marginBottom: '15px' }}>
-                                    <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 5px 0' }}>MI EMPRESA</h2>
+                                    <img
+                                        src={logoSrc}
+                                        alt="Logo"
+                                        style={{
+                                            width: '60px',
+                                            height: '60px',
+                                            borderRadius: '50%',
+                                            border: '2px solid #BFDBFE', // Soft blue border
+                                            objectFit: 'cover',
+                                            marginBottom: '8px'
+                                        }}
+                                    />
+                                    <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 2px 0' }}>REFRIELECTRIC</h2>
+                                    <h3 style={{ fontSize: '14px', fontWeight: 600, margin: '0 0 5px 0', letterSpacing: '1px' }}>THE COMPANY</h3>
                                     <p style={{ fontSize: '11px', margin: 0 }}>NIT: 900123456-1</p>
                                     <p style={{ fontSize: '13px', fontWeight: 700, margin: '8px 0 0 0' }}>Recibo #{lastSale.receiptNumber}</p>
                                 </div>

@@ -67,7 +67,7 @@ export default function Configuracion() {
                                 <Building2 size={20} style={{ color: '#1E3A5F' }} />
                                 <div><p style={{ fontSize: '13px', fontWeight: 600, color: '#1A1A2E' }}>Datos de la Empresa</p><p style={{ fontSize: '11px', color: '#9CA3AF' }}>Información legal y de contacto</p></div>
                             </div>
-                            <Input label="Razón Social" defaultValue="Ferretería El Constructor" />
+                            <Input label="Razón Social" defaultValue="REFRIELECTRIC" />
                             <Input label="NIT" defaultValue="900.123.456-1" />
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                                 <Input label="Teléfono" defaultValue="601-555-1234" />
@@ -100,7 +100,7 @@ export default function Configuracion() {
                                 <div><p style={{ fontSize: '13px', fontWeight: 600, color: '#1A1A2E' }}>Impresión</p><p style={{ fontSize: '11px', color: '#9CA3AF' }}>Formato de tickets y recibos</p></div>
                             </div>
                             <Select label="Impresora" options={[{ value: 'thermal', label: 'Térmica (80mm)' }, { value: 'standard', label: 'Estándar (A4)' }]} />
-                            <Input label="Encabezado del ticket" defaultValue="Ferretería El Constructor" />
+                            <Input label="Encabezado del ticket" defaultValue="REFRIELECTRIC" />
                             <Input label="Pie del ticket" defaultValue="¡Gracias por su compra!" />
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px', backgroundColor: '#F0F2F5', borderRadius: '8px' }}>
                                 <input type="checkbox" id="logo" defaultChecked style={{ width: '18px', height: '18px', accentColor: '#1E3A5F' }} />

@@ -302,7 +302,7 @@ async function main() {
         where: { id: 1 },
         update: {},
         create: {
-            nombreEmpresa: 'Ferretería Mi Empresa',
+            nombreEmpresa: 'REFRIELECTRIC',
             nit: '900123456-1',
             direccion: 'Calle Principal #123',
             telefono: '6012345678',
