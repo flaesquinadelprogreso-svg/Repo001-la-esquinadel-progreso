@@ -84,7 +84,7 @@ export default function AnalisisFinanciero() {
 
     if (!data) return <div style={{ padding: '40px', textAlign: 'center', color: '#6B7280' }}>Cargando análisis...</div>;
 
-    const { resumen, compras, ventas, reporteContable, ventasPositivas, devoluciones } = data;
+    const { resumen, compras, ventas, reporteContable, ventasPositivas, devoluciones, topBajoStock, topPocoMovimiento } = data;
 
     // Filtered lists - with proper null/undefined handling
     const filteredCompras = (compras || []).filter(c => {
@@ -328,7 +328,7 @@ export default function AnalisisFinanciero() {
                     </div>
 
                     {/* Secondary Data Section */}
-                    <div id="analisis-data-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                    <div id="analisis-data-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
                         {/* Top Products */}
                         <div style={{ backgroundColor: '#FFFFFF', padding: '20px', borderRadius: '12px', border: '1px solid #E2E5EA' }}>
                             <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#111827', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}><ShoppingCart size={16} color="#6B7280" /> Top 5 Productos más Vendidos</h3>
@@ -399,10 +399,10 @@ export default function AnalisisFinanciero() {
                         <div style={{ backgroundColor: '#FFFFFF', padding: '20px', borderRadius: '12px', border: '1px solid #E2E5EA' }}>
                             <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#111827', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}><Package size={16} color="#EF4444" /> Productos en Stock Crítico ({resumen.productosBajoStockCount})</h3>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                {resumen.topBajoStock?.length === 0 ? (
+                                {topBajoStock?.length === 0 ? (
                                     <span style={{ fontSize: '13px', color: '#6B7280' }}>No hay productos con stock bajo.</span>
                                 ) : (
-                                    resumen.topBajoStock?.map((p, idx) => (
+                                    topBajoStock?.map((p, idx) => (
                                         <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '8px', borderBottom: '1px solid #F3F4F6' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                                 <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 600, color: '#EF4444' }}>!</div>
@@ -417,262 +417,291 @@ export default function AnalisisFinanciero() {
                                 )}
                             </div>
                         </div>
+
+                        {/* Productos Poca Rotación */}
+                        <div style={{ backgroundColor: '#FFFFFF', padding: '20px', borderRadius: '12px', border: '1px solid #E2E5EA' }}>
+                            <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#111827', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}><TrendingUp size={16} color="#8B5CF6" style={{ transform: 'rotate(180deg)' }} /> Menor Rotación (Top 5)</h3>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                {topPocoMovimiento?.length === 0 ? (
+                                    <span style={{ fontSize: '13px', color: '#6B7280' }}>No hay datos suficientes.</span>
+                                ) : (
+                                    topPocoMovimiento?.map((p, idx) => (
+                                        <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '8px', borderBottom: '1px solid #F3F4F6' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#F5F3FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 600, color: '#8B5CF6' }}>{idx + 1}</div>
+                                                <span style={{ fontSize: '13px', fontWeight: 500, color: '#374151' }} title={p.nombre}>{p.nombre.length > 20 ? p.nombre.substring(0, 20) + '...' : p.nombre}</span>
+                                            </div>
+                                            <div style={{ textAlign: 'right' }}>
+                                                <div style={{ fontSize: '13px', fontWeight: 600, color: '#111827' }}>{p.qty} vendidas</div>
+                                                <div style={{ fontSize: '11px', color: '#6B7280' }}>Stock: {p.stock}</div>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
 
             {/* ========================================= TAB: VENTAS ========================================= */}
-            {activeTab === 'ventas' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {
+                activeTab === 'ventas' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
-                    {/* Date Filters inside Ventas */}
-                    <div className="analisis-filtros" style={{ display: 'flex', alignItems: 'flex-end', gap: '16px', padding: '16px 20px', backgroundColor: '#FFFFFF', border: '1px solid #E2E5EA', borderRadius: '12px' }}>
-                        <Input label="Desde" type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} icon={Calendar} style={{ width: '180px' }} />
-                        <Input label="Hasta" type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} icon={Calendar} style={{ width: '180px' }} />
-                        <Button variant="primary" onClick={handleApplyFilter}>Filtrar</Button>
-                        {(dateFrom || dateTo) && (
-                            <Button variant="secondary" onClick={handleClearFilter}>Limpiar</Button>
-                        )}
-                    </div>
-
-                    <div className="analisis-search-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#FFF', padding: '16px 20px', borderRadius: '10px', border: '1px solid #E5E7EB' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%' }}>
-                            <Button variant="secondary" onClick={() => setActiveTab('resumen')}>&larr; Volver</Button>
-                            <div style={{ position: 'relative', flex: 1 }}>
-                                <Search size={18} color="#9CA3AF" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
-                                <input
-                                    type="text"
-                                    placeholder="Buscar factura..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    style={{ padding: '8px 12px 8px 38px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px', width: '100%', outline: 'none' }}
-                                />
-                            </div>
+                        {/* Date Filters inside Ventas */}
+                        <div className="analisis-filtros" style={{ display: 'flex', alignItems: 'flex-end', gap: '16px', padding: '16px 20px', backgroundColor: '#FFFFFF', border: '1px solid #E2E5EA', borderRadius: '12px' }}>
+                            <Input label="Desde" type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} icon={Calendar} style={{ width: '180px' }} />
+                            <Input label="Hasta" type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} icon={Calendar} style={{ width: '180px' }} />
+                            <Button variant="primary" onClick={handleApplyFilter}>Filtrar</Button>
+                            {(dateFrom || dateTo) && (
+                                <Button variant="secondary" onClick={handleClearFilter}>Limpiar</Button>
+                            )}
                         </div>
-                        <Button variant="secondary" icon={Download} onClick={exportVentasToExcel}>Exportar Excel</Button>
-                    </div>
 
-                    <div className="analisis-table-container" style={{ backgroundColor: '#FFF', borderRadius: '10px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                            <thead>
-                                <tr style={{ backgroundColor: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
-                                    <th style={{ width: '40px' }}></th>
-                                    <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Fecha</th>
-                                    <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Recibo</th>
-                                    <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Cliente</th>
-                                    <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', textAlign: 'right' }}>Items</th>
-                                    <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', textAlign: 'right' }}>Valor de Compra Total</th>
-                                    <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', textAlign: 'right' }}>Valor de Venta Total</th>
-                                    <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#16A34A', textTransform: 'uppercase', textAlign: 'right' }}>Ganancia</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredVentas.map((venta) => (
-                                    <React.Fragment key={venta.id}>
-                                        <tr
-                                            onClick={() => setExpandedVentaId(expandedVentaId === venta.id ? null : venta.id)}
-                                            style={{ borderBottom: '1px solid #F3F4F6', cursor: 'pointer', backgroundColor: expandedVentaId === venta.id ? '#F9FAFB' : '#FFF', transition: 'background-color 0.2s' }}
-                                        >
-                                            <td data-label="Acción" style={{ padding: '14px 10px', textAlign: 'center' }}>
-                                                <span style={{ display: 'inline-block', transform: expandedVentaId === venta.id ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s', color: '#9CA3AF' }}>▶</span>
-                                            </td>
-                                            <td data-label="Fecha" style={{ padding: '14px 20px', fontSize: '14px', color: '#374151' }}>{new Date(venta.createdAt).toLocaleDateString()}</td>
-                                            <td data-label="Recibo" style={{ padding: '14px 20px', fontSize: '14px', fontWeight: 500, color: '#1A1A2E' }}>{venta.numeroRecibo}</td>
-                                            <td data-label="Cliente" style={{ padding: '14px 20px', fontSize: '14px', color: '#4B5563' }}>
-                                                {venta.cliente?.nombre || 'Cliente General'}
-                                                {venta.tieneDevoluciones && (
-                                                    <span style={{ marginLeft: '8px', fontSize: '10px', backgroundColor: '#FEE2E2', color: '#B91C1C', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>
-                                                        Devolución
-                                                    </span>
-                                                )}
-                                            </td>
-                                            <td data-label="Items" style={{ padding: '14px 20px', fontSize: '14px', color: '#4B5563', textAlign: 'right' }}>{venta.items?.length || 0}</td>
-                                            <td data-label="Valor Compra" style={{ padding: '14px 20px', fontSize: '14px', color: '#B91C1C', textAlign: 'right' }}>{formatMoney(venta.costoVenta)}</td>
-                                            <td data-label="Valor Venta" style={{ padding: '14px 20px', fontSize: '14px', fontWeight: 600, color: '#1A1A2E', textAlign: 'right' }}>{formatMoney(venta.total)}</td>
-                                            <td data-label="Ganancia" style={{ padding: '14px 20px', fontSize: '14px', fontWeight: 700, color: '#15803D', textAlign: 'right' }}>{formatMoney(venta.ganancia)}</td>
-                                        </tr>
+                        <div className="analisis-search-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#FFF', padding: '16px 20px', borderRadius: '10px', border: '1px solid #E5E7EB' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%' }}>
+                                <Button variant="secondary" onClick={() => setActiveTab('resumen')}>&larr; Volver</Button>
+                                <div style={{ position: 'relative', flex: 1 }}>
+                                    <Search size={18} color="#9CA3AF" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                                    <input
+                                        type="text"
+                                        placeholder="Buscar factura..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        style={{ padding: '8px 12px 8px 38px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px', width: '100%', outline: 'none' }}
+                                    />
+                                </div>
+                            </div>
+                            <Button variant="secondary" icon={Download} onClick={exportVentasToExcel}>Exportar Excel</Button>
+                        </div>
 
-                                        {expandedVentaId === venta.id && (
-                                            <tr className="expanded-row-container" style={{ backgroundColor: '#F8FAFC' }}>
-                                                <td colSpan="8" style={{ padding: '16px', borderBottom: '1px solid #E2E5EA' }}>
-                                                    <div className="analisis-detail-table-wrapper" style={{ backgroundColor: '#FFF', borderRadius: '8px', border: '1px solid #E2E5EA', overflow: 'hidden' }}>
-                                                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                                                            <thead>
-                                                                <tr style={{ backgroundColor: '#F1F5F9', borderBottom: '1px solid #E2E5EA' }}>
-                                                                    <th style={{ padding: '8px 16px', fontSize: '11px', fontWeight: 600, color: '#475569', textTransform: 'uppercase' }}>Producto</th>
-                                                                    <th style={{ padding: '8px 16px', fontSize: '11px', fontWeight: 600, color: '#475569', textTransform: 'uppercase', textAlign: 'center' }}>Cant (Neta)</th>
-                                                                    <th style={{ padding: '8px 16px', fontSize: '11px', fontWeight: 600, color: '#475569', textTransform: 'uppercase', textAlign: 'right' }}>Costo Unidad</th>
-                                                                    <th style={{ padding: '8px 16px', fontSize: '11px', fontWeight: 600, color: '#475569', textTransform: 'uppercase', textAlign: 'right' }}>Valor de Compra Total</th>
-                                                                    <th style={{ padding: '8px 16px', fontSize: '11px', fontWeight: 600, color: '#475569', textTransform: 'uppercase', textAlign: 'right' }}>Valor de Venta Total</th>
-                                                                    <th style={{ padding: '8px 16px', fontSize: '11px', fontWeight: 600, color: '#15803D', textTransform: 'uppercase', textAlign: 'right' }}>Ganancia</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                {groupSaleItems(venta.items).map(it => (
-                                                                    <tr key={it.id || (it.productoId ? `p-${it.productoId}` : `s-${it.servicioId}`)} style={{ borderBottom: '1px solid #F1F5F9' }}>
-                                                                        <td style={{ padding: '10px 16px', fontSize: '13px', color: '#1E293B', fontWeight: 500 }}>{it.nombre || it.producto?.nombre || 'Servicio'}</td>
-                                                                        <td style={{ padding: '10px 16px', fontSize: '13px', color: '#64748B', textAlign: 'center' }}>{it.cantidad}</td>
-                                                                        <td style={{ padding: '10px 16px', fontSize: '13px', color: '#64748B', textAlign: 'right' }}>{formatMoney(it.cantidad > 0 ? it.costoTotalItem / it.cantidad : 0)}</td>
-                                                                        <td style={{ padding: '10px 16px', fontSize: '13px', color: '#B91C1C', textAlign: 'right' }}>{formatMoney(it.costoTotalItem)}</td>
-                                                                        <td style={{ padding: '10px 16px', fontSize: '13px', color: '#0F172A', textAlign: 'right', fontWeight: 500 }}>{formatMoney(it.ventaTotalItem)}</td>
-                                                                        <td style={{ padding: '10px 16px', fontSize: '13px', color: '#16A34A', textAlign: 'right', fontWeight: 600 }}>{formatMoney(it.gananciaItem)}</td>
-                                                                    </tr>
-                                                                ))}
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
+                        <div className="analisis-table-container" style={{ backgroundColor: '#FFF', borderRadius: '10px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                                <thead>
+                                    <tr style={{ backgroundColor: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
+                                        <th style={{ width: '40px' }}></th>
+                                        <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Fecha</th>
+                                        <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Recibo</th>
+                                        <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Cliente</th>
+                                        <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', textAlign: 'right' }}>Items</th>
+                                        <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', textAlign: 'right' }}>Valor de Compra Total</th>
+                                        <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', textAlign: 'right' }}>Valor de Venta Total</th>
+                                        <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#16A34A', textTransform: 'uppercase', textAlign: 'right' }}>Ganancia</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredVentas.map((venta) => (
+                                        <React.Fragment key={venta.id}>
+                                            <tr
+                                                onClick={() => setExpandedVentaId(expandedVentaId === venta.id ? null : venta.id)}
+                                                style={{ borderBottom: '1px solid #F3F4F6', cursor: 'pointer', backgroundColor: expandedVentaId === venta.id ? '#F9FAFB' : '#FFF', transition: 'background-color 0.2s' }}
+                                            >
+                                                <td data-label="Acción" style={{ padding: '14px 10px', textAlign: 'center' }}>
+                                                    <span style={{ display: 'inline-block', transform: expandedVentaId === venta.id ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s', color: '#9CA3AF' }}>▶</span>
                                                 </td>
+                                                <td data-label="Fecha" style={{ padding: '14px 20px', fontSize: '14px', color: '#374151' }}>{new Date(venta.createdAt).toLocaleDateString()}</td>
+                                                <td data-label="Recibo" style={{ padding: '14px 20px', fontSize: '14px', fontWeight: 500, color: '#1A1A2E' }}>{venta.numeroRecibo}</td>
+                                                <td data-label="Cliente" style={{ padding: '14px 20px', fontSize: '14px', color: '#4B5563' }}>
+                                                    {venta.cliente?.nombre || 'Cliente General'}
+                                                    {venta.tieneDevoluciones && (
+                                                        <span style={{ marginLeft: '8px', fontSize: '10px', backgroundColor: '#FEE2E2', color: '#B91C1C', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>
+                                                            Devolución
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td data-label="Items" style={{ padding: '14px 20px', fontSize: '14px', color: '#4B5563', textAlign: 'right' }}>{venta.items?.length || 0}</td>
+                                                <td data-label="Valor Compra" style={{ padding: '14px 20px', fontSize: '14px', color: '#B91C1C', textAlign: 'right' }}>{formatMoney(venta.costoVenta)}</td>
+                                                <td data-label="Valor Venta" style={{ padding: '14px 20px', fontSize: '14px', fontWeight: 600, color: '#1A1A2E', textAlign: 'right' }}>{formatMoney(venta.total)}</td>
+                                                <td data-label="Ganancia" style={{ padding: '14px 20px', fontSize: '14px', fontWeight: 700, color: '#15803D', textAlign: 'right' }}>{formatMoney(venta.ganancia)}</td>
                                             </tr>
-                                        )}
-                                    </React.Fragment>
-                                ))}
-                                {filteredVentas.length === 0 && (
-                                    <tr><td colSpan="8" style={{ textAlign: 'center', padding: '30px', color: '#9CA3AF' }}>No hay ventas en este periodo.</td></tr>
-                                )}
-                            </tbody>
-                        </table>
+
+                                            {expandedVentaId === venta.id && (
+                                                <tr className="expanded-row-container" style={{ backgroundColor: '#F8FAFC' }}>
+                                                    <td colSpan="8" style={{ padding: '16px', borderBottom: '1px solid #E2E5EA' }}>
+                                                        <div className="analisis-detail-table-wrapper" style={{ backgroundColor: '#FFF', borderRadius: '8px', border: '1px solid #E2E5EA', overflow: 'hidden' }}>
+                                                            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                                                                <thead>
+                                                                    <tr style={{ backgroundColor: '#F1F5F9', borderBottom: '1px solid #E2E5EA' }}>
+                                                                        <th style={{ padding: '8px 16px', fontSize: '11px', fontWeight: 600, color: '#475569', textTransform: 'uppercase' }}>Producto</th>
+                                                                        <th style={{ padding: '8px 16px', fontSize: '11px', fontWeight: 600, color: '#475569', textTransform: 'uppercase', textAlign: 'center' }}>Cant (Neta)</th>
+                                                                        <th style={{ padding: '8px 16px', fontSize: '11px', fontWeight: 600, color: '#475569', textTransform: 'uppercase', textAlign: 'right' }}>Costo Unidad</th>
+                                                                        <th style={{ padding: '8px 16px', fontSize: '11px', fontWeight: 600, color: '#475569', textTransform: 'uppercase', textAlign: 'right' }}>Valor de Compra Total</th>
+                                                                        <th style={{ padding: '8px 16px', fontSize: '11px', fontWeight: 600, color: '#475569', textTransform: 'uppercase', textAlign: 'right' }}>Valor de Venta Total</th>
+                                                                        <th style={{ padding: '8px 16px', fontSize: '11px', fontWeight: 600, color: '#15803D', textTransform: 'uppercase', textAlign: 'right' }}>Ganancia</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {groupSaleItems(venta.items).map(it => (
+                                                                        <tr key={it.id || (it.productoId ? `p-${it.productoId}` : `s-${it.servicioId}`)} style={{ borderBottom: '1px solid #F1F5F9' }}>
+                                                                            <td style={{ padding: '10px 16px', fontSize: '13px', color: '#1E293B', fontWeight: 500 }}>{it.nombre || it.producto?.nombre || 'Servicio'}</td>
+                                                                            <td style={{ padding: '10px 16px', fontSize: '13px', color: '#64748B', textAlign: 'center' }}>{it.cantidad}</td>
+                                                                            <td style={{ padding: '10px 16px', fontSize: '13px', color: '#64748B', textAlign: 'right' }}>{formatMoney(it.cantidad > 0 ? it.costoTotalItem / it.cantidad : 0)}</td>
+                                                                            <td style={{ padding: '10px 16px', fontSize: '13px', color: '#B91C1C', textAlign: 'right' }}>{formatMoney(it.costoTotalItem)}</td>
+                                                                            <td style={{ padding: '10px 16px', fontSize: '13px', color: '#0F172A', textAlign: 'right', fontWeight: 500 }}>{formatMoney(it.ventaTotalItem)}</td>
+                                                                            <td style={{ padding: '10px 16px', fontSize: '13px', color: '#16A34A', textAlign: 'right', fontWeight: 600 }}>{formatMoney(it.gananciaItem)}</td>
+                                                                        </tr>
+                                                                    ))}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </React.Fragment>
+                                    ))}
+                                    {filteredVentas.length === 0 && (
+                                        <tr><td colSpan="8" style={{ textAlign: 'center', padding: '30px', color: '#9CA3AF' }}>No hay ventas en este periodo.</td></tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* ========================================= TAB: CONTABLE ========================================= */}
-            {activeTab === 'contable' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    <div className="analisis-search-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#FFF', padding: '16px 20px', borderRadius: '10px', border: '1px solid #E5E7EB' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%' }}>
-                            <Button variant="secondary" onClick={() => setActiveTab('resumen')}>&larr; Volver</Button>
-                            <div style={{ position: 'relative', flex: 1 }}>
-                                <Search size={18} color="#9CA3AF" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
-                                <input
-                                    type="text"
-                                    placeholder="Buscar doc..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    style={{ padding: '8px 12px 8px 38px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px', width: '100%', outline: 'none' }}
-                                />
+            {
+                activeTab === 'contable' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        <div className="analisis-search-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#FFF', padding: '16px 20px', borderRadius: '10px', border: '1px solid #E5E7EB' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%' }}>
+                                <Button variant="secondary" onClick={() => setActiveTab('resumen')}>&larr; Volver</Button>
+                                <div style={{ position: 'relative', flex: 1 }}>
+                                    <Search size={18} color="#9CA3AF" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                                    <input
+                                        type="text"
+                                        placeholder="Buscar doc..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        style={{ padding: '8px 12px 8px 38px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px', width: '100%', outline: 'none' }}
+                                    />
+                                </div>
                             </div>
+                            <Button variant="secondary" icon={Download} onClick={exportContableToExcel}>Exportar Excel</Button>
                         </div>
-                        <Button variant="secondary" icon={Download} onClick={exportContableToExcel}>Exportar Excel</Button>
-                    </div>
 
-                    <div className="analisis-table-container" style={{ backgroundColor: '#FFF', borderRadius: '10px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                            <thead>
-                                <tr style={{ backgroundColor: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
-                                    <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Fecha</th>
-                                    <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Documento</th>
-                                    <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Tipo</th>
-                                    <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Referencia Original</th>
-                                    <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Cliente</th>
-                                    <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', textAlign: 'right' }}>Venta</th>
-                                    <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', textAlign: 'right' }}>Costo</th>
-                                    <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#16A34A', textTransform: 'uppercase', textAlign: 'right' }}>Ganancia</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredContable.map((item) => (
-                                    <tr key={item.id} style={{ borderBottom: '1px solid #F3F4F6' }}>
-                                        <td data-label="Fecha" style={{ padding: '14px 20px', fontSize: '14px', color: '#374151' }}>{new Date(item.fecha).toLocaleDateString()}</td>
-                                        <td data-label="Documento" style={{ padding: '14px 20px', fontSize: '14px', fontWeight: 500, color: '#1A1A2E' }}>{item.documento}</td>
-                                        <td data-label="Tipo" style={{ padding: '14px 20px', fontSize: '14px' }}>
-                                            <span style={{
-                                                padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 600,
-                                                backgroundColor: item.tipo === 'Venta' ? '#DCFCE7' : '#FEE2E2',
-                                                color: item.tipo === 'Venta' ? '#166534' : '#991B1B'
-                                            }}>
-                                                {item.tipo}
-                                            </span>
-                                        </td>
-                                        <td data-label="Ref Orig." style={{ padding: '14px 20px', fontSize: '14px', color: '#6B7280' }}>{item.referencia || '-'}</td>
-                                        <td data-label="Cliente" style={{ padding: '14px 20px', fontSize: '14px', color: '#4B5563' }}>{item.cliente}</td>
-                                        <td data-label="Venta" style={{ padding: '14px 20px', fontSize: '14px', textAlign: 'right', fontWeight: 600, color: item.total < 0 ? '#B91C1C' : '#1A1A2E' }}>
-                                            {formatMoney(item.total)}
-                                        </td>
-                                        <td data-label="Costo" style={{ padding: '14px 20px', fontSize: '14px', textAlign: 'right', color: item.costoVenta < 0 ? '#B91C1C' : '#475569' }}>
-                                            {formatMoney(item.costoVenta)}
-                                        </td>
-                                        <td data-label="Ganancia" style={{ padding: '14px 20px', fontSize: '14px', fontWeight: 700, textAlign: 'right', color: item.ganancia < 0 ? '#B91C1C' : '#15803D' }}>
-                                            {formatMoney(item.ganancia)}
-                                        </td>
+                        <div className="analisis-table-container" style={{ backgroundColor: '#FFF', borderRadius: '10px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                                <thead>
+                                    <tr style={{ backgroundColor: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
+                                        <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Fecha</th>
+                                        <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Documento</th>
+                                        <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Tipo</th>
+                                        <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Referencia Original</th>
+                                        <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Cliente</th>
+                                        <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', textAlign: 'right' }}>Venta</th>
+                                        <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', textAlign: 'right' }}>Costo</th>
+                                        <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#16A34A', textTransform: 'uppercase', textAlign: 'right' }}>Ganancia</th>
                                     </tr>
-                                ))}
-                                {filteredContable.length === 0 && (
-                                    <tr><td colSpan="8" style={{ textAlign: 'center', padding: '30px', color: '#9CA3AF' }}>No hay movimientos en este periodo.</td></tr>
-                                )}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {filteredContable.map((item) => (
+                                        <tr key={item.id} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                                            <td data-label="Fecha" style={{ padding: '14px 20px', fontSize: '14px', color: '#374151' }}>{new Date(item.fecha).toLocaleDateString()}</td>
+                                            <td data-label="Documento" style={{ padding: '14px 20px', fontSize: '14px', fontWeight: 500, color: '#1A1A2E' }}>{item.documento}</td>
+                                            <td data-label="Tipo" style={{ padding: '14px 20px', fontSize: '14px' }}>
+                                                <span style={{
+                                                    padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 600,
+                                                    backgroundColor: item.tipo === 'Venta' ? '#DCFCE7' : '#FEE2E2',
+                                                    color: item.tipo === 'Venta' ? '#166534' : '#991B1B'
+                                                }}>
+                                                    {item.tipo}
+                                                </span>
+                                            </td>
+                                            <td data-label="Ref Orig." style={{ padding: '14px 20px', fontSize: '14px', color: '#6B7280' }}>{item.referencia || '-'}</td>
+                                            <td data-label="Cliente" style={{ padding: '14px 20px', fontSize: '14px', color: '#4B5563' }}>{item.cliente}</td>
+                                            <td data-label="Venta" style={{ padding: '14px 20px', fontSize: '14px', textAlign: 'right', fontWeight: 600, color: item.total < 0 ? '#B91C1C' : '#1A1A2E' }}>
+                                                {formatMoney(item.total)}
+                                            </td>
+                                            <td data-label="Costo" style={{ padding: '14px 20px', fontSize: '14px', textAlign: 'right', color: item.costoVenta < 0 ? '#B91C1C' : '#475569' }}>
+                                                {formatMoney(item.costoVenta)}
+                                            </td>
+                                            <td data-label="Ganancia" style={{ padding: '14px 20px', fontSize: '14px', fontWeight: 700, textAlign: 'right', color: item.ganancia < 0 ? '#B91C1C' : '#15803D' }}>
+                                                {formatMoney(item.ganancia)}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {filteredContable.length === 0 && (
+                                        <tr><td colSpan="8" style={{ textAlign: 'center', padding: '30px', color: '#9CA3AF' }}>No hay movimientos en este periodo.</td></tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* ========================================= TAB: COSTOS ========================================= */}
-            {activeTab === 'costos' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {
+                activeTab === 'costos' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
-                    {/* Date Filters inside Costos */}
-                    <div className="analisis-filtros" style={{ display: 'flex', alignItems: 'flex-end', gap: '16px', padding: '16px 20px', backgroundColor: '#FFFFFF', border: '1px solid #E2E5EA', borderRadius: '12px' }}>
-                        <Input label="Desde" type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} icon={Calendar} style={{ width: '180px' }} />
-                        <Input label="Hasta" type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} icon={Calendar} style={{ width: '180px' }} />
-                        <Button variant="primary" onClick={handleApplyFilter}>Filtrar</Button>
-                        {(dateFrom || dateTo) && (
-                            <Button variant="secondary" onClick={handleClearFilter}>Limpiar</Button>
-                        )}
-                    </div>
-
-                    <div className="analisis-search-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#FFF', padding: '16px 20px', borderRadius: '10px', border: '1px solid #E5E7EB' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%' }}>
-                            <Button variant="secondary" onClick={() => setActiveTab('resumen')}>&larr; Volver</Button>
-                            <div style={{ position: 'relative', flex: 1 }}>
-                                <Search size={18} color="#9CA3AF" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
-                                <input
-                                    type="text"
-                                    placeholder="Buscar compra..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    style={{ padding: '8px 12px 8px 38px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px', width: '100%', outline: 'none' }}
-                                />
-                            </div>
+                        {/* Date Filters inside Costos */}
+                        <div className="analisis-filtros" style={{ display: 'flex', alignItems: 'flex-end', gap: '16px', padding: '16px 20px', backgroundColor: '#FFFFFF', border: '1px solid #E2E5EA', borderRadius: '12px' }}>
+                            <Input label="Desde" type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} icon={Calendar} style={{ width: '180px' }} />
+                            <Input label="Hasta" type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} icon={Calendar} style={{ width: '180px' }} />
+                            <Button variant="primary" onClick={handleApplyFilter}>Filtrar</Button>
+                            {(dateFrom || dateTo) && (
+                                <Button variant="secondary" onClick={handleClearFilter}>Limpiar</Button>
+                            )}
                         </div>
-                        <Button variant="secondary" icon={Download} onClick={exportComprasToExcel}>Exportar Excel</Button>
-                    </div>
 
-                    <div className="analisis-table-container" style={{ backgroundColor: '#FFF', borderRadius: '10px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                            <thead>
-                                <tr style={{ backgroundColor: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
-                                    <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Fecha</th>
-                                    <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Documento</th>
-                                    <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Proveedor</th>
-                                    <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', textAlign: 'right' }}>Total Invertido</th>
-                                    <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', textAlign: 'center' }}>Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredCompras.map((compra) => (
-                                    <tr key={compra.id} style={{ borderBottom: '1px solid #F3F4F6' }}>
-                                        <td data-label="Fecha" style={{ padding: '14px 20px', fontSize: '14px', color: '#374151' }}>{new Date(compra.fechaElaboracion).toLocaleDateString()}</td>
-                                        <td data-label="Documento" style={{ padding: '14px 20px', fontSize: '14px', fontWeight: 500, color: '#1A1A2E' }}>{compra.numeroFactura || `OC-${compra.id}`}</td>
-                                        <td data-label="Proveedor" style={{ padding: '14px 20px', fontSize: '14px', color: '#4B5563' }}>{compra.proveedor?.nombre || 'Desconocido'}</td>
-                                        <td data-label="Total" style={{ padding: '14px 20px', fontSize: '14px', fontWeight: 600, color: '#D97706', textAlign: 'right' }}>{formatMoney(compra.total)}</td>
-                                        <td data-label="Estado" style={{ padding: '14px 20px', fontSize: '14px', textAlign: 'center' }}>
-                                            <span style={{
-                                                padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 500,
-                                                backgroundColor: compra.estado === 'pagada' ? '#DCFCE7' : '#FEF9C3',
-                                                color: compra.estado === 'pagada' ? '#16A34A' : '#D97706'
-                                            }}>
-                                                {compra.estado.toUpperCase()}
-                                            </span>
-                                        </td>
+                        <div className="analisis-search-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#FFF', padding: '16px 20px', borderRadius: '10px', border: '1px solid #E5E7EB' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%' }}>
+                                <Button variant="secondary" onClick={() => setActiveTab('resumen')}>&larr; Volver</Button>
+                                <div style={{ position: 'relative', flex: 1 }}>
+                                    <Search size={18} color="#9CA3AF" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                                    <input
+                                        type="text"
+                                        placeholder="Buscar compra..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        style={{ padding: '8px 12px 8px 38px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px', width: '100%', outline: 'none' }}
+                                    />
+                                </div>
+                            </div>
+                            <Button variant="secondary" icon={Download} onClick={exportComprasToExcel}>Exportar Excel</Button>
+                        </div>
+
+                        <div className="analisis-table-container" style={{ backgroundColor: '#FFF', borderRadius: '10px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                                <thead>
+                                    <tr style={{ backgroundColor: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
+                                        <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Fecha</th>
+                                        <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Documento</th>
+                                        <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Proveedor</th>
+                                        <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', textAlign: 'right' }}>Total Invertido</th>
+                                        <th style={{ padding: '12px 20px', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', textAlign: 'center' }}>Estado</th>
                                     </tr>
-                                ))}
-                                {filteredCompras.length === 0 && (
-                                    <tr><td colSpan="5" style={{ textAlign: 'center', padding: '30px', color: '#9CA3AF' }}>No hay compras en este periodo.</td></tr>
-                                )}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {filteredCompras.map((compra) => (
+                                        <tr key={compra.id} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                                            <td data-label="Fecha" style={{ padding: '14px 20px', fontSize: '14px', color: '#374151' }}>{new Date(compra.fechaElaboracion).toLocaleDateString()}</td>
+                                            <td data-label="Documento" style={{ padding: '14px 20px', fontSize: '14px', fontWeight: 500, color: '#1A1A2E' }}>{compra.numeroFactura || `OC-${compra.id}`}</td>
+                                            <td data-label="Proveedor" style={{ padding: '14px 20px', fontSize: '14px', color: '#4B5563' }}>{compra.proveedor?.nombre || 'Desconocido'}</td>
+                                            <td data-label="Total" style={{ padding: '14px 20px', fontSize: '14px', fontWeight: 600, color: '#D97706', textAlign: 'right' }}>{formatMoney(compra.total)}</td>
+                                            <td data-label="Estado" style={{ padding: '14px 20px', fontSize: '14px', textAlign: 'center' }}>
+                                                <span style={{
+                                                    padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 500,
+                                                    backgroundColor: compra.estado === 'pagada' ? '#DCFCE7' : '#FEF9C3',
+                                                    color: compra.estado === 'pagada' ? '#16A34A' : '#D97706'
+                                                }}>
+                                                    {compra.estado.toUpperCase()}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {filteredCompras.length === 0 && (
+                                        <tr><td colSpan="5" style={{ textAlign: 'center', padding: '30px', color: '#9CA3AF' }}>No hay compras en este periodo.</td></tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 }

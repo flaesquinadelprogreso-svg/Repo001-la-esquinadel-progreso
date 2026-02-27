@@ -1451,6 +1451,31 @@ app.get('/api/analisis-financiero', async (req, res) => {
 
         const lowStockList = productos.filter(p => p.stockUbicaciones.reduce((s, l) => s + l.stock, 0) <= p.stockMinimo);
 
+        // Calcular productos de menor movimiento (KPI)
+        const productStats = {};
+        productos.forEach(p => {
+            productStats[p.id] = {
+                id: p.id,
+                nombre: p.nombre,
+                qty: 0,
+                stock: p.stockUbicaciones.reduce((s, l) => s + l.stock, 0)
+            };
+        });
+
+        ventasPositivas.forEach(v => {
+            if (v.estado === 'anulada') return;
+            v.items.forEach(i => {
+                if (i.productoId && productStats[i.productoId]) {
+                    productStats[i.productoId].qty += Math.abs(i.cantidad);
+                }
+            });
+        });
+
+        const pocoMovimientoList = Object.values(productStats).sort((a, b) => {
+            if (a.qty !== b.qty) return a.qty - b.qty;
+            return b.stock - a.stock; // Si tienen la misma venta, el que tiene más stock inactivo es peor
+        });
+
         // ═══════════════════════════════════════════════════════════════
         // CÁLCULO CORRECTO: VENTAS BRUTAS, DEVOLUCIONES, VENTAS NETAS
         // ═══════════════════════════════════════════════════════════════
@@ -1509,9 +1534,10 @@ app.get('/api/analisis-financiero', async (req, res) => {
             topBajoStock: lowStockList.slice(0, 5).map(p => ({
                 id: p.id,
                 nombre: p.nombre,
-                stock: p.stockUbicaciones.reduce((s, l) => s + l.stock, 0),
+                stock: p.stock, // stock se llama internamente en bajoStock como la sumatoria
                 stockMinimo: p.stockMinimo
             })),
+            topPocoMovimiento: pocoMovimientoList.slice(0, 5),
             ventas: todasVentasCombinadas,
             ventasPositivas: ventas,
             devoluciones: devolucionesProcesadas,
