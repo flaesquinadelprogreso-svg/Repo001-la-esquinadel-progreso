@@ -258,7 +258,7 @@ export default function AnalisisFinanciero() {
             {activeTab === 'resumen' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                     {/* KPI Cards section - Nuevo formato con Ventas Brutas, Devoluciones y Netas */}
-                    <div id="analisis-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px' }}>
+                    <div id="analisis-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
 
                         {/* Ventas Brutas */}
                         <div
@@ -273,6 +273,18 @@ export default function AnalisisFinanciero() {
                                 {formatMoney(resumen.ventasBrutas ?? resumen.totalVendido)}
                             </div>
                             <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '4px' }}>{ventasPositivas?.length || ventas.length} ventas</div>
+                        </div>
+
+                        {/* Capital Inmovilizado */}
+                        <div
+                            style={{ backgroundColor: '#FFFFFF', padding: '20px', borderRadius: '12px', border: '1px solid #E2E5EA', position: 'relative', overflow: 'hidden' }}
+                        >
+                            <div style={{ position: 'absolute', right: '-15px', top: '10px', opacity: 0.05 }}><Package size={80} /></div>
+                            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>KInmovilizado</span>
+                            <div style={{ fontSize: '24px', fontWeight: 700, color: '#8B5CF6', marginTop: '8px' }}>
+                                {formatMoney(resumen.capitalInmovilizado || 0)}
+                            </div>
+                            <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '4px' }}>Costo de stock actual</div>
                         </div>
 
                         {/* Devoluciones */}

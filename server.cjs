@@ -1515,6 +1515,13 @@ app.get('/api/analisis-financiero', async (req, res) => {
             new Date(b.createdAt) - new Date(a.createdAt)
         );
 
+        // Calcular Capital Inmovilizado (Stock Total * Costo de Compra)
+        let capitalInmovilizado = 0;
+        productos.forEach(p => {
+            const stockTotal = p.stockUbicaciones.reduce((s, l) => s + l.stock, 0);
+            capitalInmovilizado += (stockTotal * (p.costo || 0));
+        });
+
         res.json({
             resumen: {
                 // Nuevos campos para el análisis correcto
@@ -1528,6 +1535,7 @@ app.get('/api/analisis-financiero', async (req, res) => {
                 totalCostoVentas: costoVentasNeto,
                 totalGanancia: utilidadNeta,
                 totalInvertido,
+                capitalInmovilizado, // Agregado aquí
                 margenRentabilidad,
                 productosBajoStockCount: lowStockList.length
             },
