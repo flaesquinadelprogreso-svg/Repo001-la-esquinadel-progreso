@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { Wifi, WifiOff, Send, Phone, AlertTriangle, CheckCircle, LogOut } from 'lucide-react';
+import { Wifi, WifiOff, Send, Phone, AlertTriangle, CheckCircle, LogOut, Loader, TestTube, Trash2, RefreshCw } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import api from '../api/client';
@@ -55,9 +55,25 @@ export default function WhatsApp() {
         if (!window.confirm('Desea desconectar WhatsApp?')) return;
         try {
             await api.post('/whatsapp/desconectar');
-            setStatus({ status: 'DISCONNECTED', qr: null });
+            setStatus({ status: 'DISCONNECTED', qr: null, hasSavedSession: false });
         } catch (err) {
             alert('Error al desconectar');
+        }
+    };
+
+    const handleLimpiarSesion = async () => {
+        if (!window.confirm('Limpiar sesion expirada y volver a vincular?')) return;
+        try {
+            await api.post('/whatsapp/desconectar');
+            setStatus({ status: 'DISCONNECTED', qr: null, hasSavedSession: false });
+            // Auto-iniciar vinculacion
+            setTimeout(async () => {
+                setLoading(true);
+                try { await api.post('/whatsapp/conectar'); } catch (e) { /* ignore */ }
+                setLoading(false);
+            }, 500);
+        } catch (err) {
+            alert('Error al limpiar sesion');
         }
     };
 
@@ -70,6 +86,23 @@ export default function WhatsApp() {
         } catch (err) {
             setResultado({ type: 'error', msg: 'Error al guardar' });
         }
+    };
+
+    const handlePrueba = async () => {
+        const num = destino || savedDestino;
+        if (!num) {
+            setResultado({ type: 'error', msg: 'Configure el numero destino primero' });
+            return;
+        }
+        setSending(true);
+        setResultado(null);
+        try {
+            const res = await api.post('/whatsapp/prueba', { numero: num });
+            setResultado({ type: 'success', msg: res.data.message || 'Mensaje de prueba enviado' });
+        } catch (err) {
+            setResultado({ type: 'error', msg: err.response?.data?.error || 'Error al enviar prueba' });
+        }
+        setSending(false);
     };
 
     const handleNotificar = async () => {
@@ -95,12 +128,18 @@ export default function WhatsApp() {
 
     const isConnected = status.status === 'CONNECTED';
     const isQR = status.status === 'QR_READY';
+    const isConnecting = status.status === 'CONNECTING';
+    const isSessionExpired = status.status === 'DISCONNECTED' && status.hasSavedSession;
 
     const statusConfig = isConnected
         ? { bg: '#DCFCE7', text: '#16A34A', border: 'rgba(22,163,74,0.3)', label: 'Conectado', sub: 'Sesion activa - listo para enviar' }
         : isQR
             ? { bg: '#FEF3C7', text: '#D97706', border: 'rgba(217,119,6,0.3)', label: 'Esperando Escaneo', sub: 'Escanea el QR con tu WhatsApp' }
-            : { bg: '#FEE2E2', text: '#DC2626', border: 'rgba(220,38,38,0.3)', label: 'Desconectado', sub: 'Vincule su dispositivo para enviar alertas' };
+            : isConnecting
+                ? { bg: '#DBEAFE', text: '#2563EB', border: 'rgba(37,99,235,0.3)', label: 'Conectando...', sub: 'Reconectando sesion guardada...' }
+                : isSessionExpired
+                    ? { bg: '#FEF3C7', text: '#D97706', border: 'rgba(217,119,6,0.3)', label: 'Sesion expirada', sub: 'La sesion anterior ya no es valida. Limpie y vuelva a vincular.' }
+                    : { bg: '#FEE2E2', text: '#DC2626', border: 'rgba(220,38,38,0.3)', label: 'Desconectado', sub: 'Vincule su dispositivo para enviar alertas' };
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '600px' }}>
@@ -112,13 +151,21 @@ export default function WhatsApp() {
                 border: `1px solid ${statusConfig.border}`
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    {isConnected ? <Wifi size={24} style={{ color: statusConfig.text }} /> : <WifiOff size={24} style={{ color: statusConfig.text }} />}
+                    {isConnected ? <Wifi size={24} style={{ color: statusConfig.text }} />
+                        : isConnecting ? <Loader size={24} style={{ color: statusConfig.text, animation: 'spin 1s linear infinite' }} />
+                        : <WifiOff size={24} style={{ color: statusConfig.text }} />}
                     <div style={{ flex: 1 }}>
                         <p style={{ fontSize: '16px', fontWeight: 700, color: statusConfig.text }}>{statusConfig.label}</p>
                         <p style={{ fontSize: '12px', color: '#6B7280', marginTop: '2px' }}>{statusConfig.sub}</p>
                     </div>
-                    {status.status === 'DISCONNECTED' && (
+                    {status.status === 'DISCONNECTED' && !isSessionExpired && (
                         <Button size="sm" onClick={handleConnect} disabled={loading}>Vincular</Button>
+                    )}
+                    {isSessionExpired && (
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <Button size="sm" onClick={handleConnect} disabled={loading} icon={RefreshCw}>Reintentar</Button>
+                            <Button size="sm" variant="secondary" onClick={handleLimpiarSesion} icon={Trash2}>Limpiar</Button>
+                        </div>
                     )}
                     {isConnected && (
                         <Button size="sm" variant="secondary" onClick={handleDisconnect} icon={LogOut}>Desconectar</Button>
@@ -185,14 +232,24 @@ export default function WhatsApp() {
                     Envia un resumen de todas las cuentas por cobrar (vencidas y pendientes) al numero configurado.
                 </p>
 
-                <Button
-                    onClick={handleNotificar}
-                    disabled={!isConnected || sending || (!destino && !savedDestino)}
-                    icon={Send}
-                    style={{ width: '100%' }}
-                >
-                    {sending ? 'Enviando...' : 'Enviar Resumen de Cuentas por Cobrar'}
-                </Button>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                    <Button
+                        onClick={handleNotificar}
+                        disabled={!isConnected || sending || (!destino && !savedDestino)}
+                        icon={Send}
+                        style={{ flex: 1 }}
+                    >
+                        {sending ? 'Enviando...' : 'Enviar Resumen de Cobranza'}
+                    </Button>
+                    <Button
+                        onClick={handlePrueba}
+                        disabled={!isConnected || sending || (!destino && !savedDestino)}
+                        icon={TestTube}
+                        variant="secondary"
+                    >
+                        Prueba
+                    </Button>
+                </div>
 
                 {!isConnected && (
                     <p style={{ fontSize: '11px', color: '#DC2626', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>

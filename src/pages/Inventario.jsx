@@ -1287,12 +1287,12 @@ export default function Inventario() {
                                                 onClick={async () => {
                                                     const nuevoNombre = prompt('Nuevo nombre para la ubicación:', u.nombre);
                                                     if (nuevoNombre && nuevoNombre !== u.nombre) {
-                                                        const res = await fetch(`/ubicaciones/${u.id}`, {
-                                                            method: 'PUT',
-                                                            headers: { 'Content-Type': 'application/json' },
-                                                            body: JSON.stringify({ nombre: nuevoNombre })
-                                                        });
-                                                        if (res.ok) fetchData();
+                                                        try {
+                                                            await api.put(`/ubicaciones/${u.id}`, { nombre: nuevoNombre });
+                                                            fetchData();
+                                                        } catch (err) {
+                                                            alert(err.response?.data?.error || 'Error al renombrar');
+                                                        }
                                                     }
                                                 }}
                                                 style={{ padding: '6px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -1303,12 +1303,11 @@ export default function Inventario() {
                                             <button
                                                 onClick={async () => {
                                                     if (confirm(`¿Está seguro de eliminar la ubicación "${u.nombre}"?`)) {
-                                                        const res = await api.get(`/ubicaciones/${u.id}`, { method: 'DELETE' });
-                                                        if (res.ok) {
+                                                        try {
+                                                            await api.delete(`/ubicaciones/${u.id}`);
                                                             fetchData();
-                                                        } else {
-                                                            const err = res.data;
-                                                            alert(err.error || 'Error al eliminar');
+                                                        } catch (err) {
+                                                            alert(err.response?.data?.error || 'Error al eliminar');
                                                         }
                                                     }
                                                 }}

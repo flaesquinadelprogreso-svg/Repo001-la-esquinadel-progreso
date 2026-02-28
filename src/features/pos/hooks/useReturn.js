@@ -11,19 +11,6 @@ export function useReturn({ cuentas, fetchData }) {
     const [returnAccountId, setReturnAccountId] = useState('');
     const [processingReturn, setProcessingReturn] = useState(false);
 
-    // Fetch client purchase history (kept from original - references setClientHistory which is not declared)
-    const fetchClientHistory = async (clienteId) => {
-        try {
-            const response = await api.get(`/clientes/${clienteId}/ventas`);
-            if (response.data) {
-                // eslint-disable-next-line no-undef
-                setClientHistory(response.data);
-            }
-        } catch (error) {
-            console.error('Error fetching client history:', error);
-        }
-    };
-
     // Open return modal for a specific sale
     const openReturnModal = (venta) => {
         setSelectedVenta(venta);
@@ -45,9 +32,10 @@ export function useReturn({ cuentas, fetchData }) {
             }
         });
         const ivaTasaVenta = selectedVenta?.ivaTasa || 0;
-        const iva = Math.round(subtotal * ivaTasaVenta / 100);
-        const total = subtotal + iva;
-        return { subtotal, iva, total };
+        // precioUnit ya incluye IVA, extraer igual que en POS
+        const total = subtotal;
+        const iva = total - Math.round(total / (1 + (ivaTasaVenta / 100)));
+        return { subtotal: total - iva, iva, total };
     };
 
     // Process return
@@ -92,7 +80,6 @@ export function useReturn({ cuentas, fetchData }) {
                 const result = response.data;
                 alert(`Devolución ${result.devolucion.numeroRecibo} procesada exitosamente.\n\nDocumento: ${result.devolucion.numeroRecibo}\nReferencia: ${result.devolucion.referencia}\nTotal devuelto: ${formatPesos(Math.abs(result.resumen.total))}`);
                 setShowReturnModal(false);
-                fetchClientHistory(creditClient); // Refresh history
                 fetchData(); // Refresh products stock
             }
         } catch (error) {

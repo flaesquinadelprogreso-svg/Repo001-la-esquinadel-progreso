@@ -446,7 +446,7 @@ export default function HistorialVentas() {
                                                                 style={{ width: '100%', padding: '6px 10px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '12px' }}
                                                             >
                                                                 <option value="">Seleccione cuenta financiera...</option>
-                                                                {cuentas.filter(c => c.tipo === (refundMethod[venta.id] === 'efectivo' ? 'efectivo' : 'banco')).map(c => (
+                                                                {cuentas.filter(c => c.tipo === (refundMethod[venta.id] === 'efectivo' ? 'caja' : 'banco')).map(c => (
                                                                     <option key={c.id} value={c.id}>{c.nombre} (- {formatPesos(c.saldo)})</option>
                                                                 ))}
                                                             </select>

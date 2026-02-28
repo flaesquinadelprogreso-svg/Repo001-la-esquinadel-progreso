@@ -42,9 +42,6 @@ if (process.env.NODE_ENV !== 'production') {
     }));
 }
 
-console.log('=== DEBUG START ===');
-console.log('Claves de variables de entorno detectadas por Node.js: ', Object.keys(process.env).join(', '));
-console.log('=== DEBUG END ===');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secreto-temporal-en-lo-que-railway-funciona-2026';
 if (!process.env.JWT_SECRET) {
@@ -55,7 +52,7 @@ if (!process.env.JWT_SECRET) {
 const verifyToken = (req, res, next) => {
     // Si la ruta es pública (relativa a /api), omitir verificación
     const publicPaths = ['/login', '/health'];
-    if (publicPaths.includes(req.path) || req.path.startsWith('/whatsapp')) {
+    if (publicPaths.includes(req.path)) {
         return next();
     }
 
@@ -73,33 +70,68 @@ const verifyToken = (req, res, next) => {
 // ═══════════════════════════════════════════════════════════════
 // CONFIGURACIÓN DE WHATSAPP (Baileys)
 // ═══════════════════════════════════════════════════════════════
-const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, makeCacheableSignalKeyStore } = require('@whiskeysockets/baileys');
+const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, makeCacheableSignalKeyStore, fetchLatestWaWebVersion } = require('@whiskeysockets/baileys');
 const pino = require('pino');
 
 let whatsappQr = null;
 let whatsappStatus = 'DISCONNECTED'; // DISCONNECTED, CONNECTING, QR_READY, CONNECTED
 let waSock = null;
-const WA_AUTH_DIR = path.join(__dirname, '.wwebjs_auth');
+let waLogoutIntencional = false;
+let waReconnectAttempts = 0;
+let waReconnectTimer = null;
+const WA_MAX_RECONNECTS = 3;
+const WA_AUTH_DIR = path.join(__dirname, '.baileys_auth');
+
+// Validar número de teléfono (7-15 dígitos según E.164)
+function validatePhone(numero) {
+    if (!numero) return null;
+    const phone = numero.replace(/\D/g, '');
+    if (phone.length < 7 || phone.length > 15) return null;
+    return phone;
+}
 
 async function startWhatsApp() {
     if (whatsappStatus === 'CONNECTING' || whatsappStatus === 'CONNECTED') return;
+
+    // Limpiar socket anterior si existe
+    if (waSock) {
+        try { waSock.ev.removeAllListeners(); } catch (_) {}
+        waSock = null;
+    }
+
     whatsappStatus = 'CONNECTING';
     whatsappQr = null;
+    waLogoutIntencional = false;
+    waReconnectAttempts = 0;
+    logger.info('Iniciando WhatsApp con Baileys...');
 
     try {
+        // Limpiar auth viejo de whatsapp-web.js si existe
+        const oldAuth = path.join(__dirname, '.wwebjs_auth');
+        if (fs.existsSync(oldAuth)) {
+            fs.rmSync(oldAuth, { recursive: true, force: true });
+            logger.info('Auth viejo de whatsapp-web.js eliminado');
+        }
+
         if (!fs.existsSync(WA_AUTH_DIR)) fs.mkdirSync(WA_AUTH_DIR, { recursive: true });
         const { state, saveCreds } = await useMultiFileAuthState(WA_AUTH_DIR);
 
+        const { version } = await fetchLatestWaWebVersion({});
+        logger.info('WA Web version: ' + JSON.stringify(version));
+
         waSock = makeWASocket({
             auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'silent' })) },
-            printQRInTerminal: true,
             logger: pino({ level: 'silent' }),
+            version,
         });
+        logger.info('Socket de WhatsApp creado, esperando QR...');
 
         waSock.ev.on('creds.update', saveCreds);
 
         waSock.ev.on('connection.update', (update) => {
             const { connection, lastDisconnect, qr } = update;
+            logger.info('WhatsApp connection.update: ' + JSON.stringify({ connection, hasQr: !!qr, statusCode: lastDisconnect?.error?.output?.statusCode }));
+
             if (qr) {
                 whatsappQr = qr;
                 whatsappStatus = 'QR_READY';
@@ -108,22 +140,34 @@ async function startWhatsApp() {
             if (connection === 'open') {
                 whatsappStatus = 'CONNECTED';
                 whatsappQr = null;
+                waReconnectAttempts = 0;
                 logger.info('WhatsApp conectado correctamente (Baileys)');
             }
             if (connection === 'close') {
+                const statusCode = lastDisconnect?.error?.output?.statusCode;
+                logger.info('WhatsApp desconectado. statusCode: ' + statusCode + ', reason: ' + JSON.stringify(lastDisconnect?.error?.message));
                 whatsappStatus = 'DISCONNECTED';
                 whatsappQr = null;
-                const statusCode = lastDisconnect?.error?.output?.statusCode;
-                // Si fue logout manual, limpiar sesión
-                if (statusCode === DisconnectReason.loggedOut) {
-                    logger.info('WhatsApp cerró sesión. Limpiando auth...');
+                waSock = null;
+
+                if (statusCode === DisconnectReason.loggedOut || waLogoutIntencional) {
+                    logger.info('Sesion cerrada, limpiando auth...');
                     if (fs.existsSync(WA_AUTH_DIR)) fs.rmSync(WA_AUTH_DIR, { recursive: true, force: true });
+                    waReconnectAttempts = 0;
+                } else if (waReconnectAttempts < WA_MAX_RECONNECTS) {
+                    waReconnectAttempts++;
+                    logger.info('Reconectando WhatsApp (intento ' + waReconnectAttempts + '/' + WA_MAX_RECONNECTS + ')...');
+                    waReconnectTimer = setTimeout(() => startWhatsApp(), 3000);
+                } else {
+                    logger.info('Maximo de reconexiones alcanzado. Use el boton Vincular para reintentar.');
+                    waReconnectAttempts = 0;
                 }
             }
         });
     } catch (err) {
-        logger.error('Error al iniciar WhatsApp:', err);
+        logger.error('Error al iniciar WhatsApp: ' + err.message);
         whatsappStatus = 'DISCONNECTED';
+        waSock = null;
     }
 }
 
@@ -148,17 +192,21 @@ const loginLimiter = rateLimit({
     standardHeaders: true
 });
 
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.json({ limit: '15mb' }));
+app.use(express.urlencoded({ limit: '15mb', extended: true }));
 
 // Rutas públicas base
 app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date() }));
 
-// Excluir WhatsApp del token check (polling continuo desde la UI)
-app.use('/api/whatsapp', (req, res, next) => next());
-
 // Protegiendo toda la API por defecto (Deny-by-default) salvo excepciones pre-programadas
 app.use('/api', verifyToken);
+
+// Rate limiter específico para envíos de WhatsApp (máx 10 por minuto)
+const waLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 10,
+    message: { error: 'Demasiados envíos de WhatsApp. Intente en un momento.' }
+});
 
 // ═══════════════════════════════════════════════════════════════
 // SISTEMA DE RUTAS PÚBLICAS Y AUTENTICACIÓN
@@ -772,6 +820,14 @@ app.post('/api/ventas', async (req, res) => {
         const { clienteId, items, metodoPago, cuentaId, fechaVencimiento, pagos, ivaTasa: reqIvaTasa } = req.body;
         if (!items || items.length === 0) return res.status(400).json({ error: 'La venta debe tener items' });
 
+        // Validar cantidades
+        for (const item of items) {
+            const qty = parseInt(item.cantidad);
+            if (!Number.isInteger(qty) || qty <= 0) {
+                return res.status(400).json({ error: `Cantidad inválida para ${item.nombre || 'item'}` });
+            }
+        }
+
         logger.info('--- NUEVA VENTA RECIBIDA ---', { itemsCount: items?.length });
         const resultado = await prisma.$transaction(async (tx) => {
             // 1. Obtener Configuración e IVA (Mover aquí para evitar ReferenceError)
@@ -886,7 +942,8 @@ app.post('/api/ventas', async (req, res) => {
                     metodoPago: metodoPago,
                     estado: 'completada',
                     items: { create: finalItemsList }
-                }
+                },
+                include: { cliente: true }
             });
 
             for (const item of finalItemsList) {
@@ -1717,6 +1774,7 @@ app.post('/api/movimientos-financieros', async (req, res) => {
 
         const resultado = await prisma.$transaction(async (tx) => {
             const cuenta = await tx.cuentaFinanciera.findUnique({ where: { id: accId } });
+            if (!cuenta) throw new Error('Cuenta financiera no encontrada');
             if (tipo === 'salida' && cuenta.saldoActual < amount) throw new Error('Saldo insuficiente');
             const mov = await tx.movimientoCaja.create({
                 data: { tipo, categoria, monto: amount, cuentaId: accId, descripcion, metodo, hora: new Date().toLocaleTimeString('es-CO') }
@@ -2137,8 +2195,13 @@ app.put('/api/compras/:id', async (req, res) => {
 // WHATSAPP API (Baileys)
 // ═════════════════════════════════
 
-app.get('/api/whatsapp/status', (req, res) => {
-    res.json({ status: whatsappStatus, qr: whatsappQr });
+app.get('/api/whatsapp/status', async (req, res) => {
+    let hasSavedSession = false;
+    try {
+        const files = await fs.promises.readdir(WA_AUTH_DIR);
+        hasSavedSession = files.length > 0;
+    } catch (_) {}
+    res.json({ status: whatsappStatus, qr: whatsappQr, hasSavedSession });
 });
 
 app.post('/api/whatsapp/conectar', async (req, res) => {
@@ -2159,7 +2222,10 @@ app.post('/api/whatsapp/conectar', async (req, res) => {
 
 app.post('/api/whatsapp/desconectar', async (req, res) => {
     try {
+        waLogoutIntencional = true;
+        if (waReconnectTimer) { clearTimeout(waReconnectTimer); waReconnectTimer = null; }
         if (waSock) {
+            try { waSock.ev.removeAllListeners(); } catch (_) {}
             await waSock.logout();
             waSock = null;
         }
@@ -2169,12 +2235,14 @@ app.post('/api/whatsapp/desconectar', async (req, res) => {
         res.json({ success: true, message: 'WhatsApp desconectado' });
     } catch (error) {
         whatsappStatus = 'DISCONNECTED';
-        res.json({ success: true, message: 'Sesión cerrada' });
+        waSock = null;
+        if (fs.existsSync(WA_AUTH_DIR)) fs.rmSync(WA_AUTH_DIR, { recursive: true, force: true });
+        res.json({ success: true, message: 'Sesion cerrada' });
     }
 });
 
 // Enviar resumen de cuentas vencidas al número del jefe/empresa
-app.post('/api/whatsapp/notificar-vencidos', async (req, res) => {
+app.post('/api/whatsapp/notificar-vencidos', waLimiter, async (req, res) => {
     if (whatsappStatus !== 'CONNECTED' || !waSock) {
         return res.status(400).json({ error: 'WhatsApp no está conectado' });
     }
@@ -2190,9 +2258,9 @@ app.post('/api/whatsapp/notificar-vencidos', async (req, res) => {
             return res.status(400).json({ error: 'No hay número de destino configurado. Configure el número en Configuración > WhatsApp.' });
         }
 
-        // Limpiar y formatear número (ej: 573001234567)
-        const phone = destino.replace(/\D/g, '');
-        if (phone.length < 10) {
+        // Validar número
+        const phone = validatePhone(destino);
+        if (!phone) {
             return res.status(400).json({ error: 'Número de destino inválido' });
         }
         const jid = `${phone}@s.whatsapp.net`;
@@ -2254,14 +2322,16 @@ app.post('/api/whatsapp/notificar-vencidos', async (req, res) => {
 });
 
 // Enviar mensaje de texto libre a un número
-app.post('/api/whatsapp/enviar', async (req, res) => {
+app.post('/api/whatsapp/enviar', waLimiter, async (req, res) => {
     if (whatsappStatus !== 'CONNECTED' || !waSock) {
         return res.status(400).json({ error: 'WhatsApp no está conectado' });
     }
     try {
         const { numero, mensaje } = req.body;
         if (!numero || !mensaje) return res.status(400).json({ error: 'Número y mensaje son requeridos' });
-        const phone = numero.replace(/\D/g, '');
+        const phone = validatePhone(numero);
+        if (!phone) return res.status(400).json({ error: 'Número inválido (7-15 dígitos)' });
+        if (mensaje.length > 4096) return res.status(400).json({ error: 'Mensaje demasiado largo' });
         const jid = `${phone}@s.whatsapp.net`;
         await waSock.sendMessage(jid, { text: mensaje });
         res.json({ success: true });
@@ -2271,6 +2341,87 @@ app.post('/api/whatsapp/enviar', async (req, res) => {
     }
 });
 
+// Mensaje de prueba para verificar que WhatsApp funciona
+app.post('/api/whatsapp/prueba', waLimiter, async (req, res) => {
+    if (whatsappStatus !== 'CONNECTED' || !waSock) {
+        return res.status(400).json({ error: 'WhatsApp no está conectado' });
+    }
+    try {
+        const { numero } = req.body;
+        if (!numero) return res.status(400).json({ error: 'Número destino requerido' });
+        const phone = validatePhone(numero);
+        if (!phone) return res.status(400).json({ error: 'Número inválido (7-15 dígitos)' });
+        const jid = `${phone}@s.whatsapp.net`;
+
+        const config = await prisma.configuracion.findFirst();
+        const empresa = config?.nombreEmpresa || 'Mi Empresa';
+
+        const msg = `*MENSAJE DE PRUEBA*\n\n` +
+            `Este es un mensaje de prueba del sistema *${empresa}*.\n\n` +
+            `Si recibes este mensaje, la conexion de WhatsApp esta funcionando correctamente.\n\n` +
+            `────────────────\n` +
+            `_Enviado automaticamente desde el sistema POS_\n` +
+            `_${new Date().toLocaleString('es-CO')}_`;
+
+        await waSock.sendMessage(jid, { text: msg });
+        res.json({ success: true, message: 'Mensaje de prueba enviado a ' + numero });
+    } catch (error) {
+        logger.error('Error enviando prueba WhatsApp:', error);
+        res.status(500).json({ error: 'Error al enviar mensaje de prueba' });
+    }
+});
+
+// Enviar recibo/factura PDF por WhatsApp al cliente
+app.post('/api/whatsapp/enviar-recibo', waLimiter, async (req, res) => {
+    if (whatsappStatus !== 'CONNECTED' || !waSock) {
+        return res.status(400).json({ error: 'WhatsApp no está conectado' });
+    }
+    try {
+        const { numero, pdfBase64, filename, recibo } = req.body;
+        if (!numero) return res.status(400).json({ error: 'Número del cliente requerido' });
+        if (!pdfBase64) return res.status(400).json({ error: 'PDF requerido' });
+
+        const phone = validatePhone(numero);
+        if (!phone) return res.status(400).json({ error: 'Número inválido (7-15 dígitos)' });
+
+        // Limitar tamaño del PDF (máx ~7.5MB decodificado)
+        if (pdfBase64.length > 10 * 1024 * 1024) {
+            return res.status(400).json({ error: 'PDF demasiado grande (máx 7.5MB)' });
+        }
+
+        const pdfBuffer = Buffer.from(pdfBase64, 'base64');
+        // Validar magic bytes de PDF
+        if (pdfBuffer.length < 4 || pdfBuffer.toString('ascii', 0, 4) !== '%PDF') {
+            return res.status(400).json({ error: 'El archivo no es un PDF válido' });
+        }
+
+        const jid = `${phone}@s.whatsapp.net`;
+        const config = await prisma.configuracion.findFirst();
+        const empresa = config?.nombreEmpresa || 'Mi Empresa';
+        const fmt = (v) => '$' + Math.round(Number(v) || 0).toLocaleString('es-CO');
+
+        // Sanitizar filename
+        const safeName = (filename || 'Recibo.pdf').replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 100);
+
+        const caption = `*${empresa}* - Recibo #${recibo?.receiptNumber || ''}\n` +
+            `*Total: ${fmt(recibo?.total)}*` +
+            (recibo?.ivaTasa != null ? ` (IVA ${recibo.ivaTasa}%)` : '') +
+            `\n¡Gracias por su compra!`;
+
+        // Enviar PDF como documento
+        await waSock.sendMessage(jid, {
+            document: pdfBuffer,
+            mimetype: 'application/pdf',
+            fileName: safeName,
+            caption
+        });
+
+        res.json({ success: true, message: 'Recibo PDF enviado por WhatsApp' });
+    } catch (error) {
+        logger.error('Error enviando recibo WhatsApp:', error);
+        res.status(500).json({ error: 'Error al enviar recibo por WhatsApp' });
+    }
+});
 
 // ═══════════════════════════════════════════════════════════════
 // SISTEMA Y PERFIL
@@ -2341,7 +2492,7 @@ app.get('/api/notificaciones', async (req, res) => {
         }).map(c => ({
             id: `cxc-${c.id}`,
             title: 'Cuenta Vencida',
-            message: `El cliente ${c.cliente.nombre} tiene un saldo pendiente de ${new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(c.monto - c.abonado)}.`,
+            message: `El cliente ${c.cliente?.nombre || 'Sin nombre'} tiene un saldo pendiente de ${new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(c.monto - (c.abonado || 0))}.`,
             time: 'Urgente',
             type: 'danger'
         }));
@@ -2803,13 +2954,13 @@ app.post('/api/compras', async (req, res) => {
                             orderBy: { fechaCreacion: 'asc' }
                         });
                         const cuentaAbierta = cuentasProv.find(c => (c.monto - (c.abonado || 0)) > 0);
-                        const descDetalle = `Factura: ${numeroFactura || `Compra ${compra.id}`} - ${formatFecha(new Date())} - ${formatPesos(p.monto)}`;
+                        const descDetalle = `Factura: ${numeroFactura || `Compra ${compra.id}`} - ${formatFecha(new Date())} - ${formatPesos(pago.monto)}`;
 
                         if (cuentaAbierta) {
                             await tx.cuentaPorPagar.update({
                                 where: { id: cuentaAbierta.id },
                                 data: {
-                                    monto: { increment: parseInt(p.monto) },
+                                    monto: { increment: parseInt(pago.monto) },
                                     descripcion: `${cuentaAbierta.descripcion} | ${descDetalle}`,
                                     estado: 'pendiente'
                                 }
@@ -2818,7 +2969,7 @@ app.post('/api/compras', async (req, res) => {
                             await tx.cuentaPorPagar.create({
                                 data: {
                                     proveedorId: parseInt(proveedorId),
-                                    monto: parseInt(p.monto),
+                                    monto: parseInt(pago.monto),
                                     descripcion: descDetalle,
                                     fechaVencimiento: fechaVencimiento || new Date().toISOString().split('T')[0],
                                     numeroFactura: numeroFactura || null,
@@ -2908,4 +3059,10 @@ app.get('/{*path}', (req, res) => {
 
 app.listen(PORT, () => {
     logger.info(`🚀 Servidor POS corriendo en puerto ${PORT}`);
+
+    // Auto-reconectar WhatsApp si hay sesión guardada
+    if (fs.existsSync(WA_AUTH_DIR) && fs.readdirSync(WA_AUTH_DIR).length > 0) {
+        logger.info('Sesion de WhatsApp encontrada, reconectando automaticamente...');
+        startWhatsApp().catch(err => logger.error('Error en auto-reconexion WhatsApp: ' + err.message));
+    }
 });
