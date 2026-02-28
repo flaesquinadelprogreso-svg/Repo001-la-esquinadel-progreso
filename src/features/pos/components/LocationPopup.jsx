@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { MapPin, Package, Plus } from 'lucide-react';
 import Modal from '../../../components/ui/Modal';
 import Button from '../../../components/ui/Button';
@@ -15,6 +15,9 @@ const ubicacionColor = (name) => {
 };
 
 export default function LocationPopup({ product, locationQuantities, setLocationQuantities, onConfirm, onClose }) {
+    const [usePrecioMayor, setUsePrecioMayor] = useState(false);
+    const precioActual = usePrecioMayor && product?.precioMayor ? product.precioMayor : product?.precio;
+
     if (!product) return null;
 
     return (
@@ -35,15 +38,37 @@ export default function LocationPopup({ product, locationQuantities, setLocation
                         </div>
                         <div style={{ fontSize: '13px', color: '#6B7280', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span>Ref: {product.codigo}</span>
-                            <span style={{ fontWeight: 700, color: '#10B981' }}>{formatPesos(product.precio)}</span>
+                            <span style={{ fontWeight: 700, color: '#10B981', fontSize: '15px' }}>{formatPesos(precioActual)}</span>
                         </div>
                     </div>
                 </div>
 
                 <div style={{ marginBottom: '16px' }}>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '12px' }}>
-                        ¿De qué ubicaciones desea extraer el producto?
-                    </label>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                        <label style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>
+                            ¿De qué ubicaciones desea extraer el producto?
+                        </label>
+                        {product.precioMayor && product.precioMayor !== product.precio && (
+                            <button
+                                onClick={() => setUsePrecioMayor(!usePrecioMayor)}
+                                title={usePrecioMayor ? `Precio Mayor: ${formatPesos(product.precioMayor)}` : 'Activar precio al por mayor'}
+                                style={{
+                                    padding: '4px 10px',
+                                    borderRadius: '6px',
+                                    border: `2px solid ${usePrecioMayor ? '#4F46E5' : '#D1D5DB'}`,
+                                    backgroundColor: usePrecioMayor ? '#EEF2FF' : '#fff',
+                                    color: usePrecioMayor ? '#4F46E5' : '#9CA3AF',
+                                    fontSize: '11px',
+                                    fontWeight: 800,
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s',
+                                    flexShrink: 0
+                                }}
+                            >
+                                PM
+                            </button>
+                        )}
+                    </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         {product.stockUbicaciones?.filter(s => s.stock > 0).map((s, idx) => {
@@ -73,7 +98,7 @@ export default function LocationPopup({ product, locationQuantities, setLocation
                                             <div style={{ fontSize: '12px', color: '#6B7280' }}>Disponible: <span style={{ fontWeight: 600, color: '#374151' }}>{s.stock} unds</span></div>
                                         </div>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                         <input
                                             type="number"
                                             min="0"
@@ -114,7 +139,7 @@ export default function LocationPopup({ product, locationQuantities, setLocation
                 <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '24px', paddingTop: '16px', borderTop: '1px solid #E5E7EB' }}>
                     <Button variant="secondary" onClick={onClose}>Cancelar</Button>
                     <Button
-                        onClick={() => onConfirm(product, locationQuantities)}
+                        onClick={() => onConfirm(product, locationQuantities, precioActual)}
                         disabled={!Object.values(locationQuantities).some(qty => parseInt(qty) > 0)}
                     >
                         <Plus size={18} style={{ marginRight: '6px' }} />

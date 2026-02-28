@@ -396,6 +396,46 @@ app.get('/api/productos', async (req, res) => {
     }
 });
 
+app.get('/api/productos/recientes', async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 12;
+        const recientes = await prisma.itemVenta.findMany({
+            where: { venta: { estado: 'completada', tipo: 'VENTA' } },
+            orderBy: { id: 'desc' },
+            select: { productoId: true, servicioId: true },
+            take: 300
+        });
+        // Obtener IDs únicos manteniendo orden de más reciente
+        const seenProd = new Set();
+        const seenServ = new Set();
+        const items = []; // { type, id }
+        for (const item of recientes) {
+            if (item.productoId && !seenProd.has(item.productoId)) {
+                seenProd.add(item.productoId);
+                items.push({ type: 'product', id: item.productoId });
+            } else if (item.servicioId && !seenServ.has(item.servicioId)) {
+                seenServ.add(item.servicioId);
+                items.push({ type: 'service', id: item.servicioId });
+            }
+            if (items.length >= limit) break;
+        }
+        if (items.length === 0) return res.json([]);
+        const prodIds = items.filter(i => i.type === 'product').map(i => i.id);
+        const servIds = items.filter(i => i.type === 'service').map(i => i.id);
+        const [productos, servicios] = await Promise.all([
+            prodIds.length > 0 ? prisma.producto.findMany({ where: { id: { in: prodIds }, activo: true }, include: { stockUbicaciones: { include: { ubicacion: true } } } }) : [],
+            servIds.length > 0 ? prisma.servicio.findMany({ where: { id: { in: servIds }, activo: true } }) : []
+        ]);
+        const prodMap = new Map(productos.map(p => [`product-${p.id}`, { ...p, _type: 'product' }]));
+        const servMap = new Map(servicios.map(s => [`service-${s.id}`, { ...s, _type: 'service' }]));
+        const result = items.map(i => i.type === 'product' ? prodMap.get(`product-${i.id}`) : servMap.get(`service-${i.id}`)).filter(Boolean);
+        res.json(result);
+    } catch (error) {
+        console.error('Error fetching recent products:', error);
+        res.status(500).json({ error: 'Error al obtener productos recientes' });
+    }
+});
+
 app.post('/api/productos', async (req, res) => {
     try {
         const { stockUbicaciones, ...data } = req.body;
@@ -1700,10 +1740,31 @@ app.get('/api/cierres/hoy', async (req, res) => {
 app.post('/api/cierres/abrir', async (req, res) => {
     try {
         const { saldoInicial, cuentaId } = req.body;
-        const cierre = await prisma.cierreCaja.create({
-            data: { saldoInicial: parseFloat(saldoInicial) || 0, cuentaId: parseInt(cuentaId), estado: 'abierta' }
+        const monto = parseFloat(saldoInicial) || 0;
+        const cId = parseInt(cuentaId);
+
+        const resultado = await prisma.$transaction(async (tx) => {
+            const cierre = await tx.cierreCaja.create({
+                data: { saldoInicial: monto, cuentaId: cId, estado: 'abierta' }
+            });
+
+            // Actualizar saldo de la cuenta financiera con el saldo inicial
+            await tx.cuentaFinanciera.update({
+                where: { id: cId },
+                data: { saldoActual: monto }
+            });
+
+            // Crear movimiento de entrada por apertura
+            if (monto > 0) {
+                await tx.movimientoCaja.create({
+                    data: { tipo: 'entrada', categoria: 'Apertura de caja', monto, metodo: 'apertura', cuentaId: cId, hora: new Date().toLocaleTimeString('es-CO') }
+                });
+            }
+
+            return cierre;
         });
-        res.json(cierre);
+
+        res.json(resultado);
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
@@ -1740,7 +1801,13 @@ app.post('/api/cierres/cerrar', async (req, res) => {
                 }
             });
 
-            // 2. Crear el nuevo periodo automáticamente (Rollover)
+            // 2. Actualizar saldo de la cuenta al saldo real contado
+            await tx.cuentaFinanciera.update({
+                where: { id: cierre.cuentaId },
+                data: { saldoActual: sReal }
+            });
+
+            // 3. Crear el nuevo periodo automáticamente (Rollover)
             const nuevaApertura = await tx.cierreCaja.create({
                 data: {
                     saldoInicial: sReal,

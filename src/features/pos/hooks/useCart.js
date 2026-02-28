@@ -4,7 +4,7 @@ export function useCart() {
     const [cart, setCart] = useState([]);
 
     // Add product to cart from location popup
-    const addToCart = (product, locationQuantities) => {
+    const addToCart = (product, locationQuantities, overridePrice) => {
         const selectedLocations = Object.entries(locationQuantities)
             .filter(([_, qty]) => parseInt(qty) > 0)
             .map(([ubicacionId, qty]) => {
@@ -42,11 +42,15 @@ export function useCart() {
                 return updated;
             }
 
+            const isPM = overridePrice && overridePrice !== product.precio;
             return [...prev, {
                 id: product.id,
                 code: product.codigo,
                 name: product.nombre,
-                price: product.precio,
+                price: overridePrice || product.precio,
+                originalPrice: product.precio,
+                precioMayor: product.precioMayor || null,
+                isPrecioMayor: !!isPM,
                 qty: totalAddedQty,
                 isProduct: true,
                 distributions: selectedLocations
@@ -117,10 +121,21 @@ export function useCart() {
         setCart(prev => prev.filter(item => !(item.id === id && item.isService === isService)));
     };
 
+    // Toggle precio mayor on a cart item
+    const togglePrecioMayor = (id) => {
+        setCart(prev => prev.map(item => {
+            if (item.id === id && item.isProduct && item.precioMayor) {
+                const newIsPM = !item.isPrecioMayor;
+                return { ...item, isPrecioMayor: newIsPM, price: newIsPM ? item.precioMayor : item.originalPrice };
+            }
+            return item;
+        }));
+    };
+
     // Clear cart (only clears cart items)
     const clearCart = () => {
         setCart([]);
     };
 
-    return { cart, addToCart, addServiceToCart, updateQty, removeFromCart, clearCart };
+    return { cart, addToCart, addServiceToCart, updateQty, removeFromCart, togglePrecioMayor, clearCart };
 }

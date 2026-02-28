@@ -1,10 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Modal from '../../../components/ui/Modal';
 import Button from '../../../components/ui/Button';
 import { formatPesos } from '../../../utils/currency';
 import logoSrc from '../../../Logo/logo.png';
 
 export default function ReceiptModal({ sale, onClose, onDownloadPDF }) {
+    // Descargar PDF automáticamente al mostrar el recibo
+    useEffect(() => {
+        if (sale && onDownloadPDF) {
+            // Esperar a que el DOM renderice el recibo
+            const timer = setTimeout(() => {
+                onDownloadPDF();
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [sale]); // eslint-disable-line react-hooks/exhaustive-deps
+
     if (!sale) return null;
 
     return (

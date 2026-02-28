@@ -4,6 +4,7 @@ import { ArrowLeft, Plus, Trash2, Check, AlertCircle, Search, X, Wallet, Buildin
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
+import Modal from '../components/ui/Modal';
 import { formatPesos } from '../utils/currency';
 
 import api from '../api/client';
@@ -20,6 +21,10 @@ export default function NuevaCompra() {
     const [showProveedorDropdown, setShowProveedorDropdown] = useState(false);
     const [contacto, setContacto] = useState('');
     const [numeroFactura, setNumeroFactura] = useState('');
+
+    // Nuevo proveedor modal
+    const [showNewProveedor, setShowNewProveedor] = useState(false);
+    const [newProveedor, setNewProveedor] = useState({ nombre: '', nit: '', telefono: '', email: '', direccion: '' });
 
     // Global Totals and Observations
     const [observaciones, setObservaciones] = useState('');
@@ -168,6 +173,24 @@ export default function NuevaCompra() {
 
     const [guardando, setGuardando] = useState(false);
 
+    const handleCreateProveedor = async () => {
+        if (!newProveedor.nombre || !newProveedor.nit) {
+            return alert('Por favor complete el nombre y NIT');
+        }
+        try {
+            const res = await api.post('/proveedores', newProveedor);
+            if (res.data) {
+                setProveedores(prev => [...prev, res.data]);
+                setProveedorId(res.data.id);
+                setProveedorSearch(res.data.nombre);
+                setShowNewProveedor(false);
+                setNewProveedor({ nombre: '', nit: '', telefono: '', email: '', direccion: '' });
+            }
+        } catch (error) {
+            alert(error?.response?.data?.error || 'Error al crear proveedor');
+        }
+    };
+
     const handleGuardar = async () => {
         if (!proveedorId) return alert('Por favor selecciona un proveedor.');
 
@@ -278,7 +301,8 @@ export default function NuevaCompra() {
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', alignItems: 'center', gap: '12px' }}>
                             <label style={{ fontSize: '12px', color: '#6B7280', textAlign: 'right' }}>Proveedor</label>
-                            <div style={{ position: 'relative' }}>
+                            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                            <div style={{ position: 'relative', flex: 1 }}>
                                 <div style={{ position: 'relative' }}>
                                     <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }} />
                                     <input
@@ -309,6 +333,29 @@ export default function NuevaCompra() {
                                         ))}
                                     </div>
                                 )}
+                            </div>
+                            <button
+                                onClick={() => setShowNewProveedor(true)}
+                                title="Crear nuevo proveedor"
+                                style={{
+                                    width: '34px',
+                                    height: '34px',
+                                    borderRadius: '6px',
+                                    border: '1px solid #D1D5DB',
+                                    backgroundColor: '#fff',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    flexShrink: 0,
+                                    color: '#4F46E5',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#EEF2FF'; e.currentTarget.style.borderColor = '#4F46E5'; }}
+                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.borderColor = '#D1D5DB'; }}
+                            >
+                                <Plus size={16} />
+                            </button>
                             </div>
                         </div>
 
@@ -661,6 +708,36 @@ export default function NuevaCompra() {
                 </div>
 
             </div>
+
+            {/* Modal Nuevo Proveedor */}
+            <Modal isOpen={showNewProveedor} onClose={() => setShowNewProveedor(false)} title="Nuevo Proveedor">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minWidth: '400px' }}>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Nombre *</label>
+                        <input type="text" value={newProveedor.nombre} onChange={e => setNewProveedor(prev => ({ ...prev, nombre: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="Nombre del proveedor" />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>NIT *</label>
+                        <input type="text" value={newProveedor.nit} onChange={e => setNewProveedor(prev => ({ ...prev, nit: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="Número de NIT" />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Teléfono</label>
+                        <input type="text" value={newProveedor.telefono} onChange={e => setNewProveedor(prev => ({ ...prev, telefono: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="Número de teléfono" />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Email</label>
+                        <input type="email" value={newProveedor.email} onChange={e => setNewProveedor(prev => ({ ...prev, email: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="correo@ejemplo.com" />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Dirección</label>
+                        <input type="text" value={newProveedor.direccion} onChange={e => setNewProveedor(prev => ({ ...prev, direccion: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="Dirección" />
+                    </div>
+                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
+                        <Button variant="secondary" onClick={() => setShowNewProveedor(false)}>Cancelar</Button>
+                        <Button onClick={handleCreateProveedor}>Crear Proveedor</Button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 }

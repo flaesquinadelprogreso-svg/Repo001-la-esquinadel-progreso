@@ -2,9 +2,9 @@ import React from 'react';
 import { ShoppingCart, Plus, Minus, Trash2, Hammer, Package } from 'lucide-react';
 import { formatPesos } from '../../../utils/currency';
 
-export default function CartPanel({ cart, clearCart, updateQty, removeFromCart }) {
+export default function CartPanel({ cart, clearCart, updateQty, removeFromCart, togglePrecioMayor }) {
     return (
-        <div id="pos-cart" style={{ flex: 1, minWidth: 0, backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div id="pos-cart" style={{ flex: 4, minWidth: 0, backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             {/* Cart Header */}
             <div style={{ padding: '16px', borderBottom: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -62,8 +62,27 @@ export default function CartPanel({ cart, clearCart, updateQty, removeFromCart }
                                     }}>
                                         {item.name}
                                     </div>
-                                    <div style={{ fontSize: '11px', color: '#6B7280' }}>
+                                    <div style={{ fontSize: '11px', color: '#6B7280', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                         {formatPesos(item.price)}
+                                        {item.isProduct && item.precioMayor && item.precioMayor !== item.originalPrice && (
+                                            <button
+                                                onClick={() => togglePrecioMayor(item.id)}
+                                                title={item.isPrecioMayor ? 'Precio al por mayor activo' : 'Activar precio al por mayor'}
+                                                style={{
+                                                    padding: '1px 4px',
+                                                    borderRadius: '4px',
+                                                    border: `1.5px solid ${item.isPrecioMayor ? '#4F46E5' : '#D1D5DB'}`,
+                                                    backgroundColor: item.isPrecioMayor ? '#EEF2FF' : '#fff',
+                                                    color: item.isPrecioMayor ? '#4F46E5' : '#9CA3AF',
+                                                    fontSize: '9px',
+                                                    fontWeight: 800,
+                                                    cursor: 'pointer',
+                                                    lineHeight: 1.2
+                                                }}
+                                            >
+                                                PM
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
 

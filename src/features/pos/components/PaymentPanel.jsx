@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import api from '../../../api/client';
 import { CreditCard, Banknote, User, Landmark, Trash2, Plus, AlertCircle, History } from 'lucide-react';
 import Button from '../../../components/ui/Button';
 import Modal from '../../../components/ui/Modal';
@@ -45,6 +46,7 @@ export default function PaymentPanel({
     cart,
     isCajaOpen,
     clients,
+    onClientCreated,
     // Actions
     onConfirmClick,
     // Confirm modal
@@ -52,6 +54,27 @@ export default function PaymentPanel({
     setShowConfirm,
     confirmSale,
 }) {
+    const [showNewClient, setShowNewClient] = useState(false);
+    const [newClient, setNewClient] = useState({ nombre: '', documento: '', telefono: '', email: '', direccion: '' });
+
+    const handleCreateClient = async () => {
+        if (!newClient.nombre || !newClient.documento) {
+            return alert('Por favor complete el nombre y documento');
+        }
+        try {
+            const res = await api.post('/clientes', newClient);
+            if (res.data) {
+                if (onClientCreated) onClientCreated(res.data);
+                setCreditClient(res.data.id);
+                setClientSearch(res.data.nombre);
+                setShowNewClient(false);
+                setNewClient({ nombre: '', documento: '', telefono: '', email: '', direccion: '' });
+            }
+        } catch (error) {
+            alert(error?.response?.data?.error || 'Error al crear cliente');
+        }
+    };
+
     const methods = [
         { id: 'efectivo', label: 'Efectivo', icon: Banknote },
         { id: 'banco', label: 'Banco', icon: Landmark },
@@ -65,22 +88,22 @@ export default function PaymentPanel({
     );
 
     return (
-        <div id="pos-payments" style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            <div style={{ padding: '16px', borderTop: '1px solid #E5E7EB', minWidth: 0, width: '100%', boxSizing: 'border-box' }}>
+        <div id="pos-payments" style={{ flex: 1, minHeight: 0, backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
+            <div style={{ padding: '12px', minWidth: 0, width: '100%', boxSizing: 'border-box', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '8px' }}>
                 {/* Totals and tax selector */}
-                <div style={{ marginBottom: '16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                        <span style={{ fontSize: '13px', color: '#6B7280', fontWeight: 500 }}>Tasa de IVA:</span>
-                        <div style={{ display: 'flex', backgroundColor: '#F3F4F6', padding: '2px', borderRadius: '8px' }}>
+                <div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '13px', color: '#6B7280', fontWeight: 500 }}>IVA:</span>
+                        <div style={{ display: 'flex', backgroundColor: '#F3F4F6', padding: '2px', borderRadius: '6px' }}>
                             {[0, 5, 19].map(tasa => (
                                 <button
                                     key={tasa}
                                     onClick={() => setIvaTasa(tasa)}
                                     style={{
                                         padding: '4px 10px',
-                                        fontSize: '11px',
+                                        fontSize: '12px',
                                         fontWeight: 600,
-                                        borderRadius: '6px',
+                                        borderRadius: '4px',
                                         border: 'none',
                                         cursor: 'pointer',
                                         backgroundColor: ivaTasa === tasa ? '#fff' : 'transparent',
@@ -99,7 +122,7 @@ export default function PaymentPanel({
                         <span>Subtotal</span>
                         <span>{formatPesos(subtotal)}</span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#6B7280', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#6B7280', marginBottom: '6px' }}>
                         <span>IVA ({ivaTasa}%)</span>
                         <span>{formatPesos(iva)}</span>
                     </div>
@@ -110,28 +133,28 @@ export default function PaymentPanel({
                 </div>
 
                 {/* Payment Methods */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px' }}>
                     {methods.map(method => (
                         <button
                             key={method.id}
                             onClick={() => setPaymentMethod(method.id)}
                             style={{
-                                padding: '8px 4px',
-                                borderRadius: '8px',
+                                padding: '6px 4px',
+                                borderRadius: '6px',
                                 border: paymentMethod === method.id ? '2px solid #1E3A5F' : '1px solid #E5E7EB',
                                 backgroundColor: paymentMethod === method.id ? '#F0F7FF' : '#fff',
                                 cursor: 'pointer',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
-                                gap: '4px',
+                                gap: '2px',
                                 transition: 'all 0.2s',
-                                minHeight: '60px',
+                                minHeight: '42px',
                                 justifyContent: 'center'
                             }}
                         >
-                            <method.icon size={18} color={paymentMethod === method.id ? '#1E3A5F' : '#9CA3AF'} />
-                            <span style={{ fontSize: '11px', fontWeight: 600, color: paymentMethod === method.id ? '#1E3A5F' : '#6B7280' }}>
+                            <method.icon size={14} color={paymentMethod === method.id ? '#1E3A5F' : '#9CA3AF'} />
+                            <span style={{ fontSize: '10px', fontWeight: 600, color: paymentMethod === method.id ? '#1E3A5F' : '#6B7280' }}>
                                 {method.label}
                             </span>
                         </button>
@@ -520,12 +543,13 @@ export default function PaymentPanel({
                 {!(paymentMethod === 'credito' || (paymentMethod === 'multiple' && multiplePayments.some(p => p.metodo === 'credito'))) && (
                     <div style={{ marginBottom: '12px' }}>
                         <label style={{ display: 'block', fontSize: '13px', marginBottom: '4px', fontWeight: 600 }}>
-                            Cliente (opcional - para historial/devoluciones)
+                            Cliente (opcional)
                         </label>
-                        <div style={{ position: 'relative' }}>
+                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                        <div style={{ position: 'relative', flex: 1 }}>
                             <input
                                 type="text"
-                                placeholder="Buscar cliente por nombre o documento..."
+                                placeholder="Buscar cliente..."
                                 value={clientSearch}
                                 onChange={(e) => {
                                     setClientSearch(e.target.value);
@@ -553,6 +577,29 @@ export default function PaymentPanel({
                                     ))}
                                 </div>
                             )}
+                        </div>
+                        <button
+                            onClick={() => setShowNewClient(true)}
+                            title="Crear nuevo cliente"
+                            style={{
+                                width: '38px',
+                                height: '38px',
+                                borderRadius: '6px',
+                                border: '1px solid #D1D5DB',
+                                backgroundColor: '#fff',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: '#4F46E5',
+                                flexShrink: 0,
+                                transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#EEF2FF'; e.currentTarget.style.borderColor = '#4F46E5'; }}
+                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.borderColor = '#D1D5DB'; }}
+                        >
+                            <Plus size={16} />
+                        </button>
                         </div>
 
                         {/* Purchase History Button */}
@@ -614,6 +661,38 @@ export default function PaymentPanel({
                         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
                             <Button variant="secondary" onClick={() => setShowConfirm(false)}>Cancelar</Button>
                             <Button onClick={confirmSale}>Confirmar</Button>
+                        </div>
+                    </div>
+                </Modal>
+            )}
+
+            {/* Modal Nuevo Cliente */}
+            {showNewClient && (
+                <Modal isOpen={true} onClose={() => setShowNewClient(false)} title="Nuevo Cliente">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minWidth: '400px' }}>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Nombre *</label>
+                            <input type="text" value={newClient.nombre} onChange={e => setNewClient(prev => ({ ...prev, nombre: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="Nombre completo" />
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Documento *</label>
+                            <input type="text" value={newClient.documento} onChange={e => setNewClient(prev => ({ ...prev, documento: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="Número de documento" />
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Teléfono</label>
+                            <input type="text" value={newClient.telefono} onChange={e => setNewClient(prev => ({ ...prev, telefono: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="Número de teléfono" />
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Email</label>
+                            <input type="email" value={newClient.email} onChange={e => setNewClient(prev => ({ ...prev, email: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="correo@ejemplo.com" />
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Dirección</label>
+                            <input type="text" value={newClient.direccion} onChange={e => setNewClient(prev => ({ ...prev, direccion: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="Dirección" />
+                        </div>
+                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
+                            <Button variant="secondary" onClick={() => setShowNewClient(false)}>Cancelar</Button>
+                            <Button onClick={handleCreateClient}>Crear Cliente</Button>
                         </div>
                     </div>
                 </Modal>

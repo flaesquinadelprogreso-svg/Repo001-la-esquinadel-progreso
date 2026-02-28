@@ -41,10 +41,10 @@ export default function POS() {
     const [selectedAccountId, setSelectedAccountId] = useState('');
 
     // Data hook
-    const { products, services, clients, cuentas, loading, isCajaOpen, fetchData } = usePOSData(search, setSelectedAccountId);
+    const { products, services, recentItems, isSearching, clients, addClient, cuentas, loading, isCajaOpen, fetchData } = usePOSData(search, setSelectedAccountId);
 
     // Cart hook
-    const { cart, addToCart, addServiceToCart, updateQty, removeFromCart, clearCart: clearCartItems } = useCart();
+    const { cart, addToCart, addServiceToCart, updateQty, removeFromCart, togglePrecioMayor, clearCart: clearCartItems } = useCart();
 
     // Totals (computed here so usePayment can receive them)
     const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
@@ -125,17 +125,34 @@ export default function POS() {
     }
 
     return (
-        <div id="pos-root" style={{ display: 'flex', gap: '24px', height: 'calc(100vh - 120px)' }}>
-            {/* Columna Izquierda: Carrito */}
+        <div id="pos-root" style={{ display: 'flex', gap: '16px', height: 'calc(100vh - 120px)' }}>
+            {/* Columna Izquierda: Carrito (50%) */}
             <CartPanel
                 cart={cart}
                 clearCart={clearCart}
                 updateQty={updateQty}
                 removeFromCart={removeFromCart}
+                togglePrecioMayor={togglePrecioMayor}
             />
 
-            {/* Columna Derecha: Pagos (arriba) + Productos (abajo) */}
-            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* Columna Central: Productos (30%) */}
+            <div style={{ flex: 3, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                <ProductGrid
+                    products={products}
+                    services={services}
+                    recentItems={recentItems}
+                    isSearching={isSearching}
+                    search={search}
+                    onSearchChange={setSearch}
+                    loading={false}
+                    onProductClick={handleProductClick}
+                    onServiceClick={handleServiceClick}
+                    onHistoryClick={handleHistoryClick}
+                />
+            </div>
+
+            {/* Columna Derecha: Pagos (30%) */}
+            <div style={{ flex: 3, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
                 <PaymentPanel
                     total={total}
                     subtotal={subtotal}
@@ -164,21 +181,11 @@ export default function POS() {
                     cart={cart}
                     isCajaOpen={isCajaOpen}
                     clients={clients}
+                    onClientCreated={addClient}
                     onConfirmClick={() => {}}
                     showConfirm={showConfirm}
                     setShowConfirm={setShowConfirm}
                     confirmSale={payment.confirmSale}
-                />
-
-                <ProductGrid
-                    products={products}
-                    services={services}
-                    search={search}
-                    onSearchChange={setSearch}
-                    loading={false}
-                    onProductClick={handleProductClick}
-                    onServiceClick={handleServiceClick}
-                    onHistoryClick={handleHistoryClick}
                 />
             </div>
 
@@ -188,8 +195,8 @@ export default function POS() {
                     product={showLocationPopup}
                     locationQuantities={locationQuantities}
                     setLocationQuantities={setLocationQuantities}
-                    onConfirm={(product, quantities) => {
-                        addToCart(product, quantities);
+                    onConfirm={(product, quantities, price) => {
+                        addToCart(product, quantities, price);
                         setShowLocationPopup(null);
                         setLocationQuantities({});
                     }}

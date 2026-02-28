@@ -4,10 +4,12 @@ import api from '../../../api/client';
 export function usePOSData(search, setSelectedAccountId) {
     const [products, setProducts] = useState([]);
     const [services, setServices] = useState([]);
+    const [recentItems, setRecentItems] = useState([]);
     const [clients, setClients] = useState([]);
     const [cuentas, setCuentas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isCajaOpen, setIsCajaOpen] = useState(false);
+    const [isSearching, setIsSearching] = useState(false);
 
     const fetchData = async (searchQuery = '', isSearch = false) => {
         try {
@@ -15,18 +17,20 @@ export function usePOSData(search, setSelectedAccountId) {
             const queryParams = searchQuery ? `?q=${searchQuery}` : `?limit=12`;
 
             if (isSearch) {
-                // Solo recargar productos en búsquedas para no bloquear ni enviar requests innecesarios y mantener el focus
+                // Solo recargar productos en búsquedas
+                setIsSearching(true);
                 const prodRes = await api.get(`/productos${queryParams}`);
                 setProducts(prodRes.data);
             } else {
-                const [prodRes, servRes, cliRes, cuentaRes] = await Promise.all([
-                    api.get(`/productos${queryParams}`),
+                const [recentRes, servRes, cliRes, cuentaRes] = await Promise.all([
+                    api.get('/productos/recientes?limit=12'),
                     api.get('/servicios'),
                     api.get('/clientes'),
                     api.get('/cuentas-financieras')
                 ]);
 
-                setProducts(prodRes.data);
+                setRecentItems(recentRes.data);
+                setIsSearching(false);
                 setServices(servRes.data);
                 setClients(cliRes.data);
                 setCuentas(cuentaRes.data);
@@ -66,7 +70,9 @@ export function usePOSData(search, setSelectedAccountId) {
             if (search && search.trim() !== '') {
                 fetchData(search, true);
             } else {
-                fetchData('', true); // Vuelve al comportamiento por defecto sin mostrar spinner de carga
+                // Vuelve a mostrar productos recientes
+                setIsSearching(false);
+                api.get('/productos/recientes?limit=12').then(res => setRecentItems(res.data)).catch(() => {});
             }
         }, 500);
 
@@ -74,5 +80,7 @@ export function usePOSData(search, setSelectedAccountId) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [search]);
 
-    return { products, services, clients, cuentas, loading, isCajaOpen, fetchData };
+    const addClient = (client) => setClients(prev => [...prev, client]);
+
+    return { products, services, recentItems, isSearching, clients, addClient, cuentas, loading, isCajaOpen, fetchData };
 }
