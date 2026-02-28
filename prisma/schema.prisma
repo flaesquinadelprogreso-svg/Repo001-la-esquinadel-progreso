@@ -417,6 +417,7 @@ model Usuario {
   username  String   @unique
   password  String   // bcrypt hash
   role      String   // admin, cajero
+  permisos  String?  // JSON override de permisos por usuario (si null, usa los del Rol)
   activo    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

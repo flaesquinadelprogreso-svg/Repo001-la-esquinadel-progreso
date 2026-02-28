@@ -26,7 +26,7 @@ const MODULES = [
     { key: 'configuracion', label: 'Configuración', desc: 'Ajustes del sistema' },
 ];
 
-const defaultForm = { username: '', password: '', role: 'cajero' };
+const defaultForm = { username: '', password: '', role: 'cajero', permisos: [] };
 const defaultRoleForm = { nombre: '', descripcion: '', permisos: [] };
 
 function Toggle({ on, onClick }) {
@@ -91,19 +91,50 @@ export default function Usuarios() {
 
     useEffect(() => { fetchData(); }, []);
 
+    // Helper: get default permissions for a role from the roles list
+    const getRolePermisos = (roleName) => {
+        if (roleName === 'admin') return MODULES.map(m => m.key);
+        const role = roles.find(r => r.nombre.toLowerCase() === roleName.toLowerCase());
+        if (role && role.permisos) {
+            try { return JSON.parse(role.permisos); } catch { return []; }
+        }
+        return [];
+    };
+
     // ─── User CRUD ───────────────────────────────────────────────
     const openNewUser = () => {
         setEditUserId(null);
-        setUserForm(defaultForm);
+        const defaultPermisos = getRolePermisos('cajero');
+        setUserForm({ ...defaultForm, permisos: defaultPermisos });
         setShowPassword(false);
         setShowUserModal(true);
     };
 
     const openEditUser = (user) => {
         setEditUserId(user.id);
-        setUserForm({ username: user.username, password: '', role: user.role });
+        let permisos = [];
+        if (user.permisos) {
+            try { permisos = JSON.parse(user.permisos); } catch { permisos = []; }
+        } else {
+            permisos = getRolePermisos(user.role);
+        }
+        setUserForm({ username: user.username, password: '', role: user.role, permisos });
         setShowPassword(false);
         setShowUserModal(true);
+    };
+
+    const handleUserRoleChange = (newRole) => {
+        const rolePermisos = getRolePermisos(newRole);
+        setUserForm(f => ({ ...f, role: newRole, permisos: rolePermisos }));
+    };
+
+    const toggleUserPermission = (moduleKey) => {
+        setUserForm(f => ({
+            ...f,
+            permisos: f.permisos.includes(moduleKey)
+                ? f.permisos.filter(p => p !== moduleKey)
+                : [...f.permisos, moduleKey]
+        }));
     };
 
     const handleSaveUser = async () => {
@@ -113,7 +144,11 @@ export default function Usuarios() {
 
         setSavingUser(true);
         try {
-            const payload = { username: userForm.username.trim(), role: userForm.role };
+            const payload = {
+                username: userForm.username.trim(),
+                role: userForm.role,
+                permisos: userForm.role === 'admin' ? null : JSON.stringify(userForm.permisos)
+            };
             if (userForm.password) payload.password = userForm.password;
             if (editUserId) {
                 await api.put(`/usuarios/${editUserId}`, payload);
@@ -407,40 +442,76 @@ export default function Usuarios() {
             {/* ═══ USER MODAL ═══ */}
             {showUserModal && (
                 <Modal isOpen={true} onClose={() => setShowUserModal(false)} title={editUserId ? 'Editar Usuario' : 'Nuevo Usuario'}>
-                    <div style={{ minWidth: '400px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                        <div>
-                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#374151', marginBottom: '6px' }}>Nombre de usuario</label>
-                            <input type="text" value={userForm.username}
-                                onChange={e => setUserForm(f => ({ ...f, username: e.target.value }))}
-                                placeholder="Ej: juan.perez"
-                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
-                        </div>
-                        <div>
-                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#374151', marginBottom: '6px' }}>
-                                Contraseña {editUserId && <span style={{ color: '#9CA3AF', fontWeight: 400 }}>(dejar vacío para no cambiar)</span>}
-                            </label>
-                            <div style={{ position: 'relative' }}>
-                                <input type={showPassword ? 'text' : 'password'} value={userForm.password}
-                                    onChange={e => setUserForm(f => ({ ...f, password: e.target.value }))}
-                                    placeholder={editUserId ? 'Nueva contraseña (opcional)' : 'Contraseña'}
-                                    style={{ width: '100%', padding: '10px 40px 10px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
-                                <button type="button" onClick={() => setShowPassword(!showPassword)}
-                                    style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', display: 'flex' }}>
-                                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                                </button>
+                    <div style={{ minWidth: '500px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                            <div style={{ flex: 1 }}>
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#374151', marginBottom: '6px' }}>Nombre de usuario</label>
+                                <input type="text" value={userForm.username}
+                                    onChange={e => setUserForm(f => ({ ...f, username: e.target.value }))}
+                                    placeholder="Ej: juan.perez"
+                                    style={{ width: '100%', padding: '10px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
+                            </div>
+                            <div style={{ flex: 1 }}>
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#374151', marginBottom: '6px' }}>
+                                    Contraseña {editUserId && <span style={{ color: '#9CA3AF', fontWeight: 400 }}>(opcional)</span>}
+                                </label>
+                                <div style={{ position: 'relative' }}>
+                                    <input type={showPassword ? 'text' : 'password'} value={userForm.password}
+                                        onChange={e => setUserForm(f => ({ ...f, password: e.target.value }))}
+                                        placeholder={editUserId ? 'Nueva contraseña' : 'Contraseña'}
+                                        style={{ width: '100%', padding: '10px 40px 10px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
+                                    <button type="button" onClick={() => setShowPassword(!showPassword)}
+                                        style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', display: 'flex' }}>
+                                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <div>
                             <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#374151', marginBottom: '6px' }}>Rol</label>
                             <select value={userForm.role}
-                                onChange={e => setUserForm(f => ({ ...f, role: e.target.value }))}
+                                onChange={e => handleUserRoleChange(e.target.value)}
                                 style={{ width: '100%', padding: '10px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box', backgroundColor: '#fff' }}>
                                 {uniqueRoles.map(r => (
                                     <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>
                                 ))}
                             </select>
                         </div>
-                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
+
+                        {/* Permission toggles */}
+                        {userForm.role !== 'admin' ? (
+                            <div>
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '8px' }}>
+                                    Permisos <span style={{ fontWeight: 400, color: '#9CA3AF' }}>({userForm.permisos.length} de {MODULES.length} módulos)</span>
+                                </label>
+                                <div style={{ border: '1px solid #E2E5EA', borderRadius: '8px', overflow: 'hidden', maxHeight: '300px', overflowY: 'auto' }}>
+                                    {MODULES.map((mod, idx) => {
+                                        const on = userForm.permisos.includes(mod.key);
+                                        return (
+                                            <div key={mod.key} style={{
+                                                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                                padding: '10px 14px',
+                                                borderBottom: idx < MODULES.length - 1 ? '1px solid #F0F2F5' : 'none',
+                                                backgroundColor: on ? '#F0FDF4' : 'transparent',
+                                                transition: 'background 150ms'
+                                            }}>
+                                                <div>
+                                                    <p style={{ fontSize: '13px', fontWeight: 500, color: on ? '#1A1A2E' : '#6B7280' }}>{mod.label}</p>
+                                                    <p style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '1px' }}>{mod.desc}</p>
+                                                </div>
+                                                <Toggle on={on} onClick={() => toggleUserPermission(mod.key)} />
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ) : (
+                            <div style={{ padding: '12px 16px', backgroundColor: '#DBEAFE', borderRadius: '8px', fontSize: '13px', color: '#1E40AF' }}>
+                                <strong>Admin</strong> tiene acceso total a todos los módulos del sistema.
+                            </div>
+                        )}
+
+                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '4px' }}>
                             <Button variant="secondary" onClick={() => setShowUserModal(false)}>Cancelar</Button>
                             <Button onClick={handleSaveUser} disabled={savingUser}>
                                 {savingUser ? 'Guardando...' : (editUserId ? 'Actualizar' : 'Crear Usuario')}

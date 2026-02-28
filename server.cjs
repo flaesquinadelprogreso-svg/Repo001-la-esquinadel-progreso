@@ -153,13 +153,17 @@ app.post('/api/login', async (req, res) => {
         });
 
         if (user && user.activo && await bcrypt.compare(password, user.password)) {
-            // Fetch role permissions
-            const rol = await prisma.rol.findFirst({ where: { nombre: { equals: user.role, mode: 'insensitive' } } });
+            // Resolve permissions: user override > role defaults
             let permisos = [];
             if (user.role === 'admin') {
-                permisos = ['all']; // Admin has full access
-            } else if (rol && rol.permisos) {
-                try { permisos = JSON.parse(rol.permisos); } catch { permisos = []; }
+                permisos = ['all'];
+            } else if (user.permisos) {
+                try { permisos = JSON.parse(user.permisos); } catch { permisos = []; }
+            } else {
+                const rol = await prisma.rol.findFirst({ where: { nombre: { equals: user.role, mode: 'insensitive' } } });
+                if (rol && rol.permisos) {
+                    try { permisos = JSON.parse(rol.permisos); } catch { permisos = []; }
+                }
             }
 
             const token = jwt.sign(
@@ -2191,10 +2195,12 @@ app.get('/api/perfil', async (req, res) => {
         }
         const { password, ...userData } = usuario;
 
-        // Include permissions
+        // Resolve permissions: user override > role defaults
         let permisos = [];
         if (usuario.role === 'admin') {
             permisos = ['all'];
+        } else if (usuario.permisos) {
+            try { permisos = JSON.parse(usuario.permisos); } catch { permisos = []; }
         } else {
             const rol = await prisma.rol.findFirst({ where: { nombre: { equals: usuario.role, mode: 'insensitive' } } });
             if (rol && rol.permisos) {
@@ -2317,7 +2323,7 @@ app.get('/api/usuarios', async (req, res) => {
         if (req.user.role !== 'admin') return res.status(403).json({ error: 'Solo administradores pueden ver usuarios' });
         const usuarios = await prisma.usuario.findMany({
             orderBy: { id: 'asc' },
-            select: { id: true, username: true, role: true, activo: true, createdAt: true, updatedAt: true }
+            select: { id: true, username: true, role: true, permisos: true, activo: true, createdAt: true, updatedAt: true }
         });
         res.json(usuarios);
     } catch (error) {
@@ -2328,12 +2334,15 @@ app.get('/api/usuarios', async (req, res) => {
 app.post('/api/usuarios', async (req, res) => {
     try {
         if (req.user.role !== 'admin') return res.status(403).json({ error: 'Solo administradores pueden crear usuarios' });
-        const { username, password, role } = req.body;
+        const { username, password, role, permisos } = req.body;
         if (!username || !password || !role) return res.status(400).json({ error: 'Username, contraseña y rol son requeridos' });
         if (password.length < 4) return res.status(400).json({ error: 'La contraseña debe tener al menos 4 caracteres' });
         const hashedPassword = await bcrypt.hash(password, 10);
         const usuario = await prisma.usuario.create({
-            data: { username, password: hashedPassword, role }
+            data: {
+                username, password: hashedPassword, role,
+                permisos: permisos ? (typeof permisos === 'string' ? permisos : JSON.stringify(permisos)) : null
+            }
         });
         const { password: _, ...userData } = usuario;
         res.status(201).json(userData);
@@ -2347,11 +2356,12 @@ app.put('/api/usuarios/:id', async (req, res) => {
     try {
         if (req.user.role !== 'admin') return res.status(403).json({ error: 'Solo administradores pueden editar usuarios' });
         const id = parseInt(req.params.id);
-        const { username, password, role, activo } = req.body;
+        const { username, password, role, activo, permisos } = req.body;
         const updateData = {};
         if (username) updateData.username = username;
         if (role) updateData.role = role;
         if (activo !== undefined) updateData.activo = activo;
+        if (permisos !== undefined) updateData.permisos = permisos ? (typeof permisos === 'string' ? permisos : JSON.stringify(permisos)) : null;
         if (password) {
             if (password.length < 4) return res.status(400).json({ error: 'La contraseña debe tener al menos 4 caracteres' });
             updateData.password = await bcrypt.hash(password, 10);
