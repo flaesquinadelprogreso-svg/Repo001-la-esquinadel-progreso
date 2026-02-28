@@ -551,8 +551,6 @@ export default function NuevaCompra() {
                                     <td style={{ padding: '4px' }}>
                                         <select value={item.tipoItem} onChange={e => handleItemChange(item.id, 'tipoItem', e.target.value)} style={{ width: '100%', padding: '6px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '12px', outline: 'none' }}>
                                             <option value="Producto">Producto</option>
-                                            <option value="Servicio">Servicio</option>
-                                            <option value="Gasto">Gasto</option>
                                         </select>
                                     </td>
                                     <td style={{ padding: '4px', position: 'relative' }}>
