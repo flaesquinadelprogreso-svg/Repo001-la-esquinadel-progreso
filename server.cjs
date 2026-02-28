@@ -1667,8 +1667,8 @@ app.post('/api/movimientos-financieros/traslado', async (req, res) => {
         await prisma.$transaction([
             prisma.cuentaFinanciera.update({ where: { id: parseInt(origenId) }, data: { saldoActual: { decrement: amount } } }),
             prisma.cuentaFinanciera.update({ where: { id: parseInt(destinoId) }, data: { saldoActual: { increment: amount } } }),
-            prisma.movimientoCaja.create({ data: { tipo: 'salida', categoria: 'Traslado', monto: amount, cuentaId: parseInt(origenId), descripcion: `Traslado a ${destinoId}` } }),
-            prisma.movimientoCaja.create({ data: { tipo: 'entrada', categoria: 'Traslado', monto: amount, cuentaId: parseInt(destinoId), descripcion: `Traslado desde ${origenId}` } })
+            prisma.movimientoCaja.create({ data: { tipo: 'salida', categoria: 'Traslado', monto: amount, metodo: 'efectivo', hora: new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }), cuentaId: parseInt(origenId), descripcion: descripcion || `Traslado a cuenta ${destinoId}` } }),
+            prisma.movimientoCaja.create({ data: { tipo: 'entrada', categoria: 'Traslado', monto: amount, metodo: 'efectivo', hora: new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }), cuentaId: parseInt(destinoId), descripcion: descripcion || `Traslado desde cuenta ${origenId}` } })
         ]);
         res.json({ success: true });
     } catch (error) {

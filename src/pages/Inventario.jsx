@@ -669,9 +669,9 @@ export default function Inventario() {
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: 'calc(100vh - 120px)', overflow: 'hidden' }}>
             {/* Header consolidado */}
-            <div id="inventario-header-consolidado" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+            <div id="inventario-header-consolidado" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', flexShrink: 0 }}>
                 <div style={{ minWidth: '200px' }}>
                     <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#1A1A2E' }}>Inventario</h1>
                     <p style={{ fontSize: '13px', color: '#6B7280', marginTop: '2px' }}>Gestión de productos</p>
@@ -727,6 +727,9 @@ export default function Inventario() {
                 </div>
             </div>
 
+            {/* Área scrollable: contenido + paginación */}
+            <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+
             {/* Content */}
             {loading ? (
                 <div style={{ padding: '60px', textAlign: 'center', color: '#6B7280' }}>
@@ -734,7 +737,7 @@ export default function Inventario() {
                 </div>
             ) : (
                 view === 'grid' ? (
-                    <div id="inventario-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(165px, 1fr))', gap: '16px' }}>
+                    <div id="inventario-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(165px, 1fr))', gap: '16px', alignContent: 'start' }}>
                         {combinedItems.map(item => (
                             <ProductCard
                                 key={`${item.type}-${item.id}`}
@@ -818,6 +821,9 @@ export default function Inventario() {
                     </Button>
                 </div>
             )}
+
+            </div>{/* fin área scrollable */}
+
             {/* Stock Popup */}
             {showStockPopup && (
                 <Modal isOpen={true} onClose={() => setShowStockPopup(null)} title={`Stock - ${showStockPopup.nombre}`} size="xs">

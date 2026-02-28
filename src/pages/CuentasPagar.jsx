@@ -59,7 +59,7 @@ export default function CuentasPagar() {
                 setSelectedAccountId(defaultCaja.id);
                 const cierreRes = await api.get(`/cierres/hoy?cuentaId=${defaultCaja.id}`).catch(() => null);
                 if (cierreRes && cierreRes.data) {
-                    setIsCajaOpen(!!cierreRes.data.cierreActivo);
+                    setIsCajaOpen(!!cierreRes.data.activo);
                 } else {
                     setIsCajaOpen(false);
                 }

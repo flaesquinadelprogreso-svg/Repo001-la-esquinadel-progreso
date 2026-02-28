@@ -14,7 +14,7 @@ const tabs = [
     { id: 'impresion', label: 'Impresión', icon: Printer },
     { id: 'whatsapp', label: 'WhatsApp', icon: MessageCircle },
     { id: 'roles', label: 'Roles y Permisos', icon: Shield },
-    { id: 'cajas', label: 'Cajas POS', icon: Printer }, // Using Printer as placeholder, or could use PC/Monitor
+    { id: 'cajas', label: 'Cajas POS', icon: Printer },
 ];
 
 export default function Configuracion() {
