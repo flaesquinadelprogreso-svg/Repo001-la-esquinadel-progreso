@@ -25,7 +25,7 @@ const navItems = [
 
 export default function Sidebar({ collapsed, onToggle, isMobile }) {
     const location = useLocation();
-    const [currentUser, setCurrentUser] = useState({ name: 'Cargando...', role: '...' });
+    const [currentUser, setCurrentUser] = useState({ name: 'Cargando...', role: '...', permisos: [] });
     const [businessName, setBusinessName] = useState(localStorage.getItem('businessName') || 'Cargando...');
 
     const fetchData = async () => {
@@ -34,18 +34,17 @@ export default function Sidebar({ collapsed, onToggle, isMobile }) {
             if (perfilRes && perfilRes.data) {
                 setCurrentUser({
                     name: perfilRes.data.username || perfilRes.data.nombre || 'Usuario',
-                    role: perfilRes.data.role || perfilRes.data.rol || 'Administrador'
+                    role: perfilRes.data.role || perfilRes.data.rol || 'Administrador',
+                    permisos: perfilRes.data.permisos || []
                 });
             }
 
-            // In a real app we might have /api/configuracion
-            // For now if it fails we keep the default
             const configRes = await api.get('/configuracion').catch(() => null);
             if (configRes && configRes.data && configRes.data.nombreEmpresa) {
                 setBusinessName(configRes.data.nombreEmpresa);
                 localStorage.setItem('businessName', configRes.data.nombreEmpresa);
             } else if (businessName === 'Cargando...') {
-                setBusinessName('Mi Negocio'); // Fallback si no hay config y no hay caché
+                setBusinessName('Mi Negocio');
             }
         } catch (error) {
             console.error('Error fetching sidebar data:', error);
@@ -55,6 +54,16 @@ export default function Sidebar({ collapsed, onToggle, isMobile }) {
     useEffect(() => {
         fetchData();
     }, []);
+
+    // Filter nav items based on user permissions
+    const isAdmin = currentUser.role === 'admin' || (currentUser.permisos && currentUser.permisos.includes('all'));
+    const filteredNavItems = isAdmin ? navItems : navItems.filter(item => {
+        // /usuarios is admin-only
+        if (item.path === '/usuarios') return false;
+        // Check if user has permission for this module
+        const moduleKey = item.path.replace('/', '');
+        return currentUser.permisos && currentUser.permisos.includes(moduleKey);
+    });
 
     const userInitials = currentUser.name ? currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase() : '?';
     const width = collapsed ? 72 : 250;
@@ -100,7 +109,7 @@ export default function Sidebar({ collapsed, onToggle, isMobile }) {
             {/* Navigation */}
             <nav style={{ flex: 1, overflowY: 'auto', padding: '12px 10px' }}>
                 <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '4px', margin: 0, padding: 0 }}>
-                    {navItems.map(({ path, label, icon: Icon }) => {
+                    {filteredNavItems.map(({ path, label, icon: Icon }) => {
                         const isActive = path === '/analisis-financiero' ? location.pathname === '/analisis-financiero' || location.pathname === '/' : location.pathname.startsWith(path);
                         return (
                             <li key={path}>

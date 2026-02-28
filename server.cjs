@@ -153,16 +153,24 @@ app.post('/api/login', async (req, res) => {
         });
 
         if (user && user.activo && await bcrypt.compare(password, user.password)) {
-            // Firma y emisión de un JWT de 12 horas
+            // Fetch role permissions
+            const rol = await prisma.rol.findFirst({ where: { nombre: { equals: user.role, mode: 'insensitive' } } });
+            let permisos = [];
+            if (user.role === 'admin') {
+                permisos = ['all']; // Admin has full access
+            } else if (rol && rol.permisos) {
+                try { permisos = JSON.parse(rol.permisos); } catch { permisos = []; }
+            }
+
             const token = jwt.sign(
-                { id: user.id, role: user.role, username: user.username },
+                { id: user.id, role: user.role, username: user.username, permisos },
                 JWT_SECRET,
                 { expiresIn: '12h' }
             );
             res.json({
                 success: true,
                 token,
-                user: { username: user.username, role: user.role }
+                user: { username: user.username, role: user.role, permisos }
             });
         } else {
             res.status(401).json({ error: 'Credenciales inválidas' });
@@ -2182,7 +2190,19 @@ app.get('/api/perfil', async (req, res) => {
             return res.status(404).json({ error: 'No se encontró el usuario.' });
         }
         const { password, ...userData } = usuario;
-        res.json(userData);
+
+        // Include permissions
+        let permisos = [];
+        if (usuario.role === 'admin') {
+            permisos = ['all'];
+        } else {
+            const rol = await prisma.rol.findFirst({ where: { nombre: { equals: usuario.role, mode: 'insensitive' } } });
+            if (rol && rol.permisos) {
+                try { permisos = JSON.parse(rol.permisos); } catch { permisos = []; }
+            }
+        }
+
+        res.json({ ...userData, permisos });
     } catch (error) {
         res.status(500).json({ error: 'Error al obtener perfil' });
     }

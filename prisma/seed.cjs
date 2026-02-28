@@ -297,6 +297,21 @@ async function main() {
         }
     });
 
+    // Create default roles
+    const defaultRoles = [
+        { nombre: 'cajero', descripcion: 'Acceso a POS y caja', permisos: JSON.stringify(['pos', 'historial-ventas', 'caja', 'clientes']) },
+        { nombre: 'bodega', descripcion: 'Gestión de inventario y compras', permisos: JSON.stringify(['inventario', 'compras', 'proveedores']) },
+        { nombre: 'contador', descripcion: 'Reportes financieros y cuentas', permisos: JSON.stringify(['analisis-financiero', 'historial-ventas', 'cuentas-cobrar', 'cuentas-pagar', 'configuracion']) },
+    ];
+    for (const role of defaultRoles) {
+        await prisma.rol.upsert({
+            where: { nombre: role.nombre },
+            update: { descripcion: role.descripcion, permisos: role.permisos },
+            create: role
+        });
+    }
+    console.log('Seeded default roles successfully!');
+
     // Create configuracion
     const config = await prisma.configuracion.upsert({
         where: { id: 1 },
