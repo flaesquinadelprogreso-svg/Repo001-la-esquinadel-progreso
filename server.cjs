@@ -357,8 +357,8 @@ app.get('/api/productos', async (req, res) => {
         if (req.query.q) {
             const search = String(req.query.q).trim();
             queryParams.where.OR = [
-                { nombre: { contains: search } },
-                { codigo: { contains: search } }
+                { nombre: { contains: search, mode: 'insensitive' } },
+                { codigo: { contains: search, mode: 'insensitive' } }
             ];
         }
 

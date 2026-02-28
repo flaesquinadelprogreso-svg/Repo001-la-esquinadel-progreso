@@ -4,7 +4,7 @@ import { formatPesos } from '../../../utils/currency';
 
 export default function CartPanel({ cart, clearCart, updateQty, removeFromCart }) {
     return (
-        <div id="pos-cart" style={{ flex: '0 0 280px', backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div id="pos-cart" style={{ flex: 1, minWidth: 0, backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             {/* Cart Header */}
             <div style={{ padding: '16px', borderBottom: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
