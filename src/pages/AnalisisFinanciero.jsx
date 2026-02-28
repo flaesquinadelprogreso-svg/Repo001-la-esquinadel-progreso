@@ -280,7 +280,7 @@ export default function AnalisisFinanciero() {
                             style={{ backgroundColor: '#FFFFFF', padding: '20px', borderRadius: '12px', border: '1px solid #E2E5EA', position: 'relative', overflow: 'hidden' }}
                         >
                             <div style={{ position: 'absolute', right: '-15px', top: '10px', opacity: 0.05 }}><Package size={80} /></div>
-                            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>KInmovilizado</span>
+                            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Valorización de inventario</span>
                             <div style={{ fontSize: '24px', fontWeight: 700, color: '#8B5CF6', marginTop: '8px' }}>
                                 {formatMoney(resumen.capitalInmovilizado || 0)}
                             </div>

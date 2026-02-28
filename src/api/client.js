@@ -3,7 +3,7 @@ import axios from 'axios';
 const api = axios.create({
     // En producción (Railway) usamos rutas relativas (/api) porque React y Express viven en el mismo host.
     // En desarrollo local seguimos usando localhost:3001 por los puertos separados.
-    baseURL: import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:3001/api'),
+    baseURL: import.meta.env.VITE_API_URL || '/api',
 });
 
 // Interceptor de peticiones para inyectar el token JWT
