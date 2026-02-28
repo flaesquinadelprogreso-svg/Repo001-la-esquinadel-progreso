@@ -115,16 +115,24 @@ client.on('disconnected', (reason) => {
 
 // CORS: Siempre debe ir ANTES del Rate Limit para no perder encabezados al rechazar conexiones excesivas
 app.use(cors({
-    origin: process.env.NODE_ENV === 'production' ? ['https://tu-dominio.com'] : ['http://localhost:5173', 'http://localhost:4173'],
+    origin: process.env.CORS_ORIGIN
+        ? process.env.CORS_ORIGIN.split(',')
+        : ['http://localhost:5173', 'http://localhost:4173'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 }));
 
 // Rate Limit
-// Ajustado a 500 requests por 5 minutos para soportar la concurrencia de llamadas en React
 const limiter = rateLimit({ windowMs: 5 * 60 * 1000, max: 500 });
-// Aplicar solo a rutas de API para no penalizar assets estáticos
 app.use('/api', limiter);
+
+// Login rate limiter: max 10 intentos por IP cada 15 minutos
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: { error: 'Demasiados intentos de login. Intente de nuevo en 15 minutos.' },
+    standardHeaders: true
+});
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
@@ -143,7 +151,7 @@ app.use('/api', verifyToken);
 // SISTEMA DE RUTAS PÚBLICAS Y AUTENTICACIÓN
 // ═══════════════════════════════════════════════════════════════
 
-app.post('/api/login', async (req, res) => {
+app.post('/api/login', loginLimiter, async (req, res) => {
     const { username, password } = req.body;
 
     try {
@@ -1716,15 +1724,22 @@ app.post('/api/movimientos-financieros/traslado', async (req, res) => {
     try {
         const { origenId, destinoId, monto, descripcion } = req.body;
         const amount = parseInt(monto);
-        await prisma.$transaction([
-            prisma.cuentaFinanciera.update({ where: { id: parseInt(origenId) }, data: { saldoActual: { decrement: amount } } }),
-            prisma.cuentaFinanciera.update({ where: { id: parseInt(destinoId) }, data: { saldoActual: { increment: amount } } }),
-            prisma.movimientoCaja.create({ data: { tipo: 'salida', categoria: 'Traslado', monto: amount, metodo: 'efectivo', hora: new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }), cuentaId: parseInt(origenId), descripcion: descripcion || `Traslado a cuenta ${destinoId}` } }),
-            prisma.movimientoCaja.create({ data: { tipo: 'entrada', categoria: 'Traslado', monto: amount, metodo: 'efectivo', hora: new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }), cuentaId: parseInt(destinoId), descripcion: descripcion || `Traslado desde cuenta ${origenId}` } })
-        ]);
+        if (isNaN(amount) || amount <= 0) return res.status(400).json({ error: 'El monto debe ser mayor a 0' });
+
+        await prisma.$transaction(async (tx) => {
+            const origen = await tx.cuentaFinanciera.findUnique({ where: { id: parseInt(origenId) } });
+            if (!origen) throw new Error('Cuenta origen no encontrada');
+            if (origen.saldoActual < amount) throw new Error(`Saldo insuficiente en ${origen.nombre}. Disponible: ${origen.saldoActual}`);
+
+            const hora = new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+            await tx.cuentaFinanciera.update({ where: { id: parseInt(origenId) }, data: { saldoActual: { decrement: amount } } });
+            await tx.cuentaFinanciera.update({ where: { id: parseInt(destinoId) }, data: { saldoActual: { increment: amount } } });
+            await tx.movimientoCaja.create({ data: { tipo: 'salida', categoria: 'Traslado', monto: amount, metodo: 'efectivo', hora, cuentaId: parseInt(origenId), descripcion: descripcion || `Traslado a cuenta ${destinoId}` } });
+            await tx.movimientoCaja.create({ data: { tipo: 'entrada', categoria: 'Traslado', monto: amount, metodo: 'efectivo', hora, cuentaId: parseInt(destinoId), descripcion: descripcion || `Traslado desde cuenta ${origenId}` } });
+        });
         res.json({ success: true });
     } catch (error) {
-        res.status(500).json({ error: 'Error en traslado' });
+        res.status(400).json({ error: error.message || 'Error en traslado' });
     }
 });
 
@@ -1756,6 +1771,12 @@ app.post('/api/cierres/abrir', async (req, res) => {
         const cId = parseInt(cuentaId);
 
         const resultado = await prisma.$transaction(async (tx) => {
+            // Prevenir apertura doble
+            const yaAbierta = await tx.cierreCaja.findFirst({
+                where: { cuentaId: cId, estado: 'abierta' }
+            });
+            if (yaAbierta) throw new Error('Esta caja ya está abierta');
+
             const cierre = await tx.cierreCaja.create({
                 data: { saldoInicial: monto, cuentaId: cId, estado: 'abierta' }
             });
@@ -2393,15 +2414,6 @@ app.delete('/api/usuarios/:id', async (req, res) => {
     } catch (error) {
         if (error.code === 'P2025') return res.status(404).json({ error: 'Usuario no encontrado' });
         res.status(500).json({ error: 'Error al desactivar usuario' });
-    }
-});
-
-app.get('/api/ubicaciones', async (req, res) => {
-    try {
-        const ubicaciones = await prisma.ubicacion.findMany();
-        res.json(ubicaciones);
-    } catch (error) {
-        res.status(500).json({ error: 'Error al obtener ubicaciones' });
     }
 });
 

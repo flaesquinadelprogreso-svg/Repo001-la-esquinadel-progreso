@@ -1,10 +1,19 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Modal from '../../../components/ui/Modal';
 import Button from '../../../components/ui/Button';
 import { formatPesos } from '../../../utils/currency';
 import logoSrc from '../../../Logo/logo.png';
+import api from '../../../api/client';
 
 export default function ReceiptModal({ sale, onClose, onDownloadPDF }) {
+    const [config, setConfig] = useState({ nombreEmpresa: '', nit: '' });
+
+    useEffect(() => {
+        api.get('/configuracion').then(r => {
+            if (r.data) setConfig(r.data);
+        }).catch(() => {});
+    }, []);
+
     // Descargar PDF automáticamente al mostrar el recibo
     useEffect(() => {
         if (sale && onDownloadPDF) {
@@ -35,9 +44,8 @@ export default function ReceiptModal({ sale, onClose, onDownloadPDF }) {
                                 marginBottom: '8px'
                             }}
                         />
-                        <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 2px 0' }}>REFRIELECTRIC</h2>
-                        <h3 style={{ fontSize: '14px', fontWeight: 600, margin: '0 0 5px 0', letterSpacing: '1px' }}>THE COMPANY</h3>
-                        <p style={{ fontSize: '11px', margin: 0 }}>NIT: 900123456-1</p>
+                        <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 2px 0' }}>{config.nombreEmpresa || 'MI NEGOCIO'}</h2>
+                        {config.nit && <p style={{ fontSize: '11px', margin: 0 }}>NIT: {config.nit}</p>}
                         <p style={{ fontSize: '13px', fontWeight: 700, margin: '8px 0 0 0' }}>Recibo #{sale.receiptNumber}</p>
                     </div>
 
