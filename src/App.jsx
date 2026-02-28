@@ -20,6 +20,7 @@ const Proveedores        = lazy(() => import('./pages/Proveedores'));
 const CuentasCobrar      = lazy(() => import('./pages/CuentasCobrar'));
 const CuentasPagar       = lazy(() => import('./pages/CuentasPagar'));
 const Configuracion      = lazy(() => import('./pages/Configuracion'));
+const Usuarios           = lazy(() => import('./pages/Usuarios'));
 
 // Fallback mínimo mientras carga el chunk de la página
 function PageLoader() {
@@ -54,6 +55,7 @@ export default function App() {
             <Route path="/cuentas-cobrar" element={<Suspense fallback={<PageLoader />}><CuentasCobrar /></Suspense>} />
             <Route path="/cuentas-pagar" element={<Suspense fallback={<PageLoader />}><CuentasPagar /></Suspense>} />
             <Route path="/configuracion" element={<Suspense fallback={<PageLoader />}><Configuracion /></Suspense>} />
+            <Route path="/usuarios" element={<Suspense fallback={<PageLoader />}><Usuarios /></Suspense>} />
           </Route>
         </Route>
       </Routes>

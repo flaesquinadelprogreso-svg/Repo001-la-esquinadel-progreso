@@ -19,6 +19,7 @@ const navItems = [
     { path: '/proveedores', label: 'Proveedores', icon: Truck },
     { path: '/cuentas-cobrar', label: 'Cuentas por Cobrar', icon: CreditCard },
     { path: '/cuentas-pagar', label: 'Cuentas por Pagar', icon: Banknote },
+    { path: '/usuarios', label: 'Usuarios y Roles', icon: Shield },
     { path: '/configuracion', label: 'Configuración', icon: Settings },
 ];
 
@@ -32,8 +33,8 @@ export default function Sidebar({ collapsed, onToggle, isMobile }) {
             const perfilRes = await api.get('/perfil').catch(() => null);
             if (perfilRes && perfilRes.data) {
                 setCurrentUser({
-                    name: perfilRes.data.nombre || 'Usuario',
-                    role: perfilRes.data.rol || 'Administrador'
+                    name: perfilRes.data.username || perfilRes.data.nombre || 'Usuario',
+                    role: perfilRes.data.role || perfilRes.data.rol || 'Administrador'
                 });
             }
 

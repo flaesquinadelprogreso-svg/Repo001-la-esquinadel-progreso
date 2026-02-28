@@ -2175,13 +2175,14 @@ app.post('/api/whatsapp/notificar-vencidos', async (req, res) => {
 
 app.get('/api/perfil', async (req, res) => {
     try {
-        const usuario = await prisma.usuario.findFirst({
-            where: { activo: true }
+        const usuario = await prisma.usuario.findUnique({
+            where: { id: req.user.id }
         });
         if (!usuario) {
-            return res.status(404).json({ error: 'No se encontró un usuario activo. Por favor inicie sesión o cree un administrador.' });
+            return res.status(404).json({ error: 'No se encontró el usuario.' });
         }
-        res.json(usuario);
+        const { password, ...userData } = usuario;
+        res.json(userData);
     } catch (error) {
         res.status(500).json({ error: 'Error al obtener perfil' });
     }
@@ -2236,10 +2237,132 @@ app.get('/api/notificaciones', async (req, res) => {
 
 app.get('/api/roles', async (req, res) => {
     try {
-        const roles = await prisma.rol.findMany();
+        const roles = await prisma.rol.findMany({ orderBy: { id: 'asc' } });
         res.json(roles);
     } catch (error) {
         res.status(500).json({ error: 'Error al obtener roles' });
+    }
+});
+
+app.post('/api/roles', async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ error: 'Solo administradores pueden crear roles' });
+        const { nombre, descripcion, permisos } = req.body;
+        if (!nombre) return res.status(400).json({ error: 'El nombre del rol es requerido' });
+        const rol = await prisma.rol.create({
+            data: { nombre, descripcion: descripcion || null, permisos: typeof permisos === 'string' ? permisos : JSON.stringify(permisos || []) }
+        });
+        res.status(201).json(rol);
+    } catch (error) {
+        if (error.code === 'P2002') return res.status(400).json({ error: 'Ya existe un rol con ese nombre' });
+        res.status(500).json({ error: 'Error al crear rol' });
+    }
+});
+
+app.put('/api/roles/:id', async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ error: 'Solo administradores pueden editar roles' });
+        const { nombre, descripcion, permisos } = req.body;
+        const rol = await prisma.rol.update({
+            where: { id: parseInt(req.params.id) },
+            data: {
+                ...(nombre && { nombre }),
+                ...(descripcion !== undefined && { descripcion }),
+                ...(permisos !== undefined && { permisos: typeof permisos === 'string' ? permisos : JSON.stringify(permisos) })
+            }
+        });
+        res.json(rol);
+    } catch (error) {
+        if (error.code === 'P2002') return res.status(400).json({ error: 'Ya existe un rol con ese nombre' });
+        res.status(500).json({ error: 'Error al actualizar rol' });
+    }
+});
+
+app.delete('/api/roles/:id', async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ error: 'Solo administradores pueden eliminar roles' });
+        await prisma.rol.delete({ where: { id: parseInt(req.params.id) } });
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al eliminar rol' });
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// GESTIÓN DE USUARIOS
+// ═══════════════════════════════════════════════════════════════
+
+app.get('/api/usuarios', async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ error: 'Solo administradores pueden ver usuarios' });
+        const usuarios = await prisma.usuario.findMany({
+            orderBy: { id: 'asc' },
+            select: { id: true, username: true, role: true, activo: true, createdAt: true, updatedAt: true }
+        });
+        res.json(usuarios);
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener usuarios' });
+    }
+});
+
+app.post('/api/usuarios', async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ error: 'Solo administradores pueden crear usuarios' });
+        const { username, password, role } = req.body;
+        if (!username || !password || !role) return res.status(400).json({ error: 'Username, contraseña y rol son requeridos' });
+        if (password.length < 4) return res.status(400).json({ error: 'La contraseña debe tener al menos 4 caracteres' });
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const usuario = await prisma.usuario.create({
+            data: { username, password: hashedPassword, role }
+        });
+        const { password: _, ...userData } = usuario;
+        res.status(201).json(userData);
+    } catch (error) {
+        if (error.code === 'P2002') return res.status(400).json({ error: 'Ya existe un usuario con ese nombre' });
+        res.status(500).json({ error: 'Error al crear usuario' });
+    }
+});
+
+app.put('/api/usuarios/:id', async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ error: 'Solo administradores pueden editar usuarios' });
+        const id = parseInt(req.params.id);
+        const { username, password, role, activo } = req.body;
+        const updateData = {};
+        if (username) updateData.username = username;
+        if (role) updateData.role = role;
+        if (activo !== undefined) updateData.activo = activo;
+        if (password) {
+            if (password.length < 4) return res.status(400).json({ error: 'La contraseña debe tener al menos 4 caracteres' });
+            updateData.password = await bcrypt.hash(password, 10);
+        }
+        const usuario = await prisma.usuario.update({
+            where: { id },
+            data: updateData
+        });
+        const { password: _, ...userData } = usuario;
+        res.json(userData);
+    } catch (error) {
+        if (error.code === 'P2002') return res.status(400).json({ error: 'Ya existe un usuario con ese nombre' });
+        if (error.code === 'P2025') return res.status(404).json({ error: 'Usuario no encontrado' });
+        res.status(500).json({ error: 'Error al actualizar usuario' });
+    }
+});
+
+app.delete('/api/usuarios/:id', async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ error: 'Solo administradores pueden eliminar usuarios' });
+        const id = parseInt(req.params.id);
+        if (id === req.user.id) return res.status(400).json({ error: 'No puede eliminar su propia cuenta' });
+        // Soft delete - deactivate instead of deleting
+        await prisma.usuario.update({
+            where: { id },
+            data: { activo: false }
+        });
+        res.json({ success: true });
+    } catch (error) {
+        if (error.code === 'P2025') return res.status(404).json({ error: 'Usuario no encontrado' });
+        res.status(500).json({ error: 'Error al desactivar usuario' });
     }
 });
 

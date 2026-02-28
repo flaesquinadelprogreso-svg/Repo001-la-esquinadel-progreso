@@ -28,8 +28,8 @@ export default function Topbar() {
 
             if (perfilRes && perfilRes.data) {
                 const newProfile = {
-                    name: perfilRes.data.nombre || 'Administrador',
-                    role: perfilRes.data.rol || 'Propietario'
+                    name: perfilRes.data.username || perfilRes.data.nombre || 'Administrador',
+                    role: perfilRes.data.role || perfilRes.data.rol || 'Propietario'
                 };
                 setCurrentUser(newProfile);
                 localStorage.setItem('currentUser', JSON.stringify(newProfile));
