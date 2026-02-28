@@ -71,47 +71,61 @@ const verifyToken = (req, res, next) => {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// CONFIGURACIÓN DE WHATSAPP
+// CONFIGURACIÓN DE WHATSAPP (Baileys)
 // ═══════════════════════════════════════════════════════════════
-const { Client, LocalAuth } = require('whatsapp-web.js');
-const qrcodeTerminal = require('qrcode-terminal');
+const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, makeCacheableSignalKeyStore } = require('@whiskeysockets/baileys');
+const pino = require('pino');
 
 let whatsappQr = null;
 let whatsappStatus = 'DISCONNECTED'; // DISCONNECTED, CONNECTING, QR_READY, CONNECTED
+let waSock = null;
+const WA_AUTH_DIR = path.join(__dirname, '.wwebjs_auth');
 
-const client = new Client({
-    authStrategy: new LocalAuth(),
-    puppeteer: {
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    }
-});
-
-client.on('qr', (qr) => {
-    whatsappQr = qr;
-    whatsappStatus = 'QR_READY';
-    logger.info('✅ QR de WhatsApp generado. Escanea para conectar.');
-    qrcodeTerminal.generate(qr, { small: true });
-});
-
-client.on('ready', () => {
-    whatsappStatus = 'CONNECTED';
+async function startWhatsApp() {
+    if (whatsappStatus === 'CONNECTING' || whatsappStatus === 'CONNECTED') return;
+    whatsappStatus = 'CONNECTING';
     whatsappQr = null;
-    logger.info('🚀 WhatsApp listo para enviar mensajes');
-});
 
-client.on('authenticated', () => {
-    logger.info('✅ WhatsApp autenticado correctamente');
-});
+    try {
+        if (!fs.existsSync(WA_AUTH_DIR)) fs.mkdirSync(WA_AUTH_DIR, { recursive: true });
+        const { state, saveCreds } = await useMultiFileAuthState(WA_AUTH_DIR);
 
-client.on('auth_failure', (msg) => {
-    whatsappStatus = 'DISCONNECTED';
-    logger.error('❌ Error de autenticación en WhatsApp:', msg);
-});
+        waSock = makeWASocket({
+            auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'silent' })) },
+            printQRInTerminal: true,
+            logger: pino({ level: 'silent' }),
+        });
 
-client.on('disconnected', (reason) => {
-    whatsappStatus = 'DISCONNECTED';
-    logger.info('❌ WhatsApp desconectado:', reason);
-});
+        waSock.ev.on('creds.update', saveCreds);
+
+        waSock.ev.on('connection.update', (update) => {
+            const { connection, lastDisconnect, qr } = update;
+            if (qr) {
+                whatsappQr = qr;
+                whatsappStatus = 'QR_READY';
+                logger.info('QR de WhatsApp generado. Escanea para conectar.');
+            }
+            if (connection === 'open') {
+                whatsappStatus = 'CONNECTED';
+                whatsappQr = null;
+                logger.info('WhatsApp conectado correctamente (Baileys)');
+            }
+            if (connection === 'close') {
+                whatsappStatus = 'DISCONNECTED';
+                whatsappQr = null;
+                const statusCode = lastDisconnect?.error?.output?.statusCode;
+                // Si fue logout manual, limpiar sesión
+                if (statusCode === DisconnectReason.loggedOut) {
+                    logger.info('WhatsApp cerró sesión. Limpiando auth...');
+                    if (fs.existsSync(WA_AUTH_DIR)) fs.rmSync(WA_AUTH_DIR, { recursive: true, force: true });
+                }
+            }
+        });
+    } catch (err) {
+        logger.error('Error al iniciar WhatsApp:', err);
+        whatsappStatus = 'DISCONNECTED';
+    }
+}
 
 // CORS: Siempre debe ir ANTES del Rate Limit para no perder encabezados al rechazar conexiones excesivas
 app.use(cors({
@@ -140,8 +154,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // Rutas públicas base
 app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date() }));
 
-// Excluir WhatsApp temporalmente debido al polling continuo desde la UI sin tokens
-// Opcional: puedes envolver tu middleware global si es necesario excluir ciertos prefijos.
+// Excluir WhatsApp del token check (polling continuo desde la UI)
 app.use('/api/whatsapp', (req, res, next) => next());
 
 // Protegiendo toda la API por defecto (Deny-by-default) salvo excepciones pre-programadas
@@ -2121,7 +2134,7 @@ app.put('/api/compras/:id', async (req, res) => {
 });
 
 // ═════════════════════════════════
-// WHATSAPP API
+// WHATSAPP API (Baileys)
 // ═════════════════════════════════
 
 app.get('/api/whatsapp/status', (req, res) => {
@@ -2130,20 +2143,13 @@ app.get('/api/whatsapp/status', (req, res) => {
 
 app.post('/api/whatsapp/conectar', async (req, res) => {
     if (whatsappStatus === 'CONNECTED') {
-        return res.status(400).json({ error: 'WhatsApp ya está conectado' });
+        return res.json({ status: 'CONNECTED', message: 'WhatsApp ya está conectado' });
     }
     if (whatsappStatus === 'CONNECTING' || whatsappStatus === 'QR_READY') {
         return res.json({ status: whatsappStatus, message: 'Ya se está generando el QR' });
     }
-
-    whatsappStatus = 'CONNECTING';
-    whatsappQr = null;
-
     try {
-        client.initialize().catch(err => {
-            logger.error('Error al inicializar cliente:', err);
-            whatsappStatus = 'DISCONNECTED';
-        });
+        await startWhatsApp();
         res.json({ success: true, message: 'Inicializando WhatsApp...' });
     } catch (error) {
         whatsappStatus = 'DISCONNECTED';
@@ -2151,53 +2157,117 @@ app.post('/api/whatsapp/conectar', async (req, res) => {
     }
 });
 
+app.post('/api/whatsapp/desconectar', async (req, res) => {
+    try {
+        if (waSock) {
+            await waSock.logout();
+            waSock = null;
+        }
+        whatsappStatus = 'DISCONNECTED';
+        whatsappQr = null;
+        if (fs.existsSync(WA_AUTH_DIR)) fs.rmSync(WA_AUTH_DIR, { recursive: true, force: true });
+        res.json({ success: true, message: 'WhatsApp desconectado' });
+    } catch (error) {
+        whatsappStatus = 'DISCONNECTED';
+        res.json({ success: true, message: 'Sesión cerrada' });
+    }
+});
+
+// Enviar resumen de cuentas vencidas al número del jefe/empresa
 app.post('/api/whatsapp/notificar-vencidos', async (req, res) => {
-    if (whatsappStatus !== 'CONNECTED') {
+    if (whatsappStatus !== 'CONNECTED' || !waSock) {
         return res.status(400).json({ error: 'WhatsApp no está conectado' });
     }
 
     try {
-        const hoy = new Date();
+        // Obtener número destino desde configuración o del body
+        let destino = req.body.numero;
+        if (!destino) {
+            const config = await prisma.configuracion.findFirst();
+            destino = config?.whatsappDestino;
+        }
+        if (!destino) {
+            return res.status(400).json({ error: 'No hay número de destino configurado. Configure el número en Configuración > WhatsApp.' });
+        }
+
+        // Limpiar y formatear número (ej: 573001234567)
+        const phone = destino.replace(/\D/g, '');
+        if (phone.length < 10) {
+            return res.status(400).json({ error: 'Número de destino inválido' });
+        }
+        const jid = `${phone}@s.whatsapp.net`;
+
+        // Buscar cuentas por cobrar pendientes/vencidas
+        const hoy = new Date().toISOString().split('T')[0];
         const vencidos = await prisma.cuentaPorCobrar.findMany({
             where: {
-                estado: 'pendiente',
-                fechaVencimiento: { lt: hoy }
+                estado: { in: ['pendiente', 'vencida'] },
             },
-            include: { cliente: true }
+            include: { cliente: true },
+            orderBy: { fechaVencimiento: 'asc' }
         });
 
         if (vencidos.length === 0) {
-            return res.json({ success: true, message: 'No hay cuentas vencidas para notificar' });
+            return res.json({ success: true, message: 'No hay cuentas por cobrar pendientes' });
         }
 
-        let enviados = 0;
-        let errores = 0;
+        // Separar vencidas de pendientes
+        const cuentasVencidas = vencidos.filter(c => c.fechaVencimiento <= hoy);
+        const cuentasPendientes = vencidos.filter(c => c.fechaVencimiento > hoy);
 
-        for (const cuenta of vencidos) {
-            if (!cuenta.cliente || !cuenta.cliente.telefono) continue;
+        const formatCOP = (v) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(v);
 
-            const phone = cuenta.cliente.telefono.replace(/\D/g, ''); // Limpiar el número
-            if (!phone) continue;
+        let msg = `*RESUMEN DE CUENTAS POR COBRAR*\n_${new Date().toLocaleDateString('es-CO')}_\n\n`;
 
-            // Formatear para whatsapp-web.js (ej: 573105550000@c.us)
-            const chatId = phone.includes('@c.us') ? phone : `${phone}@c.us`;
+        if (cuentasVencidas.length > 0) {
+            const totalVencido = cuentasVencidas.reduce((s, c) => s + (c.monto - (c.abonado || 0)), 0);
+            msg += `*VENCIDAS (${cuentasVencidas.length}):* Total: ${formatCOP(totalVencido)}\n`;
+            msg += `────────────────\n`;
+            for (const c of cuentasVencidas) {
+                const saldo = c.monto - (c.abonado || 0);
+                msg += `- *${c.cliente?.nombre || 'Sin cliente'}*\n`;
+                msg += `  Saldo: ${formatCOP(saldo)} | Venc: ${c.fechaVencimiento}\n`;
+                if (c.cliente?.telefono) msg += `  Tel: ${c.cliente.telefono}\n`;
+            }
+            msg += `\n`;
+        }
 
-            const message = `*Recordatorio de Pago - ${cuenta.cliente.nombre}*\n\nHola, te informamos que tienes una cuenta pendiente por valor de *${new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(cuenta.monto - (cuenta.abonado || 0))}*.\n\nFecha de vencimiento: _${new Date(cuenta.fechaVencimiento).toLocaleDateString()}_\n\nPor favor, realiza el pago lo antes posible para evitar recargos. Si ya realizaste el pago, por favor ignora este mensaje.`;
-
-            try {
-                await client.sendMessage(chatId, message);
-                enviados++;
-                // Pequeño delay para no saturar
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            } catch (err) {
-                logger.error(`Error enviando a ${phone}:`, err);
-                errores++;
+        if (cuentasPendientes.length > 0) {
+            const totalPendiente = cuentasPendientes.reduce((s, c) => s + (c.monto - (c.abonado || 0)), 0);
+            msg += `*PENDIENTES (${cuentasPendientes.length}):* Total: ${formatCOP(totalPendiente)}\n`;
+            msg += `────────────────\n`;
+            for (const c of cuentasPendientes) {
+                const saldo = c.monto - (c.abonado || 0);
+                msg += `- *${c.cliente?.nombre || 'Sin cliente'}*: ${formatCOP(saldo)} (vence ${c.fechaVencimiento})\n`;
             }
         }
 
-        res.json({ success: true, enviados, errores });
+        const totalGeneral = vencidos.reduce((s, c) => s + (c.monto - (c.abonado || 0)), 0);
+        msg += `\n*TOTAL POR COBRAR: ${formatCOP(totalGeneral)}*`;
+
+        await waSock.sendMessage(jid, { text: msg });
+        res.json({ success: true, message: `Resumen enviado a ${destino}`, cuentasVencidas: cuentasVencidas.length, cuentasPendientes: cuentasPendientes.length });
     } catch (error) {
-        res.status(500).json({ error: 'Error al procesar notificaciones' });
+        logger.error('Error enviando resumen WhatsApp:', error);
+        res.status(500).json({ error: 'Error al enviar el mensaje' });
+    }
+});
+
+// Enviar mensaje de texto libre a un número
+app.post('/api/whatsapp/enviar', async (req, res) => {
+    if (whatsappStatus !== 'CONNECTED' || !waSock) {
+        return res.status(400).json({ error: 'WhatsApp no está conectado' });
+    }
+    try {
+        const { numero, mensaje } = req.body;
+        if (!numero || !mensaje) return res.status(400).json({ error: 'Número y mensaje son requeridos' });
+        const phone = numero.replace(/\D/g, '');
+        const jid = `${phone}@s.whatsapp.net`;
+        await waSock.sendMessage(jid, { text: mensaje });
+        res.json({ success: true });
+    } catch (error) {
+        logger.error('Error enviando mensaje WhatsApp:', error);
+        res.status(500).json({ error: 'Error al enviar mensaje' });
     }
 });
 
@@ -2500,6 +2570,20 @@ app.get('/api/configuracion', async (req, res) => {
         res.json(config);
     } catch (error) {
         res.status(500).json({ error: 'Error al obtener configuración' });
+    }
+});
+
+app.put('/api/configuracion', async (req, res) => {
+    try {
+        const { nombreEmpresa, nit, direccion, telefono, email, moneda, ivaDefecto, whatsappDestino } = req.body;
+        const config = await prisma.configuracion.upsert({
+            where: { id: 1 },
+            update: { nombreEmpresa, nit, direccion, telefono, email, moneda, ivaDefecto, whatsappDestino },
+            create: { nombreEmpresa, nit, direccion, telefono, email, moneda: moneda || 'COP', ivaDefecto: ivaDefecto || 19, whatsappDestino }
+        });
+        res.json(config);
+    } catch (error) {
+        res.status(500).json({ error: 'Error al guardar configuración' });
     }
 });
 

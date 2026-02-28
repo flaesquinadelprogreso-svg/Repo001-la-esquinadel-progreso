@@ -437,16 +437,17 @@ model Rol {
 // ═══════════════════════════════════════════════════════════════
 
 model Configuracion {
-  id          Int      @id @default(1)
-  nombreEmpresa String?
-  nit         String?
-  direccion   String?
-  telefono    String?
-  email       String?
-  logo        String?
-  moneda      String   @default("COP")
-  ivaDefecto  Int      @default(19)
-  updatedAt   DateTime @updatedAt
+  id              Int      @id @default(1)
+  nombreEmpresa   String?
+  nit             String?
+  direccion       String?
+  telefono        String?
+  email           String?
+  logo            String?
+  moneda          String   @default("COP")
+  ivaDefecto      Int      @default(19)
+  whatsappDestino String?  // Número WhatsApp donde se envían alertas (ej: 573001234567)
+  updatedAt       DateTime @updatedAt
 }
 
 model Resolucion {

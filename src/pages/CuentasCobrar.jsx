@@ -196,21 +196,17 @@ export default function CuentasCobrar() {
                         variant="secondary"
                         icon={MessageCircle}
                         onClick={async () => {
-                            if (!window.confirm('¿Desea enviar recordatorios de pago a todos los clientes con deudas vencidas?')) return;
+                            if (!window.confirm('Enviar resumen de cuentas por cobrar al WhatsApp configurado?')) return;
                             try {
                                 const res = await api.post('/whatsapp/notificar-vencidos');
-                                const data = res.data;
-                                if (data.success) {
-                                    alert(`Proceso completado.\nEnviados: ${data.enviados}\nErrores: ${data.errores}`);
-                                } else {
-                                    alert('Error: ' + data.error);
-                                }
+                                const d = res.data;
+                                alert(d.message || `Enviado. Vencidas: ${d.cuentasVencidas}, Pendientes: ${d.cuentasPendientes}`);
                             } catch (err) {
-                                alert('Error al conectar con el servidor');
+                                alert(err.response?.data?.error || 'Error: WhatsApp no conectado o sin numero destino');
                             }
                         }}
                     >
-                        Notificar Vencidos
+                        Enviar Resumen WhatsApp
                     </Button>
                     <Button onClick={() => setShowModal(true)}><Plus size={16} style={{ marginRight: '6px' }} />Nueva Cuenta</Button>
                 </div>
