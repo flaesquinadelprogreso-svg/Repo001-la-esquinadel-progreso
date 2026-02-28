@@ -47,6 +47,7 @@ export default function App() {
             <Route path="/historial-ventas" element={<Suspense fallback={<PageLoader />}><HistorialVentas /></Suspense>} />
             <Route path="/compras" element={<Suspense fallback={<PageLoader />}><Compras /></Suspense>} />
             <Route path="/nueva-compra" element={<Suspense fallback={<PageLoader />}><NuevaCompra /></Suspense>} />
+            <Route path="/editar-compra/:id" element={<Suspense fallback={<PageLoader />}><NuevaCompra /></Suspense>} />
             <Route path="/caja" element={<Suspense fallback={<PageLoader />}><Caja /></Suspense>} />
             <Route path="/clientes" element={<Suspense fallback={<PageLoader />}><Clientes /></Suspense>} />
             <Route path="/proveedores" element={<Suspense fallback={<PageLoader />}><Proveedores /></Suspense>} />

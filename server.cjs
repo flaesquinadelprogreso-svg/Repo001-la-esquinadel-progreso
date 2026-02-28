@@ -1836,6 +1836,257 @@ app.get('/api/compras', async (req, res) => {
     } catch (error) { res.status(500).json({ error: 'Error al cargar compras' }); }
 });
 
+app.get('/api/compras/:id', async (req, res) => {
+    try {
+        const compra = await prisma.compra.findUnique({
+            where: { id: parseInt(req.params.id) },
+            include: { proveedor: true, items: { include: { producto: true, ubicacion: true } } }
+        });
+        if (!compra) return res.status(404).json({ error: 'Compra no encontrada' });
+        res.json(compra);
+    } catch (error) { res.status(500).json({ error: 'Error al cargar compra' }); }
+});
+
+app.delete('/api/compras/:id', async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        await prisma.$transaction(async (tx) => {
+            const compra = await tx.compra.findUnique({
+                where: { id },
+                include: { items: true }
+            });
+            if (!compra) throw new Error('Compra no encontrada');
+
+            // 1. Revertir stock
+            for (const item of compra.items) {
+                if (item.productoId && item.ubicacionId) {
+                    await tx.stockUbicacion.update({
+                        where: { productoId_ubicacionId: { productoId: item.productoId, ubicacionId: item.ubicacionId } },
+                        data: { stock: { decrement: item.cantidad } }
+                    });
+                }
+            }
+
+            // 2. Revertir movimientos financieros y saldos
+            const movimientos = await tx.movimientoCaja.findMany({
+                where: { referencia: `Compra ${id}` }
+            });
+            for (const mov of movimientos) {
+                await tx.cuentaFinanciera.update({
+                    where: { id: mov.cuentaId },
+                    data: { saldoActual: { increment: mov.monto } }
+                });
+            }
+            await tx.movimientoCaja.deleteMany({ where: { referencia: `Compra ${id}` } });
+
+            // 3. Revertir cuentas por pagar si fue a crédito
+            if (compra.proveedorId) {
+                const cuentasProv = await tx.cuentaPorPagar.findMany({
+                    where: { proveedorId: compra.proveedorId },
+                    orderBy: { fechaCreacion: 'desc' }
+                });
+                for (const cuenta of cuentasProv) {
+                    if (cuenta.descripcion && cuenta.descripcion.includes(`Compra ${id}`)) {
+                        await tx.cuentaPorPagar.delete({ where: { id: cuenta.id } });
+                        break;
+                    } else if (cuenta.descripcion && (cuenta.descripcion.includes(compra.numeroFactura || `Compra ${id}`))) {
+                        const nuevoMonto = cuenta.monto - compra.total;
+                        if (nuevoMonto <= 0) {
+                            await tx.cuentaPorPagar.delete({ where: { id: cuenta.id } });
+                        } else {
+                            await tx.cuentaPorPagar.update({
+                                where: { id: cuenta.id },
+                                data: { monto: nuevoMonto }
+                            });
+                        }
+                        break;
+                    }
+                }
+            }
+
+            // 4. Eliminar items y compra
+            await tx.itemCompra.deleteMany({ where: { compraId: id } });
+            await tx.compra.delete({ where: { id } });
+        });
+        res.json({ success: true });
+    } catch (error) { res.status(500).json({ error: error.message }); }
+});
+
+app.put('/api/compras/:id', async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const { proveedorId, items, subtotal, iva, total, metodoPago, cuentaId, numeroFactura, pagos, fechaVencimiento, tipoDocumento, fechaElaboracion, contacto, observaciones, descuentoGlobal, reteIva, reteIca } = req.body;
+
+        const resultado = await prisma.$transaction(async (tx) => {
+            // === REVERTIR LA COMPRA ANTERIOR ===
+            const compraAnterior = await tx.compra.findUnique({
+                where: { id },
+                include: { items: true }
+            });
+            if (!compraAnterior) throw new Error('Compra no encontrada');
+
+            // Revertir stock
+            for (const item of compraAnterior.items) {
+                if (item.productoId && item.ubicacionId) {
+                    await tx.stockUbicacion.update({
+                        where: { productoId_ubicacionId: { productoId: item.productoId, ubicacionId: item.ubicacionId } },
+                        data: { stock: { decrement: item.cantidad } }
+                    });
+                }
+            }
+
+            // Revertir movimientos financieros
+            const movimientos = await tx.movimientoCaja.findMany({
+                where: { referencia: `Compra ${id}` }
+            });
+            for (const mov of movimientos) {
+                await tx.cuentaFinanciera.update({
+                    where: { id: mov.cuentaId },
+                    data: { saldoActual: { increment: mov.monto } }
+                });
+            }
+            await tx.movimientoCaja.deleteMany({ where: { referencia: `Compra ${id}` } });
+
+            // Revertir cuentas por pagar si la compra anterior fue a crédito
+            if (compraAnterior.proveedorId) {
+                const cuentasProv = await tx.cuentaPorPagar.findMany({
+                    where: { proveedorId: compraAnterior.proveedorId },
+                    orderBy: { fechaCreacion: 'desc' }
+                });
+                for (const cuenta of cuentasProv) {
+                    if (cuenta.descripcion && cuenta.descripcion.includes(`Compra ${id}`)) {
+                        // Si el monto coincide exactamente, eliminar
+                        await tx.cuentaPorPagar.delete({ where: { id: cuenta.id } });
+                        break;
+                    } else if (cuenta.descripcion && (cuenta.descripcion.includes(compraAnterior.numeroFactura || `Compra ${id}`))) {
+                        // Si es parte de una cuenta acumulada, decrementar el monto
+                        const nuevoMonto = cuenta.monto - compraAnterior.total;
+                        if (nuevoMonto <= 0) {
+                            await tx.cuentaPorPagar.delete({ where: { id: cuenta.id } });
+                        } else {
+                            await tx.cuentaPorPagar.update({
+                                where: { id: cuenta.id },
+                                data: { monto: nuevoMonto }
+                            });
+                        }
+                        break;
+                    }
+                }
+            }
+
+            await tx.itemCompra.deleteMany({ where: { compraId: id } });
+
+            // === ACTUALIZAR CON NUEVOS DATOS ===
+            const hasCredit = metodoPago === 'credito' || (metodoPago === 'multiple' && pagos?.some(p => p.metodo === 'credito'));
+
+            const compra = await tx.compra.update({
+                where: { id },
+                data: {
+                    proveedorId: proveedorId ? parseInt(proveedorId) : null,
+                    numeroFactura,
+                    tipoDocumento: tipoDocumento || undefined,
+                    fechaElaboracion: fechaElaboracion ? new Date(fechaElaboracion) : undefined,
+                    contacto: contacto || null,
+                    observaciones: observaciones || null,
+                    subtotal: parseInt(subtotal),
+                    descuentoGlobal: parseInt(descuentoGlobal) || 0,
+                    iva: parseInt(iva),
+                    reteIva: parseInt(reteIva) || 0,
+                    reteIca: parseInt(reteIca) || 0,
+                    total: parseInt(total),
+                    estado: hasCredit ? 'recibida' : 'pagada'
+                }
+            });
+
+            // Crear nuevos items y actualizar stock
+            for (const item of items) {
+                await tx.itemCompra.create({
+                    data: {
+                        compraId: compra.id,
+                        tipoItem: item.tipoItem || 'Producto',
+                        productoId: item.productoId ? parseInt(item.productoId) : null,
+                        nombre: item.nombre || item.descripcion || 'Sin nombre',
+                        codigo: item.codigo || null,
+                        cantidad: parseInt(item.cantidad) || 1,
+                        precioUnit: parseInt(item.precioUnit) || 0,
+                        descuento: parseInt(item.descuento) || 0,
+                        impCargo: parseInt(item.impCargo) || 0,
+                        subtotal: (parseInt(item.cantidad) || 1) * (parseInt(item.precioUnit) || 0),
+                        ubicacionId: item.ubicacionId ? parseInt(item.ubicacionId) : null
+                    }
+                });
+                if (item.productoId && item.ubicacionId) {
+                    await tx.stockUbicacion.upsert({
+                        where: { productoId_ubicacionId: { productoId: parseInt(item.productoId), ubicacionId: parseInt(item.ubicacionId) } },
+                        update: { stock: { increment: parseInt(item.cantidad) } },
+                        create: { productoId: parseInt(item.productoId), ubicacionId: parseInt(item.ubicacionId), stock: parseInt(item.cantidad) }
+                    });
+                }
+            }
+
+            // Procesar pagos
+            if (metodoPago === 'multiple' && pagos) {
+                for (const pago of pagos) {
+                    if (pago.metodo === 'credito' && proveedorId) {
+                        const cuentasProv = await tx.cuentaPorPagar.findMany({
+                            where: { proveedorId: parseInt(proveedorId) },
+                            orderBy: { fechaCreacion: 'asc' }
+                        });
+                        const cuentaAbierta = cuentasProv.find(c => (c.monto - (c.abonado || 0)) > 0);
+                        const descDetalle = `Factura: ${numeroFactura || `Compra ${compra.id}`} - ${formatFecha(new Date())} - ${formatPesos(pago.monto)}`;
+                        if (cuentaAbierta) {
+                            await tx.cuentaPorPagar.update({
+                                where: { id: cuentaAbierta.id },
+                                data: { monto: { increment: parseInt(pago.monto) }, descripcion: `${cuentaAbierta.descripcion} | ${descDetalle}`, estado: 'pendiente' }
+                            });
+                        } else {
+                            await tx.cuentaPorPagar.create({
+                                data: { proveedorId: parseInt(proveedorId), monto: parseInt(pago.monto), descripcion: descDetalle, fechaVencimiento: fechaVencimiento || new Date().toISOString().split('T')[0], numeroFactura: numeroFactura || null, estado: 'pendiente' }
+                            });
+                        }
+                    } else if (pago.cuentaId) {
+                        await tx.movimientoCaja.create({
+                            data: { tipo: 'salida', categoria: 'Compra', monto: parseInt(pago.monto), metodo: pago.metodo, referencia: `Compra ${compra.id}`, fecha: new Date(), hora: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }), cuentaId: parseInt(pago.cuentaId) }
+                        });
+                        await tx.cuentaFinanciera.update({
+                            where: { id: parseInt(pago.cuentaId) },
+                            data: { saldoActual: { decrement: parseInt(pago.monto) } }
+                        });
+                    }
+                }
+            } else if (metodoPago !== 'credito' && cuentaId) {
+                await tx.movimientoCaja.create({
+                    data: { tipo: 'salida', categoria: 'Compra', monto: parseInt(total), metodo: metodoPago, referencia: `Compra ${compra.id}`, fecha: new Date(), hora: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }), cuentaId: parseInt(cuentaId) }
+                });
+                await tx.cuentaFinanciera.update({
+                    where: { id: parseInt(cuentaId) },
+                    data: { saldoActual: { decrement: parseInt(total) } }
+                });
+            } else if (metodoPago === 'credito' && proveedorId) {
+                const cuentasProv = await tx.cuentaPorPagar.findMany({
+                    where: { proveedorId: parseInt(proveedorId) },
+                    orderBy: { fechaCreacion: 'asc' }
+                });
+                const cuentaAbierta = cuentasProv.find(c => (c.monto - (c.abonado || 0)) > 0);
+                const descDetalle = `Factura: ${numeroFactura || `Compra ${compra.id}`} - ${formatFecha(new Date())} - ${formatPesos(total)}`;
+                if (cuentaAbierta) {
+                    await tx.cuentaPorPagar.update({
+                        where: { id: cuentaAbierta.id },
+                        data: { monto: { increment: parseInt(total) }, descripcion: `${cuentaAbierta.descripcion} | ${descDetalle}`, estado: 'pendiente' }
+                    });
+                } else {
+                    await tx.cuentaPorPagar.create({
+                        data: { proveedorId: parseInt(proveedorId), monto: parseInt(total), descripcion: descDetalle, fechaVencimiento: fechaVencimiento || new Date().toISOString().split('T')[0], numeroFactura: numeroFactura || null, estado: 'pendiente' }
+                    });
+                }
+            }
+
+            return compra;
+        });
+        res.json(resultado);
+    } catch (error) { res.status(500).json({ error: error.message }); }
+});
+
 // ═════════════════════════════════
 // WHATSAPP API
 // ═════════════════════════════════

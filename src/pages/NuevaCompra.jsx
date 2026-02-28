@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Plus, Trash2, Check, AlertCircle, Search, X, Wallet, Building, CreditCard, ClipboardList, Layers } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -12,6 +12,8 @@ import '../styles/compras-mobile.css';
 
 export default function NuevaCompra() {
     const navigate = useNavigate();
+    const { id: editId } = useParams();
+    const isEditing = !!editId;
 
     // Header state
     const [tipoDocumento, setTipoDocumento] = useState('OC - 1 - Orden de compra principal');
@@ -79,6 +81,51 @@ export default function NuevaCompra() {
             })
             .catch(console.error);
     }, []);
+
+    // Load existing purchase data when editing
+    useEffect(() => {
+        if (!editId) return;
+        api.get(`/compras/${editId}`)
+            .then(res => res.data)
+            .then(compra => {
+                setTipoDocumento(compra.tipoDocumento || 'OC - 1 - Orden de compra principal');
+                setFechaElaboracion(compra.fechaElaboracion ? new Date(compra.fechaElaboracion).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
+                setProveedorId(compra.proveedorId || '');
+                setProveedorSearch(compra.proveedor?.nombre || '');
+                setContacto(compra.contacto || '');
+                setNumeroFactura(compra.numeroFactura || '');
+                setObservaciones(compra.observaciones || '');
+                if (compra.items && compra.items.length > 0) {
+                    setItems(compra.items.map(item => {
+                        const numCant = parseFloat(item.cantidad) || 0;
+                        const numPrecio = parseFloat(item.precioUnit) || 0;
+                        const numDesc = parseFloat(item.descuento) || 0;
+                        const subtotalLinea = numCant * numPrecio - numDesc;
+                        const numImpCargo = parseFloat(item.impCargo) || 0;
+                        const valorIva = subtotalLinea * (numImpCargo / 100);
+                        return {
+                            id: item.id,
+                            tipoItem: item.tipoItem || 'Producto',
+                            productoId: item.productoId || '',
+                            productoSearch: item.producto?.nombre || item.nombre || '',
+                            showProductoDropdown: false,
+                            descripcion: item.nombre || '',
+                            ubicacionId: item.ubicacionId || '',
+                            cantidad: item.cantidad,
+                            precioUnit: item.precioUnit,
+                            descuento: item.descuento || 0,
+                            impCargo: item.impCargo || 0,
+                            valor: subtotalLinea + valorIva
+                        };
+                    }));
+                }
+            })
+            .catch(err => {
+                console.error('Error loading compra:', err);
+                alert('Error al cargar la compra');
+                navigate('/compras');
+            });
+    }, [editId]);
 
     // Line items state
     const emptyRow = {
@@ -251,7 +298,11 @@ export default function NuevaCompra() {
                 }))
             };
 
-            await api.post('/compras', payload);
+            if (isEditing) {
+                await api.put(`/compras/${editId}`, payload);
+            } else {
+                await api.post('/compras', payload);
+            }
             navigate('/compras');
         } catch (error) {
             console.error('Error:', error);
@@ -269,7 +320,7 @@ export default function NuevaCompra() {
                     <button onClick={() => navigate('/compras')} style={{ border: 'none', background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#F3F4F6', color: '#4B5563', transition: 'background 0.2s' }}>
                         <ArrowLeft size={18} />
                     </button>
-                    <h1 style={{ fontSize: '24px', fontWeight: 600, color: '#3B82F6' }}>Nueva orden de compra</h1>
+                    <h1 style={{ fontSize: '24px', fontWeight: 600, color: '#3B82F6' }}>{isEditing ? 'Editar orden de compra' : 'Nueva orden de compra'}</h1>
                 </div>
                 <div style={{ display: 'flex', gap: '8px' }}>
                     <Button variant="secondary" onClick={() => navigate('/compras')}>Cancelar</Button>
@@ -277,7 +328,7 @@ export default function NuevaCompra() {
                         onClick={handleGuardar}
                         disabled={guardando || (!isCajaOpen && (metodoPago === 'efectivo' || (metodoPago === 'multiple' && multiplePayments.some(p => p.metodo === 'efectivo'))))}
                     >
-                        {guardando ? 'Guardando...' : (!isCajaOpen && (metodoPago === 'efectivo' || (metodoPago === 'multiple' && multiplePayments.some(p => p.metodo === 'efectivo'))) ? 'Caja Cerrada' : 'Guardar y enviar por mail')}
+                        {guardando ? 'Guardando...' : (!isCajaOpen && (metodoPago === 'efectivo' || (metodoPago === 'multiple' && multiplePayments.some(p => p.metodo === 'efectivo'))) ? 'Caja Cerrada' : (isEditing ? 'Actualizar compra' : 'Guardar y enviar por mail'))}
                     </Button>
                 </div>
             </div>

@@ -178,9 +178,19 @@ export default function PaymentPanel({
                     </div>
                 )}
 
-                {/* Cash received and change */}
+                {/* Cash register selection and cash received */}
                 {paymentMethod === 'efectivo' && (
                     <div style={{ marginBottom: '12px' }}>
+                        <label style={{ display: 'block', fontSize: '13px', marginBottom: '4px', fontWeight: 600 }}>Seleccionar Caja</label>
+                        <select
+                            value={selectedAccountId}
+                            onChange={(e) => setSelectedAccountId(e.target.value)}
+                            style={{ width: '100%', padding: '10px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px', marginBottom: '8px' }}
+                        >
+                            {cuentas.filter(c => c.tipo === 'caja').map(c => (
+                                <option key={c.id} value={c.id}>{c.nombre}</option>
+                            ))}
+                        </select>
                         <label style={{ display: 'block', fontSize: '13px', marginBottom: '4px', fontWeight: 600 }}>Efectivo recibido</label>
                         <input
                             type="number"
