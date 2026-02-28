@@ -441,17 +441,18 @@ export default function Usuarios() {
 
             {/* ═══ USER MODAL ═══ */}
             {showUserModal && (
-                <Modal isOpen={true} onClose={() => setShowUserModal(false)} title={editUserId ? 'Editar Usuario' : 'Nuevo Usuario'}>
-                    <div style={{ minWidth: '500px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                        <div style={{ display: 'flex', gap: '12px' }}>
-                            <div style={{ flex: 1 }}>
-                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#374151', marginBottom: '6px' }}>Nombre de usuario</label>
+                <Modal isOpen={true} onClose={() => setShowUserModal(false)} title={editUserId ? 'Editar Usuario' : 'Nuevo Usuario'} size="xl">
+                    <div style={{ display: 'flex', gap: '20px' }}>
+                        {/* Left: User data */}
+                        <div style={{ flex: '0 0 260px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#374151', marginBottom: '6px' }}>Usuario</label>
                                 <input type="text" value={userForm.username}
                                     onChange={e => setUserForm(f => ({ ...f, username: e.target.value }))}
                                     placeholder="Ej: juan.perez"
                                     style={{ width: '100%', padding: '10px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
                             </div>
-                            <div style={{ flex: 1 }}>
+                            <div>
                                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#374151', marginBottom: '6px' }}>
                                     Contraseña {editUserId && <span style={{ color: '#9CA3AF', fontWeight: 400 }}>(opcional)</span>}
                                 </label>
@@ -466,57 +467,56 @@ export default function Usuarios() {
                                     </button>
                                 </div>
                             </div>
-                        </div>
-                        <div>
-                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#374151', marginBottom: '6px' }}>Rol</label>
-                            <select value={userForm.role}
-                                onChange={e => handleUserRoleChange(e.target.value)}
-                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box', backgroundColor: '#fff' }}>
-                                {uniqueRoles.map(r => (
-                                    <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>
-                                ))}
-                            </select>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#374151', marginBottom: '6px' }}>Rol</label>
+                                <select value={userForm.role}
+                                    onChange={e => handleUserRoleChange(e.target.value)}
+                                    style={{ width: '100%', padding: '10px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box', backgroundColor: '#fff' }}>
+                                    {uniqueRoles.map(r => (
+                                        <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {userForm.role === 'admin' && (
+                                <div style={{ padding: '12px 14px', backgroundColor: '#DBEAFE', borderRadius: '8px', fontSize: '12px', color: '#1E40AF' }}>
+                                    <strong>Admin</strong> tiene acceso total a todos los módulos.
+                                </div>
+                            )}
+
+                            <div style={{ display: 'flex', gap: '10px', marginTop: 'auto', paddingTop: '12px' }}>
+                                <Button variant="secondary" onClick={() => setShowUserModal(false)} style={{ flex: 1 }}>Cancelar</Button>
+                                <Button onClick={handleSaveUser} disabled={savingUser} style={{ flex: 1 }}>
+                                    {savingUser ? 'Guardando...' : (editUserId ? 'Actualizar' : 'Crear')}
+                                </Button>
+                            </div>
                         </div>
 
-                        {/* Permission toggles */}
-                        {userForm.role !== 'admin' ? (
-                            <div>
-                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '8px' }}>
-                                    Permisos <span style={{ fontWeight: 400, color: '#9CA3AF' }}>({userForm.permisos.length} de {MODULES.length} módulos)</span>
+                        {/* Right: Permission toggles */}
+                        {userForm.role !== 'admin' && (
+                            <div style={{ flex: 1, borderLeft: '1px solid #E2E5EA', paddingLeft: '20px', display: 'flex', flexDirection: 'column' }}>
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '10px' }}>
+                                    Permisos <span style={{ fontWeight: 400, color: '#9CA3AF' }}>({userForm.permisos.length}/{MODULES.length})</span>
                                 </label>
-                                <div style={{ border: '1px solid #E2E5EA', borderRadius: '8px', overflow: 'hidden', maxHeight: '300px', overflowY: 'auto' }}>
+                                <div style={{ border: '1px solid #E2E5EA', borderRadius: '8px', overflow: 'hidden', overflowY: 'auto', flex: 1 }}>
                                     {MODULES.map((mod, idx) => {
                                         const on = userForm.permisos.includes(mod.key);
                                         return (
                                             <div key={mod.key} style={{
                                                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                                                padding: '10px 14px',
+                                                padding: '9px 14px',
                                                 borderBottom: idx < MODULES.length - 1 ? '1px solid #F0F2F5' : 'none',
                                                 backgroundColor: on ? '#F0FDF4' : 'transparent',
                                                 transition: 'background 150ms'
                                             }}>
-                                                <div>
-                                                    <p style={{ fontSize: '13px', fontWeight: 500, color: on ? '#1A1A2E' : '#6B7280' }}>{mod.label}</p>
-                                                    <p style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '1px' }}>{mod.desc}</p>
-                                                </div>
+                                                <p style={{ fontSize: '13px', fontWeight: 500, color: on ? '#1A1A2E' : '#6B7280' }}>{mod.label}</p>
                                                 <Toggle on={on} onClick={() => toggleUserPermission(mod.key)} />
                                             </div>
                                         );
                                     })}
                                 </div>
                             </div>
-                        ) : (
-                            <div style={{ padding: '12px 16px', backgroundColor: '#DBEAFE', borderRadius: '8px', fontSize: '13px', color: '#1E40AF' }}>
-                                <strong>Admin</strong> tiene acceso total a todos los módulos del sistema.
-                            </div>
                         )}
-
-                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '4px' }}>
-                            <Button variant="secondary" onClick={() => setShowUserModal(false)}>Cancelar</Button>
-                            <Button onClick={handleSaveUser} disabled={savingUser}>
-                                {savingUser ? 'Guardando...' : (editUserId ? 'Actualizar' : 'Crear Usuario')}
-                            </Button>
-                        </div>
                     </div>
                 </Modal>
             )}
