@@ -88,7 +88,7 @@ export default function Login() {
                     </div>
                 )}
 
-                <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <form onSubmit={handleLogin} method="post" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                     <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '8px' }}>Usuario</label>
                         <div style={{ position: 'relative' }}>
@@ -100,6 +100,7 @@ export default function Login() {
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 placeholder="Ingresa tu usuario"
+                                autoComplete="username"
                                 required
                                 style={{
                                     width: '100%',
@@ -128,6 +129,7 @@ export default function Login() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="••••••••"
+                                autoComplete="current-password"
                                 required
                                 style={{
                                     width: '100%',
