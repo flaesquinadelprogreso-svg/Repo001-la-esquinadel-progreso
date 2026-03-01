@@ -5,6 +5,8 @@ import Button from '../../../components/ui/Button';
 import Modal from '../../../components/ui/Modal';
 import {
     formatPesos,
+    parseCurrency,
+    formatInputCurrency,
     validatePaymentAmount,
     sanitizePaymentAmount,
     calculatePaymentsTotal,
@@ -193,15 +195,19 @@ export default function PaymentPanel({
                         </select>
                         <label style={{ display: 'block', fontSize: '13px', marginBottom: '4px', fontWeight: 600 }}>Efectivo recibido</label>
                         <input
-                            type="number"
-                            value={cashGiven}
-                            onChange={(e) => setCashGiven(e.target.value)}
+                            type="text"
+                            inputMode="numeric"
+                            value={cashGiven ? formatInputCurrency(cashGiven) : ''}
+                            onChange={(e) => {
+                                const raw = e.target.value.replace(/[^\d]/g, '');
+                                setCashGiven(raw);
+                            }}
                             style={{ width: '100%', padding: '10px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
-                            placeholder="0"
+                            placeholder="$0"
                         />
-                        {parseInt(cashGiven) >= total && (
+                        {parseCurrency(cashGiven) >= total && parseCurrency(cashGiven) > 0 && (
                             <div style={{ marginTop: '8px', padding: '10px', backgroundColor: '#DCFCE7', borderRadius: '8px', fontSize: '14px', fontWeight: 700, color: '#16A34A', textAlign: 'center' }}>
-                                CAMBIO: {formatPesos(parseInt(cashGiven) - total)}
+                                CAMBIO: {formatPesos(parseCurrency(cashGiven) - total)}
                             </div>
                         )}
                     </div>

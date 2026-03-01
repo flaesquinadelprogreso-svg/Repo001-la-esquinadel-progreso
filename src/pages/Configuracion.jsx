@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
-import { Globe, Building2, Receipt, Printer, Save, MessageCircle, Shield } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Globe, Building2, Receipt, Printer, Save, MessageCircle, Shield, AlertTriangle } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
+import Modal from '../components/ui/Modal';
 import WhatsApp from './WhatsApp';
 import Roles from './Roles';
 import ConfiguracionCajas from './ConfiguracionCajas';
+import api from '../api/client';
 
-const tabs = [
+const baseTabs = [
     { id: 'general', label: 'General', icon: Globe },
     { id: 'empresa', label: 'Empresa', icon: Building2 },
     { id: 'impuestos', label: 'Impuestos', icon: Receipt },
@@ -19,6 +21,37 @@ const tabs = [
 
 export default function Configuracion() {
     const [tab, setTab] = useState('general');
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [showPanicModal, setShowPanicModal] = useState(false);
+    const [panicConfirmText, setPanicConfirmText] = useState('');
+    const [panicLoading, setPanicLoading] = useState(false);
+
+    useEffect(() => {
+        api.get('/perfil').then(res => {
+            const user = res.data;
+            setIsAdmin(user.role === 'admin' || (user.permisos && user.permisos.includes('all')));
+        }).catch(() => {});
+    }, []);
+
+    const handlePanicReset = async () => {
+        if (panicConfirmText !== 'RESETEAR') return;
+        setPanicLoading(true);
+        try {
+            await api.post('/admin/panic-reset', { confirmCode: 'RESETEAR' });
+            alert('Sistema reseteado correctamente. Se recargará la página.');
+            window.location.reload();
+        } catch (error) {
+            alert(error?.response?.data?.error || 'Error al resetear el sistema');
+        } finally {
+            setPanicLoading(false);
+            setShowPanicModal(false);
+            setPanicConfirmText('');
+        }
+    };
+
+    const tabs = isAdmin
+        ? [...baseTabs, { id: 'sistema', label: 'Sistema', icon: AlertTriangle }]
+        : baseTabs;
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -47,7 +80,7 @@ export default function Configuracion() {
                 </div>
 
                 {/* Content */}
-                <div style={{ padding: '28px', maxWidth: (tab === 'whatsapp' || tab === 'roles' || tab === 'cajas') ? '100%' : '520px' }}>
+                <div style={{ padding: '28px', maxWidth: (tab === 'whatsapp' || tab === 'roles' || tab === 'cajas' || tab === 'sistema') ? '100%' : '520px' }}>
                     {tab === 'general' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 20px', backgroundColor: '#EBF0F7', borderRadius: '10px' }}>
@@ -116,8 +149,94 @@ export default function Configuracion() {
                     {tab === 'whatsapp' && <WhatsApp />}
                     {tab === 'roles' && <Roles />}
                     {tab === 'cajas' && <ConfiguracionCajas />}
+
+                    {tab === 'sistema' && isAdmin && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '600px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 20px', backgroundColor: '#FEF2F2', borderRadius: '10px', border: '1px solid #FECACA' }}>
+                                <AlertTriangle size={20} style={{ color: '#DC2626' }} />
+                                <div>
+                                    <p style={{ fontSize: '13px', fontWeight: 600, color: '#991B1B' }}>Zona de Peligro</p>
+                                    <p style={{ fontSize: '11px', color: '#B91C1C' }}>Acciones irreversibles del sistema</p>
+                                </div>
+                            </div>
+
+                            <div style={{ padding: '20px', backgroundColor: '#FFF', border: '2px solid #FCA5A5', borderRadius: '10px' }}>
+                                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '20px' }}>
+                                    <div>
+                                        <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#991B1B', marginBottom: '6px' }}>Resetear Sistema</h3>
+                                        <p style={{ fontSize: '12px', color: '#6B7280', lineHeight: '1.5' }}>
+                                            Elimina <strong>todos los datos</strong>: ventas, compras, movimientos de caja,
+                                            cierres, cuentas por cobrar/pagar, productos, servicios, stock y devoluciones.
+                                        </p>
+                                        <p style={{ fontSize: '12px', color: '#6B7280', lineHeight: '1.5', marginTop: '6px' }}>
+                                            <strong>Se mantienen:</strong> clientes, proveedores, usuarios, roles,
+                                            ubicaciones y configuración. Los saldos de cuentas financieras se ponen en $0.
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowPanicModal(true)}
+                                        style={{
+                                            flexShrink: 0, padding: '10px 20px', backgroundColor: '#DC2626', color: '#FFF',
+                                            border: 'none', borderRadius: '8px', fontWeight: 600, fontSize: '13px',
+                                            cursor: 'pointer', whiteSpace: 'nowrap'
+                                        }}
+                                    >
+                                        Resetear Todo
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
+
+            {/* Modal de confirmación Panic Reset */}
+            <Modal isOpen={showPanicModal} onClose={() => { setShowPanicModal(false); setPanicConfirmText(''); }} title="Confirmar Reset del Sistema">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minWidth: '420px' }}>
+                    <div style={{ padding: '14px', backgroundColor: '#FEF2F2', borderRadius: '8px', border: '1px solid #FECACA', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                        <AlertTriangle size={20} style={{ color: '#DC2626', flexShrink: 0, marginTop: '2px' }} />
+                        <div style={{ fontSize: '13px', color: '#991B1B', lineHeight: '1.5' }}>
+                            <strong>Esta acción es IRREVERSIBLE.</strong><br />
+                            Se eliminarán todas las ventas, compras, movimientos de caja, cierres,
+                            cuentas por cobrar/pagar, productos, servicios, stock y devoluciones. Los saldos se pondrán en $0.
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '8px', color: '#374151' }}>
+                            Para confirmar, escriba <strong style={{ color: '#DC2626' }}>RESETEAR</strong> en el campo:
+                        </label>
+                        <input
+                            type="text"
+                            value={panicConfirmText}
+                            onChange={(e) => setPanicConfirmText(e.target.value)}
+                            placeholder="Escriba RESETEAR"
+                            style={{
+                                width: '100%', padding: '10px 14px', border: '2px solid #E5E7EB', borderRadius: '8px',
+                                fontSize: '15px', fontWeight: 600, textAlign: 'center', letterSpacing: '2px',
+                                borderColor: panicConfirmText === 'RESETEAR' ? '#DC2626' : '#E5E7EB'
+                            }}
+                        />
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
+                        <Button variant="secondary" onClick={() => { setShowPanicModal(false); setPanicConfirmText(''); }}>
+                            Cancelar
+                        </Button>
+                        <button
+                            onClick={handlePanicReset}
+                            disabled={panicConfirmText !== 'RESETEAR' || panicLoading}
+                            style={{
+                                padding: '10px 24px', backgroundColor: panicConfirmText === 'RESETEAR' ? '#DC2626' : '#9CA3AF',
+                                color: '#FFF', border: 'none', borderRadius: '8px', fontWeight: 600, fontSize: '13px',
+                                cursor: panicConfirmText === 'RESETEAR' ? 'pointer' : 'not-allowed', opacity: panicLoading ? 0.7 : 1
+                            }}
+                        >
+                            {panicLoading ? 'Reseteando...' : 'Confirmar Reset'}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 }

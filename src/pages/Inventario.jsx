@@ -33,6 +33,7 @@ export default function Inventario() {
     const [ubicaciones, setUbicaciones] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('productos');
+    const [userPermisos, setUserPermisos] = useState([]);
 
     // Pagination
     const [page, setPage] = useState(1);
@@ -57,6 +58,20 @@ export default function Inventario() {
     const [editService, setEditService] = useState(null);
     const [editTab, setEditTab] = useState('general');
     const fileInputRef = useRef(null);
+
+    // Fetch user permissions
+    useEffect(() => {
+        api.get('/perfil').then(res => {
+            const role = res.data?.role;
+            if (role === 'admin') {
+                setUserPermisos(['all']);
+            } else {
+                setUserPermisos(res.data?.permisos || []);
+            }
+        }).catch(() => {});
+    }, []);
+
+    const canDisminuir = userPermisos.includes('all') || userPermisos.includes('inventario_disminuir');
 
     // Fetch data from API
     const fetchData = async (currentPage = page, searchQuery = search) => {
@@ -1019,7 +1034,7 @@ export default function Inventario() {
                 >
                     <div style={{ padding: '4px' }}>
                         {/* Tabs Bar - Only if editing product */}
-                        {editProduct.id && (
+                        {editProduct.id && canDisminuir && (
                             <div style={{ display: 'flex', gap: '4px', marginBottom: '24px', backgroundColor: '#F3F4F6', padding: '4px', borderRadius: '4px' }}>
                                 {['general', 'disminuir'].map(tab => (
                                     <button
@@ -1204,7 +1219,7 @@ export default function Inventario() {
                         )}
 
                         {/* Disminuir Tab Content */}
-                        {editTab === 'disminuir' && (
+                        {editTab === 'disminuir' && canDisminuir && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                                 <div>
                                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Ubicación</label>

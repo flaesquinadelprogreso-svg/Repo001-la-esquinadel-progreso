@@ -828,6 +828,17 @@ app.post('/api/ventas', async (req, res) => {
             }
         }
 
+        // Validar que la caja esté abierta para pagos no-crédito
+        if (metodoPago !== 'credito') {
+            const targetCuentaId = cuentaId || (pagos && pagos[0]?.cuentaId);
+            if (targetCuentaId) {
+                const cajaAbierta = await prisma.cierreCaja.findFirst({
+                    where: { cuentaId: parseInt(targetCuentaId), estado: 'abierta' }
+                });
+                if (!cajaAbierta) return res.status(400).json({ error: 'La caja no está abierta. Debe abrir caja antes de vender.' });
+            }
+        }
+
         logger.info('--- NUEVA VENTA RECIBIDA ---', { itemsCount: items?.length });
         const resultado = await prisma.$transaction(async (tx) => {
             // 1. Obtener Configuración e IVA (Mover aquí para evitar ReferenceError)
@@ -1669,13 +1680,14 @@ app.get('/api/analisis-financiero', async (req, res) => {
                 margenRentabilidad,
                 productosBajoStockCount: lowStockList.length
             },
-            topBajoStock: lowStockList.slice(0, 5).map(p => ({
+            topBajoStock: lowStockList.map(p => ({
                 id: p.id,
                 nombre: p.nombre,
-                stock: p.stock, // stock se llama internamente en bajoStock como la sumatoria
+                codigo: p.codigo,
+                stock: p.stock,
                 stockMinimo: p.stockMinimo
             })),
-            topPocoMovimiento: pocoMovimientoList.slice(0, 5),
+            topPocoMovimiento: pocoMovimientoList.slice(0, 10),
             ventas: todasVentasCombinadas,
             ventasPositivas: ventas,
             devoluciones: devolucionesProcesadas,
@@ -1829,8 +1841,26 @@ app.get('/api/cierres/hoy', async (req, res) => {
     try {
         const { cuentaId } = req.query;
         if (!cuentaId) return res.status(400).json({ error: 'cuentaId requerido' });
-        const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
-        const cierre = await prisma.cierreCaja.findFirst({ where: { cuentaId: parseInt(cuentaId), estado: 'abierta', fechaApertura: { gte: hoy } } });
+        const cId = parseInt(cuentaId);
+
+        // Buscar caja abierta sin filtro de fecha
+        let cierre = await prisma.cierreCaja.findFirst({ where: { cuentaId: cId, estado: 'abierta' } });
+
+        // Auto-recovery: si no hay caja abierta pero sí hay cierres previos,
+        // crear automáticamente una nueva apertura usando el saldoReal del último cierre.
+        // Esto garantiza que el usuario solo abre caja manualmente la PRIMERA vez.
+        if (!cierre) {
+            const lastClosed = await prisma.cierreCaja.findFirst({
+                where: { cuentaId: cId, estado: 'cerrada' },
+                orderBy: { fechaCierre: 'desc' }
+            });
+            if (lastClosed) {
+                cierre = await prisma.cierreCaja.create({
+                    data: { saldoInicial: lastClosed.saldoReal, cuentaId: cId, estado: 'abierta' }
+                });
+            }
+        }
+
         res.json({ activo: !!cierre, cierre });
     } catch (error) { res.json({ activo: false }); }
 });
@@ -1881,10 +1911,9 @@ app.post('/api/cierres/cerrar', async (req, res) => {
             const cierre = await tx.cierreCaja.findUnique({ where: { id: parseInt(id) } });
             if (!cierre) throw new Error('Cierre no encontrado');
 
-            const hoyInicio = new Date(cierre.fechaApertura);
-            hoyInicio.setHours(0, 0, 0, 0);
+            // Capturar todos los movimientos desde la apertura de caja (no solo hoy)
             const movimientos = await tx.movimientoCaja.findMany({
-                where: { fecha: { gte: hoyInicio }, cuentaId: cierre.cuentaId }
+                where: { fecha: { gte: cierre.fechaApertura }, cuentaId: cierre.cuentaId }
             });
 
             let totalIngresos = 0, totalEgresos = 0;
@@ -3045,6 +3074,59 @@ app.post('/api/compras', async (req, res) => {
 app.use((err, req, res, next) => {
     logger.error(err.stack || err);
     res.status(500).json({ message: 'Error interno del servidor' });
+});
+
+// ═══════════════════════════════════════════════════════════════
+// BOTÓN DE PÁNICO — RESET TOTAL (Solo admin)
+// ═══════════════════════════════════════════════════════════════
+app.post('/api/admin/panic-reset', async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Solo el administrador puede realizar esta acción' });
+        }
+
+        const { confirmCode } = req.body;
+        if (confirmCode !== 'RESETEAR') {
+            return res.status(400).json({ error: 'Código de confirmación incorrecto' });
+        }
+
+        await prisma.$transaction(async (tx) => {
+            // Orden de eliminación respetando foreign keys (hijos primero)
+            await tx.movimientoCajaDevolucion.deleteMany();
+            await tx.movimientoCaja.deleteMany();
+            await tx.pagoVenta.deleteMany();
+            await tx.itemDevolucion.deleteMany();
+            await tx.itemVenta.deleteMany();
+            await tx.itemCompra.deleteMany();
+            await tx.devolucion.deleteMany();
+            await tx.abonoCobro.deleteMany();
+            await tx.abonoPago.deleteMany();
+            await tx.cuentaPorCobrar.deleteMany();
+            await tx.cuentaPorPagar.deleteMany();
+            await tx.venta.deleteMany();
+            await tx.compra.deleteMany();
+            await tx.cierreCaja.deleteMany();
+            await tx.stockUbicacion.deleteMany();
+
+            // Eliminar inventario (productos y servicios)
+            await tx.producto.deleteMany();
+            await tx.servicio.deleteMany();
+
+            // Resetear saldos de cuentas financieras a 0
+            await tx.cuentaFinanciera.updateMany({ data: { saldoActual: 0 } });
+
+            // Resetear resoluciones al inicio
+            const resoluciones = await tx.resolucion.findMany();
+            for (const r of resoluciones) {
+                await tx.resolucion.update({ where: { id: r.id }, data: { actual: r.desde } });
+            }
+        });
+
+        res.json({ success: true, message: 'Sistema reseteado correctamente. Todos los datos transaccionales han sido eliminados.' });
+    } catch (error) {
+        logger.error('Error en panic reset:', error);
+        res.status(500).json({ error: 'Error al resetear el sistema: ' + error.message });
+    }
 });
 
 // Servir archivos estáticos del Frontend (Vite build)

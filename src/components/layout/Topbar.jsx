@@ -4,6 +4,7 @@ import { Search, Bell, Wallet, User, LogOut, Settings, ChevronDown } from 'lucid
 import Dropdown, { DropdownItem } from '../ui/Dropdown';
 import Badge from '../ui/Badge';
 import api from '../../api/client';
+import { clearPersistedModule } from '../../hooks/usePersistedState';
 
 export default function Topbar() {
     const [searchFocused, setSearchFocused] = useState(false);
@@ -15,6 +16,7 @@ export default function Topbar() {
     const navigate = useNavigate();
 
     const handleLogout = () => {
+        clearPersistedModule(''); // Limpiar todos los borradores (carrito, compras, etc.)
         localStorage.removeItem('token');
         navigate('/login');
     };

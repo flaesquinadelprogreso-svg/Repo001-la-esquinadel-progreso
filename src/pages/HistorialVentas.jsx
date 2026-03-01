@@ -329,20 +329,22 @@ export default function HistorialVentas() {
                                 {expandedHistoryId === venta.id && (
                                     <div className="historial-venta-detalle" style={{ padding: '12px 16px 16px 40px', backgroundColor: '#F8FAFC', borderTop: '1px solid #E5E7EB' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                            <span style={{ fontSize: '13px', fontWeight: 600, color: '#1A1A2E' }}>Detalle de Artículos y Devolución</span>
-                                            <button
-                                                onClick={() => {
-                                                    const all = {};
-                                                    venta.items.forEach(item => {
-                                                        const disponible = item.cantidad - (item.cantidadDevuelta || 0);
-                                                        if (disponible > 0) all[item.id] = disponible;
-                                                    });
-                                                    setReturnItems(all);
-                                                }}
-                                                style={{ padding: '4px 10px', fontSize: '11px', border: '1px solid #D1D5DB', borderRadius: '4px', backgroundColor: '#FFF', cursor: 'pointer', fontWeight: 500 }}
-                                            >
-                                                Devolver Factura Completa
-                                            </button>
+                                            <span style={{ fontSize: '13px', fontWeight: 600, color: '#1A1A2E' }}>Detalle de Artículos{venta.tipo !== 'DEVOLUCION' ? ' y Devolución' : ''}</span>
+                                            {venta.tipo !== 'DEVOLUCION' && venta.estado !== 'anulada' && (
+                                                <button
+                                                    onClick={() => {
+                                                        const all = {};
+                                                        venta.items.forEach(item => {
+                                                            const disponible = item.cantidad - (item.cantidadDevuelta || 0);
+                                                            if (disponible > 0) all[item.id] = disponible;
+                                                        });
+                                                        setReturnItems(all);
+                                                    }}
+                                                    style={{ padding: '4px 10px', fontSize: '11px', border: '1px solid #D1D5DB', borderRadius: '4px', backgroundColor: '#FFF', cursor: 'pointer', fontWeight: 500 }}
+                                                >
+                                                    Devolver Factura Completa
+                                                </button>
+                                            )}
                                         </div>
 
                                         <div className="historial-venta-tabla-container">
@@ -350,9 +352,9 @@ export default function HistorialVentas() {
                                                 <thead>
                                                     <tr style={{ color: '#6B7280', borderBottom: '1px solid #E5E7EB', backgroundColor: '#F9FAFB' }}>
                                                         <th style={{ textAlign: 'left', padding: '6px 10px' }}>Producto</th>
-                                                        <th style={{ textAlign: 'center', padding: '6px 10px', width: '70px' }}>Comprado</th>
-                                                        <th style={{ textAlign: 'center', padding: '6px 10px', width: '70px' }}>Devuelto</th>
-                                                        <th style={{ textAlign: 'center', padding: '6px 10px', width: '110px' }}>Cantidad a Devolver</th>
+                                                        <th style={{ textAlign: 'center', padding: '6px 10px', width: '70px' }}>{venta.tipo === 'DEVOLUCION' ? 'Cantidad' : 'Comprado'}</th>
+                                                        {venta.tipo !== 'DEVOLUCION' && <th style={{ textAlign: 'center', padding: '6px 10px', width: '70px' }}>Devuelto</th>}
+                                                        {venta.tipo !== 'DEVOLUCION' && venta.estado !== 'anulada' && <th style={{ textAlign: 'center', padding: '6px 10px', width: '110px' }}>Cantidad a Devolver</th>}
                                                         <th style={{ textAlign: 'right', padding: '6px 10px', width: '90px' }}>Precio Ud.</th>
                                                     </tr>
                                                 </thead>
@@ -368,36 +370,40 @@ export default function HistorialVentas() {
                                                                     <div style={{ fontSize: '10px', color: '#9CA3AF', marginTop: '1px' }}>{item.codigo}</div>
                                                                 </td>
                                                                 <td style={{ textAlign: 'center', padding: '8px 10px', fontWeight: 600 }}>{item.cantidad}</td>
-                                                                <td style={{ textAlign: 'center', padding: '8px 10px', color: item.cantidadDevuelta > 0 ? '#DC2626' : '#9CA3AF', fontWeight: item.cantidadDevuelta > 0 ? 600 : 400 }}>
-                                                                    {item.cantidadDevuelta || 0}
-                                                                </td>
-                                                                <td style={{ textAlign: 'center', padding: '8px 10px' }}>
-                                                                    {disponible > 0 ? (
-                                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>
-                                                                            <button
-                                                                                onClick={() => setReturnItems(prev => ({ ...prev, [item.id]: Math.max(0, (prev[item.id] || 0) - 1) }))}
-                                                                                style={{ padding: '1px 6px', border: '1px solid #E5E7EB', borderRadius: '4px', backgroundColor: '#F3F4F6', cursor: 'pointer', fontSize: '12px' }}
-                                                                            >-</button>
-                                                                            <input
-                                                                                type="number"
-                                                                                min="0"
-                                                                                max={disponible}
-                                                                                value={currentReturn || ''}
-                                                                                onChange={(e) => {
-                                                                                    const val = Math.min(parseInt(e.target.value) || 0, disponible);
-                                                                                    setReturnItems(prev => ({ ...prev, [item.id]: val || 0 }));
-                                                                                }}
-                                                                                style={{ width: '36px', padding: '2px', border: '1px solid #D1D5DB', borderRadius: '4px', textAlign: 'center', fontSize: '12px', MozAppearance: 'textfield' }}
-                                                                            />
-                                                                            <button
-                                                                                onClick={() => setReturnItems(prev => ({ ...prev, [item.id]: Math.min(disponible, (prev[item.id] || 0) + 1) }))}
-                                                                                style={{ padding: '1px 6px', border: '1px solid #E5E7EB', borderRadius: '4px', backgroundColor: '#F3F4F6', cursor: 'pointer', fontSize: '12px' }}
-                                                                            >+</button>
-                                                                        </div>
-                                                                    ) : (
-                                                                        <span style={{ color: '#9CA3AF', fontSize: '11px' }}>No disponible</span>
-                                                                    )}
-                                                                </td>
+                                                                {venta.tipo !== 'DEVOLUCION' && (
+                                                                    <td style={{ textAlign: 'center', padding: '8px 10px', color: item.cantidadDevuelta > 0 ? '#DC2626' : '#9CA3AF', fontWeight: item.cantidadDevuelta > 0 ? 600 : 400 }}>
+                                                                        {item.cantidadDevuelta || 0}
+                                                                    </td>
+                                                                )}
+                                                                {venta.tipo !== 'DEVOLUCION' && venta.estado !== 'anulada' && (
+                                                                    <td style={{ textAlign: 'center', padding: '8px 10px' }}>
+                                                                        {disponible > 0 ? (
+                                                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>
+                                                                                <button
+                                                                                    onClick={() => setReturnItems(prev => ({ ...prev, [item.id]: Math.max(0, (prev[item.id] || 0) - 1) }))}
+                                                                                    style={{ padding: '1px 6px', border: '1px solid #E5E7EB', borderRadius: '4px', backgroundColor: '#F3F4F6', cursor: 'pointer', fontSize: '12px' }}
+                                                                                >-</button>
+                                                                                <input
+                                                                                    type="number"
+                                                                                    min="0"
+                                                                                    max={disponible}
+                                                                                    value={currentReturn || ''}
+                                                                                    onChange={(e) => {
+                                                                                        const val = Math.min(parseInt(e.target.value) || 0, disponible);
+                                                                                        setReturnItems(prev => ({ ...prev, [item.id]: val || 0 }));
+                                                                                    }}
+                                                                                    style={{ width: '36px', padding: '2px', border: '1px solid #D1D5DB', borderRadius: '4px', textAlign: 'center', fontSize: '12px', MozAppearance: 'textfield' }}
+                                                                                />
+                                                                                <button
+                                                                                    onClick={() => setReturnItems(prev => ({ ...prev, [item.id]: Math.min(disponible, (prev[item.id] || 0) + 1) }))}
+                                                                                    style={{ padding: '1px 6px', border: '1px solid #E5E7EB', borderRadius: '4px', backgroundColor: '#F3F4F6', cursor: 'pointer', fontSize: '12px' }}
+                                                                                >+</button>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <span style={{ color: '#9CA3AF', fontSize: '11px' }}>No disponible</span>
+                                                                        )}
+                                                                    </td>
+                                                                )}
                                                                 <td style={{ textAlign: 'right', padding: '8px 10px', fontWeight: 500 }}>{formatPesos(item.precioUnit)}</td>
                                                             </tr>
                                                         );

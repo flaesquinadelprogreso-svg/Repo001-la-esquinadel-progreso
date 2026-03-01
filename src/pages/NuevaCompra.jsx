@@ -6,6 +6,7 @@ import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
 import Modal from '../components/ui/Modal';
 import { formatPesos } from '../utils/currency';
+import { usePersistedState, clearPersistedModule } from '../hooks/usePersistedState';
 
 import api from '../api/client';
 import '../styles/compras-mobile.css';
@@ -15,31 +16,31 @@ export default function NuevaCompra() {
     const { id: editId } = useParams();
     const isEditing = !!editId;
 
-    // Header state
-    const [tipoDocumento, setTipoDocumento] = useState('OC - 1 - Orden de compra principal');
-    const [fechaElaboracion, setFechaElaboracion] = useState(new Date().toISOString().split('T')[0]);
-    const [proveedorId, setProveedorId] = useState('');
-    const [proveedorSearch, setProveedorSearch] = useState('');
+    // Header state (persisted only in create mode, not edit mode)
+    const [tipoDocumento, setTipoDocumento] = usePersistedState(isEditing ? null : 'compra_tipoDocumento', 'FC - Factura de compra');
+    const [fechaElaboracion, setFechaElaboracion] = usePersistedState(isEditing ? null : 'compra_fechaElaboracion', new Date().toISOString().split('T')[0]);
+    const [proveedorId, setProveedorId] = usePersistedState(isEditing ? null : 'compra_proveedorId', '');
+    const [proveedorSearch, setProveedorSearch] = usePersistedState(isEditing ? null : 'compra_proveedorSearch', '');
     const [showProveedorDropdown, setShowProveedorDropdown] = useState(false);
-    const [contacto, setContacto] = useState('');
-    const [numeroFactura, setNumeroFactura] = useState('');
+    const [contacto, setContacto] = usePersistedState(isEditing ? null : 'compra_contacto', '');
+    const [numeroFactura, setNumeroFactura] = usePersistedState(isEditing ? null : 'compra_numeroFactura', '');
 
     // Nuevo proveedor modal
     const [showNewProveedor, setShowNewProveedor] = useState(false);
     const [newProveedor, setNewProveedor] = useState({ nombre: '', nit: '', telefono: '', email: '', direccion: '' });
 
     // Global Totals and Observations
-    const [observaciones, setObservaciones] = useState('');
-    const [metodoPago, setMetodoPago] = useState('credito');
-    const [fechaVencimiento, setFechaVencimiento] = useState('');
-    const [multiplePayments, setMultiplePayments] = useState([{ id: Date.now(), metodo: 'efectivo', monto: 0, cuentaId: '' }]);
+    const [observaciones, setObservaciones] = usePersistedState(isEditing ? null : 'compra_observaciones', '');
+    const [metodoPago, setMetodoPago] = usePersistedState(isEditing ? null : 'compra_metodoPago', 'credito');
+    const [fechaVencimiento, setFechaVencimiento] = usePersistedState(isEditing ? null : 'compra_fechaVencimiento', '');
+    const [multiplePayments, setMultiplePayments] = usePersistedState(isEditing ? null : 'compra_multiPayments', [{ id: Date.now(), metodo: 'efectivo', monto: 0, cuentaId: '' }]);
 
     // Dependencies
     const [proveedores, setProveedores] = useState([]);
     const [productos, setProductos] = useState([]);
     const [ubicaciones, setUbicaciones] = useState([]);
     const [cuentas, setCuentas] = useState([]);
-    const [cuentaId, setCuentaId] = useState('');
+    const [cuentaId, setCuentaId] = usePersistedState(isEditing ? null : 'compra_cuentaId', '');
     const [isCajaOpen, setIsCajaOpen] = useState(true);
 
     useEffect(() => {
@@ -88,7 +89,7 @@ export default function NuevaCompra() {
         api.get(`/compras/${editId}`)
             .then(res => res.data)
             .then(compra => {
-                setTipoDocumento(compra.tipoDocumento || 'OC - 1 - Orden de compra principal');
+                setTipoDocumento(compra.tipoDocumento || 'FC - Factura de compra');
                 setFechaElaboracion(compra.fechaElaboracion ? new Date(compra.fechaElaboracion).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
                 setProveedorId(compra.proveedorId || '');
                 setProveedorSearch(compra.proveedor?.nombre || '');
@@ -101,8 +102,6 @@ export default function NuevaCompra() {
                         const numPrecio = parseFloat(item.precioUnit) || 0;
                         const numDesc = parseFloat(item.descuento) || 0;
                         const subtotalLinea = numCant * numPrecio - numDesc;
-                        const numImpCargo = parseFloat(item.impCargo) || 0;
-                        const valorIva = subtotalLinea * (numImpCargo / 100);
                         return {
                             id: item.id,
                             tipoItem: item.tipoItem || 'Producto',
@@ -114,8 +113,7 @@ export default function NuevaCompra() {
                             cantidad: item.cantidad,
                             precioUnit: item.precioUnit,
                             descuento: item.descuento || 0,
-                            impCargo: item.impCargo || 0,
-                            valor: subtotalLinea + valorIva
+                            valor: subtotalLinea
                         };
                     }));
                 }
@@ -139,11 +137,10 @@ export default function NuevaCompra() {
         cantidad: 1,
         precioUnit: 0,
         descuento: 0,
-        impCargo: 0,
         valor: 0
     };
 
-    const [items, setItems] = useState([{ ...emptyRow }]);
+    const [items, setItems] = usePersistedState(isEditing ? null : 'compra_items', [{ ...emptyRow }]);
 
     const addRow = () => {
         setItems([...items, { ...emptyRow, id: Date.now() }]);
@@ -183,11 +180,7 @@ export default function NuevaCompra() {
 
                 // Aplicar descuento como valor fijo
                 subtotalLinea = subtotalLinea - numDesc;
-
-                // Calcular Impuestos (ej: IVA) - siempre se suman por encima
-                const numImpCargo = parseFloat(updated.impCargo) || 0; // Porcentaje de IVA (ej: 19)
-                const valorIva = subtotalLinea * (numImpCargo / 100);
-                updated.valor = subtotalLinea + valorIva;
+                updated.valor = subtotalLinea;
 
                 return updated;
             }
@@ -204,17 +197,12 @@ export default function NuevaCompra() {
         const neto = parseFloat(item.valor) || 0;
         let descCalculado = parseFloat(item.descuento) || 0;
 
-        const subtotalLinea = subtotalBase - descCalculado;
-        const numImpCargo = parseFloat(item.impCargo) || 0;
-        const iva = subtotalLinea * (numImpCargo / 100);
-
         acc.bruto += subtotalBase;
         acc.descuentos += descCalculado;
-        acc.iva += iva;
         acc.neto += neto;
 
         return acc;
-    }, { bruto: 0, descuentos: 0, iva: 0, neto: 0 });
+    }, { bruto: 0, descuentos: 0, neto: 0 });
 
     const subtotalCalc = totales.bruto - totales.descuentos;
 
@@ -240,6 +228,12 @@ export default function NuevaCompra() {
 
     const handleGuardar = async () => {
         if (!proveedorId) return alert('Por favor selecciona un proveedor.');
+
+        // Validar que todos los items tengan producto seleccionado
+        const itemsSinProducto = items.filter(i => !i.productoId);
+        if (itemsSinProducto.length > 0) {
+            return alert('Todos los ítems deben tener un producto seleccionado. Elimine las filas vacías o seleccione un producto.');
+        }
 
         if (metodoPago === 'multiple') {
             const sum = multiplePayments.reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0);
@@ -287,7 +281,7 @@ export default function NuevaCompra() {
                 })) : undefined,
                 subtotal: subtotalCalc,
                 descuentoGlobal: totales.descuentos,
-                iva: totales.iva,
+                iva: 0,
                 reteIca: 0, // Placeholder
                 reteIva: 0, // Placeholder
                 total: totales.neto,
@@ -302,6 +296,7 @@ export default function NuevaCompra() {
                 await api.put(`/compras/${editId}`, payload);
             } else {
                 await api.post('/compras', payload);
+                clearPersistedModule('compra');
             }
             navigate('/compras');
         } catch (error) {
@@ -328,7 +323,7 @@ export default function NuevaCompra() {
                         onClick={handleGuardar}
                         disabled={guardando || (!isCajaOpen && (metodoPago === 'efectivo' || (metodoPago === 'multiple' && multiplePayments.some(p => p.metodo === 'efectivo'))))}
                     >
-                        {guardando ? 'Guardando...' : (!isCajaOpen && (metodoPago === 'efectivo' || (metodoPago === 'multiple' && multiplePayments.some(p => p.metodo === 'efectivo'))) ? 'Caja Cerrada' : (isEditing ? 'Actualizar compra' : 'Guardar y enviar por mail'))}
+                        {guardando ? 'Guardando...' : (!isCajaOpen && (metodoPago === 'efectivo' || (metodoPago === 'multiple' && multiplePayments.some(p => p.metodo === 'efectivo'))) ? 'Caja Cerrada' : (isEditing ? 'Actualizar compra' : 'Guardar'))}
                     </Button>
                 </div>
             </div>
@@ -342,7 +337,6 @@ export default function NuevaCompra() {
                         <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', alignItems: 'center', gap: '12px' }}>
                             <label style={{ fontSize: '12px', color: '#6B7280', textAlign: 'right' }}>Tipo</label>
                             <Select value={tipoDocumento} onChange={e => setTipoDocumento(e.target.value)} options={[
-                                { value: 'OC - 1 - Orden de compra principal', label: 'OC - 1 - Orden de compra principal' },
                                 { value: 'FC - Factura de compra', label: 'FC - Factura de compra' }
                             ]} />
                         </div>
@@ -416,10 +410,6 @@ export default function NuevaCompra() {
                         <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', alignItems: 'center', gap: '12px' }}>
                             <label style={{ fontSize: '12px', color: '#6B7280', textAlign: 'right' }}>Número / Ref</label>
                             <Input placeholder="Numeración estandar o manual" value={numeroFactura} onChange={e => setNumeroFactura(e.target.value)} />
-                        </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', alignItems: 'center', gap: '12px' }}>
-                            <label style={{ fontSize: '12px', color: '#6B7280', textAlign: 'right' }}>Contacto</label>
-                            <Select value={contacto} onChange={e => setContacto(e.target.value)} options={[{ value: '', label: 'Seleccionar contacto' }, { value: 'Principal', label: 'Contacto Principal' }]} />
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '150px 1fr', alignItems: 'center', gap: '12px' }}>
                             <label style={{ fontSize: '12px', color: '#6B7280', textAlign: 'right' }}>Método de Pago</label>
@@ -582,14 +572,12 @@ export default function NuevaCompra() {
                         <thead>
                             <tr style={{ borderBottom: '2px solid #E5E7EB', color: '#1F2937', fontWeight: 600 }}>
                                 <th style={{ padding: '8px', textAlign: 'left', width: '40px' }}>#</th>
-                                <th style={{ padding: '8px', textAlign: 'left', minWidth: '100px' }}>Tipo</th>
                                 <th style={{ padding: '8px', textAlign: 'left', minWidth: '200px' }}>Ítem</th>
                                 <th style={{ padding: '8px', textAlign: 'left', minWidth: '150px' }}>Descripción</th>
                                 <th style={{ padding: '8px', textAlign: 'left', minWidth: '120px' }}>Bodegas</th>
                                 <th style={{ padding: '8px', textAlign: 'right', width: '80px' }}>Cant.</th>
                                 <th style={{ padding: '8px', textAlign: 'right', minWidth: '120px' }}>Vr.Unitario</th>
                                 <th style={{ padding: '8px', textAlign: 'right', width: '100px' }}>Descuento</th>
-                                <th style={{ padding: '8px', textAlign: 'right', width: '90px' }}>Imp Cargo</th>
                                 <th style={{ padding: '8px', textAlign: 'right', width: '120px' }}>Precio Ponderado</th>
                                 <th style={{ padding: '8px', textAlign: 'right', minWidth: '140px' }}>Valor</th>
                                 <th style={{ padding: '8px', textAlign: 'center', width: '40px' }}></th>
@@ -599,11 +587,6 @@ export default function NuevaCompra() {
                             {items.map((item, index) => (
                                 <tr key={item.id} style={{ borderBottom: '1px solid #F3F4F6' }}>
                                     <td style={{ padding: '8px', color: '#6B7280' }}>{index + 1}</td>
-                                    <td style={{ padding: '4px' }}>
-                                        <select value={item.tipoItem} onChange={e => handleItemChange(item.id, 'tipoItem', e.target.value)} style={{ width: '100%', padding: '6px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '12px', outline: 'none' }}>
-                                            <option value="Producto">Producto</option>
-                                        </select>
-                                    </td>
                                     <td style={{ padding: '4px', position: 'relative' }}>
                                         {item.tipoItem === 'Producto' ? (
                                             <div style={{ position: 'relative' }}>
@@ -673,13 +656,6 @@ export default function NuevaCompra() {
                                         <input type="number" value={item.descuento} onChange={e => handleItemChange(item.id, 'descuento', e.target.value)} style={{ width: '100%', padding: '6px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '12px', textAlign: 'right', outline: 'none' }} />
                                     </td>
                                     <td style={{ padding: '4px' }}>
-                                        <select value={item.impCargo} onChange={e => handleItemChange(item.id, 'impCargo', e.target.value)} style={{ width: '100%', padding: '6px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '12px', textAlign: 'right', outline: 'none', appearance: 'none' }}>
-                                            <option value="0">0%</option>
-                                            <option value="5">5%</option>
-                                            <option value="19">19%</option>
-                                        </select>
-                                    </td>
-                                    <td style={{ padding: '4px' }}>
                                         {(() => {
                                             if (item.tipoItem !== 'Producto' || !item.productoId) return null;
                                             const prod = productos.find(p => p.id === parseInt(item.productoId));
@@ -744,10 +720,6 @@ export default function NuevaCompra() {
                         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #E5E7EB', paddingBottom: '8px' }}>
                             <span style={{ color: '#4B5563' }}>Subtotal</span>
                             <span style={{ fontWeight: 600 }}>{formatPesos(subtotalCalc)}</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', marginTop: '4px' }}>
-                            <span style={{ color: '#4B5563' }}>Cargos (IVA)</span>
-                            <span style={{ fontWeight: 500 }}>{formatPesos(totales.iva)}</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 16px', marginTop: '8px', backgroundColor: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '6px' }}>
                             <span style={{ fontWeight: 700, fontSize: '14px', color: '#111827' }}>Total neto</span>

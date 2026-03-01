@@ -6,6 +6,7 @@ import { usePOSData } from '../features/pos/hooks/usePOSData';
 import { useCart } from '../features/pos/hooks/useCart';
 import { usePayment } from '../features/pos/hooks/usePayment';
 import { useReturn } from '../features/pos/hooks/useReturn';
+import { usePersistedState } from '../hooks/usePersistedState';
 
 import CartPanel from '../features/pos/components/CartPanel';
 import PaymentPanel from '../features/pos/components/PaymentPanel';
@@ -18,7 +19,7 @@ import ReturnModal from '../features/pos/components/ReturnModal';
 export default function POS() {
     const navigate = useNavigate();
     const [search, setSearch] = useState('');
-    const [ivaTasa, setIvaTasa] = useState(19);
+    const [ivaTasa, setIvaTasa] = usePersistedState('pos_ivaTasa', 19);
 
     // Receipt / confirm modal state
     const [showConfirm, setShowConfirm] = useState(false);
@@ -38,7 +39,7 @@ export default function POS() {
     const [loadingHistory, setLoadingHistory] = useState(false);
 
     // Financial account selected (shared between usePOSData and usePayment)
-    const [selectedAccountId, setSelectedAccountId] = useState('');
+    const [selectedAccountId, setSelectedAccountId] = usePersistedState('pos_accountId', '');
 
     // Data hook
     const { products, services, recentItems, isSearching, clients, addClient, cuentas, loading, isCajaOpen, fetchData } = usePOSData(search, setSelectedAccountId);

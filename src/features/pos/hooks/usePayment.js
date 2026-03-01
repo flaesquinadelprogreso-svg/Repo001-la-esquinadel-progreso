@@ -2,19 +2,21 @@ import { useState, useEffect } from 'react';
 import api from '../../../api/client';
 import {
     formatPesos,
+    parseCurrency,
     validatePaymentAmount,
     sanitizePaymentAmount,
     calculatePaymentsTotal,
     MAX_PAYMENT_AMOUNT
 } from '../../../utils/currency';
+import { usePersistedState, clearPersistedModule } from '../../../hooks/usePersistedState';
 
 export function usePayment({ cart, total, subtotal, iva, ivaTasa, cuentas, selectedAccountId, setSelectedAccountId, clearCart, fetchData, setLastSale, setShowConfirm, setShowReceipt }) {
-    const [paymentMethod, setPaymentMethod] = useState('efectivo');
-    const [cashGiven, setCashGiven] = useState('');
-    const [multiplePayments, setMultiplePayments] = useState([{ id: Date.now(), metodo: 'efectivo', monto: 0, cuentaId: '' }]);
+    const [paymentMethod, setPaymentMethod, clearPaymentMethod] = usePersistedState('pos_paymentMethod', 'efectivo');
+    const [cashGiven, setCashGiven, clearCashGiven] = usePersistedState('pos_cashGiven', '');
+    const [multiplePayments, setMultiplePayments, clearMultiplePayments] = usePersistedState('pos_multiPayments', [{ id: Date.now(), metodo: 'efectivo', monto: 0, cuentaId: '' }]);
     const [paymentErrors, setPaymentErrors] = useState({});
-    const [creditClient, setCreditClient] = useState('');
-    const [creditDueDate, setCreditDueDate] = useState('');
+    const [creditClient, setCreditClient, clearCreditClient] = usePersistedState('pos_creditClient', '');
+    const [creditDueDate, setCreditDueDate, clearCreditDueDate] = usePersistedState('pos_creditDueDate', '');
     const [clientSearch, setClientSearch] = useState('');
     const [showClientDropdown, setShowClientDropdown] = useState(false);
 
@@ -41,12 +43,12 @@ export function usePayment({ cart, total, subtotal, iva, ivaTasa, cuentas, selec
 
     // Reset payment state (called when cart is cleared after a sale)
     const resetPayment = (currentCuentas) => {
-        setPaymentMethod('efectivo');
-        setCashGiven('');
-        setMultiplePayments([{ id: Date.now(), metodo: 'efectivo', monto: 0, cuentaId: '' }]);
+        clearPaymentMethod();
+        clearCashGiven();
+        clearMultiplePayments();
         setPaymentErrors({});
-        setCreditClient('');
-        setCreditDueDate('');
+        clearCreditClient();
+        clearCreditDueDate();
         const defaultCaja = currentCuentas.find(c => c.tipo === 'caja');
         if (defaultCaja) setSelectedAccountId(defaultCaja.id);
     };
@@ -164,8 +166,8 @@ export function usePayment({ cart, total, subtotal, iva, ivaTasa, cuentas, selec
                     items: cart,
                     receiptNumber: sale.numeroRecibo,
                     paymentMethod: paymentMethod,
-                    cashReceived: paymentMethod === 'efectivo' ? (parseInt(cashGiven) || 0) : total,
-                    change: paymentMethod === 'efectivo' ? (parseInt(cashGiven) || 0) - total : 0
+                    cashReceived: paymentMethod === 'efectivo' ? (parseCurrency(cashGiven) || 0) : total,
+                    change: paymentMethod === 'efectivo' ? (parseCurrency(cashGiven) || 0) - total : 0
                 });
                 setShowConfirm(false);
                 setShowReceipt(true);

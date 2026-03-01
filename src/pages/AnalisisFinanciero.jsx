@@ -191,6 +191,21 @@ export default function AnalisisFinanciero() {
         XLSX.writeFile(workbook, `compras_gastos_${new Date().toISOString().split('T')[0]}.xlsx`);
     };
 
+    const exportStockCriticoToExcel = () => {
+        if (!topBajoStock?.length) return;
+        const excelData = topBajoStock.map(p => ({
+            'Código': p.codigo || 'N/A',
+            'Producto': p.nombre,
+            'Stock Actual': p.stock,
+            'Stock Mínimo': p.stockMinimo,
+            'Déficit': p.stockMinimo - p.stock
+        }));
+        const worksheet = XLSX.utils.json_to_sheet(excelData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Stock Crítico');
+        XLSX.writeFile(workbook, `stock_critico_${new Date().toISOString().split('T')[0]}.xlsx`);
+    };
+
     if (!data) {
         return (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', flexDirection: 'column', gap: '16px' }}>
@@ -409,12 +424,19 @@ export default function AnalisisFinanciero() {
 
                         {/* Stock Crítico */}
                         <div style={{ backgroundColor: '#FFFFFF', padding: '20px', borderRadius: '12px', border: '1px solid #E2E5EA' }}>
-                            <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#111827', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}><Package size={16} color="#EF4444" /> Productos en Stock Crítico ({resumen.productosBajoStockCount})</h3>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                                <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#111827', display: 'flex', alignItems: 'center', gap: '8px' }}><Package size={16} color="#EF4444" /> Productos en Stock Crítico ({resumen.productosBajoStockCount})</h3>
+                                {topBajoStock?.length > 0 && (
+                                    <button onClick={exportStockCriticoToExcel} style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '4px 10px', fontSize: '11px', fontWeight: 500, color: '#374151', backgroundColor: '#F3F4F6', border: '1px solid #D1D5DB', borderRadius: '6px', cursor: 'pointer' }}>
+                                        <Download size={12} /> Excel
+                                    </button>
+                                )}
+                            </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                 {topBajoStock?.length === 0 ? (
                                     <span style={{ fontSize: '13px', color: '#6B7280' }}>No hay productos con stock bajo.</span>
                                 ) : (
-                                    topBajoStock?.map((p, idx) => (
+                                    topBajoStock?.slice(0, 10).map((p, idx) => (
                                         <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '8px', borderBottom: '1px solid #F3F4F6' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                                 <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 600, color: '#EF4444' }}>!</div>
@@ -432,7 +454,7 @@ export default function AnalisisFinanciero() {
 
                         {/* Productos Poca Rotación */}
                         <div style={{ backgroundColor: '#FFFFFF', padding: '20px', borderRadius: '12px', border: '1px solid #E2E5EA' }}>
-                            <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#111827', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}><TrendingUp size={16} color="#8B5CF6" style={{ transform: 'rotate(180deg)' }} /> Menor Rotación (Top 5)</h3>
+                            <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#111827', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}><TrendingUp size={16} color="#8B5CF6" style={{ transform: 'rotate(180deg)' }} /> Menor Rotación (Top 10)</h3>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                 {topPocoMovimiento?.length === 0 ? (
                                     <span style={{ fontSize: '13px', color: '#6B7280' }}>No hay datos suficientes.</span>

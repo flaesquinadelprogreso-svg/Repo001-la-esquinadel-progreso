@@ -14,7 +14,9 @@ const roleColors = {
 // Modules that can be toggled per role
 const MODULES = [
     { key: 'analisis-financiero', label: 'Análisis Financiero', desc: 'Dashboard y reportes financieros' },
-    { key: 'inventario', label: 'Inventario', desc: 'Gestión de productos y stock' },
+    { key: 'inventario', label: 'Inventario', desc: 'Gestión de productos y stock', children: [
+        { key: 'inventario_disminuir', label: 'Disminuir Stock', desc: 'Permitir disminuir stock manualmente' },
+    ]},
     { key: 'pos', label: 'POS Ventas', desc: 'Punto de venta' },
     { key: 'historial-ventas', label: 'Historial Ventas', desc: 'Ver historial de ventas' },
     { key: 'compras', label: 'Compras', desc: 'Registro de compras y facturas' },
@@ -25,6 +27,9 @@ const MODULES = [
     { key: 'cuentas-pagar', label: 'Cuentas por Pagar', desc: 'Obligaciones con proveedores' },
     { key: 'configuracion', label: 'Configuración', desc: 'Ajustes del sistema' },
 ];
+
+// Flatten all permission keys (parents + children) for counting
+const ALL_PERMISSION_KEYS = MODULES.flatMap(m => [m.key, ...(m.children || []).map(c => c.key)]);
 
 const defaultForm = { username: '', password: '', role: 'cajero', permisos: [] };
 const defaultRoleForm = { nombre: '', descripcion: '', permisos: [] };
@@ -129,12 +134,16 @@ export default function Usuarios() {
     };
 
     const toggleUserPermission = (moduleKey) => {
-        setUserForm(f => ({
-            ...f,
-            permisos: f.permisos.includes(moduleKey)
-                ? f.permisos.filter(p => p !== moduleKey)
-                : [...f.permisos, moduleKey]
-        }));
+        setUserForm(f => {
+            const isOn = f.permisos.includes(moduleKey);
+            if (isOn) {
+                // Turning off: also remove children
+                const mod = MODULES.find(m => m.key === moduleKey);
+                const childKeys = (mod?.children || []).map(c => c.key);
+                return { ...f, permisos: f.permisos.filter(p => p !== moduleKey && !childKeys.includes(p)) };
+            }
+            return { ...f, permisos: [...f.permisos, moduleKey] };
+        });
     };
 
     const handleSaveUser = async () => {
@@ -202,18 +211,21 @@ export default function Usuarios() {
     };
 
     const togglePermission = (moduleKey) => {
-        setRoleForm(f => ({
-            ...f,
-            permisos: f.permisos.includes(moduleKey)
-                ? f.permisos.filter(p => p !== moduleKey)
-                : [...f.permisos, moduleKey]
-        }));
+        setRoleForm(f => {
+            const isOn = f.permisos.includes(moduleKey);
+            if (isOn) {
+                const mod = MODULES.find(m => m.key === moduleKey);
+                const childKeys = (mod?.children || []).map(c => c.key);
+                return { ...f, permisos: f.permisos.filter(p => p !== moduleKey && !childKeys.includes(p)) };
+            }
+            return { ...f, permisos: [...f.permisos, moduleKey] };
+        });
     };
 
     const toggleAll = () => {
         setRoleForm(f => ({
             ...f,
-            permisos: f.permisos.length === MODULES.length ? [] : MODULES.map(m => m.key)
+            permisos: f.permisos.length === ALL_PERMISSION_KEYS.length ? [] : [...ALL_PERMISSION_KEYS]
         }));
     };
 
@@ -502,16 +514,33 @@ export default function Usuarios() {
                                     {MODULES.map((mod, idx) => {
                                         const on = userForm.permisos.includes(mod.key);
                                         return (
-                                            <div key={mod.key} style={{
-                                                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                                                padding: '9px 14px',
-                                                borderBottom: idx < MODULES.length - 1 ? '1px solid #F0F2F5' : 'none',
-                                                backgroundColor: on ? '#F0FDF4' : 'transparent',
-                                                transition: 'background 150ms'
-                                            }}>
-                                                <p style={{ fontSize: '13px', fontWeight: 500, color: on ? '#1A1A2E' : '#6B7280' }}>{mod.label}</p>
-                                                <Toggle on={on} onClick={() => toggleUserPermission(mod.key)} />
-                                            </div>
+                                            <React.Fragment key={mod.key}>
+                                                <div style={{
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                                    padding: '9px 14px',
+                                                    borderBottom: (idx < MODULES.length - 1 || (on && mod.children)) ? '1px solid #F0F2F5' : 'none',
+                                                    backgroundColor: on ? '#F0FDF4' : 'transparent',
+                                                    transition: 'background 150ms'
+                                                }}>
+                                                    <p style={{ fontSize: '13px', fontWeight: 500, color: on ? '#1A1A2E' : '#6B7280' }}>{mod.label}</p>
+                                                    <Toggle on={on} onClick={() => toggleUserPermission(mod.key)} />
+                                                </div>
+                                                {on && mod.children && mod.children.map(child => {
+                                                    const childOn = userForm.permisos.includes(child.key);
+                                                    return (
+                                                        <div key={child.key} style={{
+                                                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                                            padding: '7px 14px 7px 32px',
+                                                            borderBottom: '1px solid #F0F2F5',
+                                                            backgroundColor: childOn ? '#EFF6FF' : '#F9FAFB',
+                                                            transition: 'background 150ms'
+                                                        }}>
+                                                            <p style={{ fontSize: '12px', fontWeight: 500, color: childOn ? '#1E3A5F' : '#9CA3AF' }}>↳ {child.label}</p>
+                                                            <Toggle on={childOn} onClick={() => toggleUserPermission(child.key)} />
+                                                        </div>
+                                                    );
+                                                })}
+                                            </React.Fragment>
                                         );
                                     })}
                                 </div>
@@ -555,19 +584,39 @@ export default function Usuarios() {
                                 {MODULES.map((mod, idx) => {
                                     const on = roleForm.permisos.includes(mod.key);
                                     return (
-                                        <div key={mod.key} style={{
-                                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                                            padding: '12px 16px',
-                                            borderBottom: idx < MODULES.length - 1 ? '1px solid #F0F2F5' : 'none',
-                                            backgroundColor: on ? '#F0FDF4' : 'transparent',
-                                            transition: 'background 150ms'
-                                        }}>
-                                            <div>
-                                                <p style={{ fontSize: '13px', fontWeight: 500, color: on ? '#1A1A2E' : '#6B7280' }}>{mod.label}</p>
-                                                <p style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '1px' }}>{mod.desc}</p>
+                                        <React.Fragment key={mod.key}>
+                                            <div style={{
+                                                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                                padding: '12px 16px',
+                                                borderBottom: (idx < MODULES.length - 1 || (on && mod.children)) ? '1px solid #F0F2F5' : 'none',
+                                                backgroundColor: on ? '#F0FDF4' : 'transparent',
+                                                transition: 'background 150ms'
+                                            }}>
+                                                <div>
+                                                    <p style={{ fontSize: '13px', fontWeight: 500, color: on ? '#1A1A2E' : '#6B7280' }}>{mod.label}</p>
+                                                    <p style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '1px' }}>{mod.desc}</p>
+                                                </div>
+                                                <Toggle on={on} onClick={() => togglePermission(mod.key)} />
                                             </div>
-                                            <Toggle on={on} onClick={() => togglePermission(mod.key)} />
-                                        </div>
+                                            {on && mod.children && mod.children.map(child => {
+                                                const childOn = roleForm.permisos.includes(child.key);
+                                                return (
+                                                    <div key={child.key} style={{
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                                        padding: '10px 16px 10px 36px',
+                                                        borderBottom: '1px solid #F0F2F5',
+                                                        backgroundColor: childOn ? '#EFF6FF' : '#F9FAFB',
+                                                        transition: 'background 150ms'
+                                                    }}>
+                                                        <div>
+                                                            <p style={{ fontSize: '12px', fontWeight: 500, color: childOn ? '#1E3A5F' : '#9CA3AF' }}>↳ {child.label}</p>
+                                                            <p style={{ fontSize: '10px', color: '#9CA3AF', marginTop: '1px' }}>{child.desc}</p>
+                                                        </div>
+                                                        <Toggle on={childOn} onClick={() => togglePermission(child.key)} />
+                                                    </div>
+                                                );
+                                            })}
+                                        </React.Fragment>
                                     );
                                 })}
                             </div>

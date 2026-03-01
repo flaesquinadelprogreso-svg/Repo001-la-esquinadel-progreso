@@ -302,8 +302,14 @@ export default function CuentasCobrar() {
                                             </span>
                                         )}
                                     </div>
-                                    <div style={{ fontSize: '13px', color: '#6B7280', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                        {cuenta.descripcion}
+                                    <div style={{ fontSize: '12px', color: '#6B7280', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '350px' }}>
+                                        {(() => {
+                                            const firstLine = (cuenta.descripcion || '').split('|')[0].trim();
+                                            const parts = firstLine.replace(/^PAGADA\s*/i, '').split(' - ');
+                                            const recibo = parts[0]?.trim() || '';
+                                            const totalLines = (cuenta.descripcion || '').split('|').length;
+                                            return recibo.length > 25 ? recibo.substring(0, 25) + '...' + (totalLines > 1 ? ` (+${totalLines - 1})` : '') : recibo + (totalLines > 1 ? ` (+${totalLines - 1} más)` : '');
+                                        })()}
                                     </div>
                                     <div style={{ fontSize: '12px', color: cuenta.tieneVencidas && cuenta.saldoPendiente > 0 ? '#DC2626' : '#9CA3AF', marginTop: '4px' }}>
                                         Vence: {cuenta.fechaVencimiento ? new Date(cuenta.fechaVencimiento).toLocaleDateString() : 'N/A'}
@@ -390,49 +396,43 @@ export default function CuentasCobrar() {
 
                 return (
                     <Modal isOpen={true} onClose={() => setShowDetalleModal(null)} title="Estado de Cuenta" size="lg">
-                        <div id="cuentas-modal-bg" style={{ backgroundColor: '#F3F4F6', padding: '15px' }}>
+                        <div id="cuentas-modal-bg" style={{ padding: '4px' }}>
                             <div id="cuentas-modal-paper" style={{
                                 backgroundColor: '#fff',
-                                padding: '30px',
-                                borderRadius: '2px',
-                                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+                                padding: '16px 20px',
+                                borderRadius: '8px',
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: '24px',
-                                maxWidth: '100%',
-                                margin: '0 auto'
+                                gap: '12px'
                             }}>
-                                {/* Header (Exactly like screenshot) */}
-                                <div id="cuentas-modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #000', paddingBottom: '10px' }}>
-                                    <div>
-                                        <h1 style={{ fontSize: '24px', fontWeight: 900, color: '#1A1A2E', margin: 0, letterSpacing: '-0.5px' }}>ESTADO DE CUENTA</h1>
-                                        <p style={{ fontSize: '14px', color: '#6B7280', margin: '4px 0 0 0' }}>Detalle de obligaciones pendientes</p>
+                                {/* Header compacto */}
+                                <div id="cuentas-modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '8px', borderBottom: '1px solid #E5E7EB' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#1E3A5F', backgroundColor: '#EBF0F7', padding: '3px 8px', borderRadius: '4px' }}>CXC-{cuentaActiva.id.toString().padStart(4, '0')}</span>
+                                        <span style={{ fontSize: '14px', fontWeight: 700, color: '#1A1A2E' }}>{cuentaActiva.clienteNombre}</span>
                                     </div>
-                                    <div style={{ textAlign: 'right' }}>
-                                        <div style={{ fontSize: '18px', fontWeight: 800, color: '#1A1A2E' }}>{cuentaActiva.clienteNombre}</div>
-                                        <div style={{ fontSize: '12px', color: '#6B7280' }}>ID Cliente: {cuentaActiva.clienteId || cuentaActiva.cliente?.id}</div>
-                                    </div>
+                                    <span style={{ fontSize: '11px', color: '#6B7280' }}>Vence: {cuentaActiva.fechaVencimiento ? new Date(cuentaActiva.fechaVencimiento).toLocaleDateString() : 'N/A'}</span>
                                 </div>
 
-                                {/* Summary Totals (Grid style) */}
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '40px' }}>
-                                    <div style={{ paddingRight: '20px', borderRight: '1px solid #F3F4FB' }}>
-                                        <div style={{ fontSize: '11px', color: '#9CA3AF', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px' }}>Total Deuda</div>
-                                        <div style={{ fontSize: '22px', fontWeight: 800 }}>{formatPesos(cuentaActiva.monto)}</div>
+                                {/* Summary compacto en línea */}
+                                <div style={{ display: 'flex', gap: '16px', padding: '8px 12px', backgroundColor: '#F9FAFB', borderRadius: '6px', fontSize: '13px' }}>
+                                    <div style={{ flex: 1 }}>
+                                        <span style={{ color: '#6B7280', fontSize: '11px' }}>Deuda</span>
+                                        <div style={{ fontWeight: 700 }}>{formatPesos(cuentaActiva.monto)}</div>
                                     </div>
-                                    <div style={{ paddingRight: '20px', borderRight: '1px solid #F3F4FB' }}>
-                                        <div style={{ fontSize: '11px', color: '#9CA3AF', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px' }}>Total Abonado</div>
-                                        <div style={{ fontSize: '22px', fontWeight: 800, color: '#16A34A' }}>{formatPesos((cuentaActiva.abonado || 0) + (parseInt(pagoMonto) || 0))}</div>
+                                    <div style={{ flex: 1, borderLeft: '1px solid #E5E7EB', paddingLeft: '16px' }}>
+                                        <span style={{ color: '#6B7280', fontSize: '11px' }}>Abonado</span>
+                                        <div style={{ fontWeight: 700, color: '#16A34A' }}>{formatPesos((cuentaActiva.abonado || 0) + (parseInt(pagoMonto) || 0))}</div>
                                     </div>
-                                    <div>
-                                        <div style={{ fontSize: '11px', color: '#9CA3AF', textTransform: 'uppercase', fontWeight: 700, marginBottom: '4px' }}>Saldo Pendiente</div>
-                                        <div style={{ fontSize: '22px', fontWeight: 800, color: '#DC2626' }}>{formatPesos(cuentaActiva.saldoPendiente - (parseInt(pagoMonto) || 0))}</div>
+                                    <div style={{ flex: 1, borderLeft: '1px solid #E5E7EB', paddingLeft: '16px' }}>
+                                        <span style={{ color: '#6B7280', fontSize: '11px' }}>Pendiente</span>
+                                        <div style={{ fontWeight: 700, color: '#DC2626' }}>{formatPesos(cuentaActiva.saldoPendiente - (parseInt(pagoMonto) || 0))}</div>
                                     </div>
                                 </div>
 
                                 {/* Detailed Table with FIFO logic */}
                                 <div>
-                                    <div style={{ fontSize: '13px', fontWeight: 900, color: '#1A1A2E', marginBottom: '20px', textTransform: 'uppercase' }}>FACTURAS Y CARGOS</div>
+                                    <div style={{ fontSize: '11px', fontWeight: 700, color: '#6B7280', marginBottom: '6px', textTransform: 'uppercase' }}>Detalle de facturas</div>
                                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                                         <thead>
                                             <tr style={{ borderBottom: '1px solid #E5E7EB', textAlign: 'left' }}>
@@ -446,14 +446,15 @@ export default function CuentasCobrar() {
                                         <tbody>
                                             {(() => {
                                                 const lines = cuentaActiva.descripcion ? cuentaActiva.descripcion.split('|') : [];
-                                                let abonoRestante = (cuentaActiva.abonado || 0) + (parseInt(pagoMonto) || 0);
+                                                let abonoYaAplicado = (cuentaActiva.abonado || 0);
+                                                const nuevoAbono = parseInt(pagoMonto) || 0;
 
-                                                return lines.map((line, idx) => {
+                                                // First pass: calculate pending per item (before new payment)
+                                                const itemsData = lines.map((line) => {
                                                     const cleanLine = line.trim();
                                                     const parts = cleanLine.replace(/^PAGADA\s*/i, '').split(' - ');
                                                     const detail = parts[0]?.trim() || 'Recibo';
                                                     const date = parts.length >= 2 ? parts[1]?.trim() : (cuentaActiva.fechaVencimiento ? new Date(cuentaActiva.fechaVencimiento).toLocaleDateString() : '-');
-
                                                     let itemAmount = 0;
                                                     if (parts.length >= 3) {
                                                         const valStr = parts[2].replace(/[^0-9]/g, '');
@@ -461,11 +462,19 @@ export default function CuentasCobrar() {
                                                     } else {
                                                         itemAmount = lines.length === 1 ? cuentaActiva.monto : 0;
                                                     }
+                                                    const pagadoPrevio = Math.min(abonoYaAplicado, itemAmount);
+                                                    const pendienteAntes = itemAmount - pagadoPrevio;
+                                                    abonoYaAplicado -= pagadoPrevio;
+                                                    return { detail, date, itemAmount, pendienteAntes };
+                                                });
 
-                                                    const pagadoDeEsteItem = Math.min(abonoRestante, itemAmount);
-                                                    const pendienteDeEsteItem = itemAmount - pagadoDeEsteItem;
-                                                    abonoRestante -= pagadoDeEsteItem;
-                                                    const isItemPagada = pendienteDeEsteItem <= 0;
+                                                // Second pass: distribute new payment FIFO
+                                                let abonoNuevoRestante = nuevoAbono;
+                                                return itemsData.map((item, idx) => {
+                                                    const abonarEsteItem = Math.min(abonoNuevoRestante, item.pendienteAntes);
+                                                    const pendienteDespues = item.pendienteAntes - abonarEsteItem;
+                                                    abonoNuevoRestante -= abonarEsteItem;
+                                                    const isItemPagada = pendienteDespues <= 0 && item.itemAmount > 0;
 
                                                     return (
                                                         <tr key={idx} style={{
@@ -478,12 +487,14 @@ export default function CuentasCobrar() {
                                                                 ) : (
                                                                     <span style={{ fontSize: '10px', color: '#1E3A5F', backgroundColor: '#EBF0F7', padding: '2px 6px', borderRadius: '4px', fontWeight: 800 }}>CXC-{cuentaActiva.id.toString().padStart(4, '0')}</span>
                                                                 )}
-                                                                <span style={{ fontWeight: 500, color: isItemPagada ? '#166534' : '#111827' }}>{detail}</span>
+                                                                <span style={{ fontWeight: 500, color: isItemPagada ? '#166534' : '#111827' }}>{item.detail}</span>
                                                             </td>
-                                                            <td style={{ padding: '12px 0', color: isItemPagada ? '#166534' : '#6B7280' }}>{date}</td>
-                                                            <td style={{ padding: '12px 0', textAlign: 'right', fontWeight: 600, color: isItemPagada ? '#166534' : '#111827' }}>{formatPesos(itemAmount)}</td>
-                                                            <td style={{ padding: '12px 0', textAlign: 'right', fontWeight: 700, color: isItemPagada ? '#16A34A' : '#111827' }}>{formatPesos(pendienteDeEsteItem)}</td>
-                                                            <td style={{ padding: '12px 0', textAlign: 'right', color: '#9CA3AF' }}>-</td>
+                                                            <td style={{ padding: '12px 0', color: isItemPagada ? '#166534' : '#6B7280' }}>{item.date}</td>
+                                                            <td style={{ padding: '12px 0', textAlign: 'right', fontWeight: 600, color: isItemPagada ? '#166534' : '#111827' }}>{formatPesos(item.itemAmount)}</td>
+                                                            <td style={{ padding: '12px 0', textAlign: 'right', fontWeight: 700, color: isItemPagada ? '#16A34A' : '#111827' }}>{formatPesos(pendienteDespues)}</td>
+                                                            <td style={{ padding: '12px 0', textAlign: 'right', fontWeight: 700, color: abonarEsteItem > 0 ? '#DC2626' : '#9CA3AF' }}>
+                                                                {abonarEsteItem > 0 ? formatPesos(abonarEsteItem) : '-'}
+                                                            </td>
                                                         </tr>
                                                     );
                                                 });
@@ -492,82 +503,61 @@ export default function CuentasCobrar() {
                                     </table>
                                 </div>
 
-                                {/* Divider */}
-                                <div style={{ borderTop: '1px dashed #D1D5DB', margin: '10px 0' }}></div>
-
-                                {/* Payment Interface */}
+                                {/* Payment Interface compacto */}
                                 {cuentaActiva.saldoPendiente > 0 ? (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                        <div style={{ display: 'flex', gap: '30px', flexWrap: 'wrap' }}>
-                                            <div style={{ flex: 1, minWidth: '250px' }}>
-                                                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '10px', color: '#1A1A2E' }}>REGISTRAR NUEVO ABONO</label>
-                                                <div style={{ display: 'flex', gap: '10px' }}>
-                                                    {metodosPago.map(metodo => (
-                                                        <button
-                                                            key={metodo.id}
-                                                            onClick={() => setMetodoSeleccionado(metodo.id)}
-                                                            style={{
-                                                                flex: 1,
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                justifyContent: 'center',
-                                                                gap: '8px',
-                                                                padding: '12px',
-                                                                borderRadius: '8px',
-                                                                border: '1px solid',
-                                                                borderColor: metodoSeleccionado === metodo.id ? '#1A1A2E' : '#E5E7EB',
-                                                                backgroundColor: metodoSeleccionado === metodo.id ? '#1A1A2E' : '#fff',
-                                                                color: metodoSeleccionado === metodo.id ? '#fff' : '#4B5563',
-                                                                cursor: 'pointer',
-                                                                fontWeight: 600,
-                                                                transition: 'all 0.2s'
-                                                            }}
-                                                        >
-                                                            <metodo.icon size={16} color={metodoSeleccionado === metodo.id ? '#fff' : metodo.color} />
-                                                            {metodo.label}
-                                                        </button>
-                                                    ))}
-                                                </div>
+                                    <div style={{ padding: '10px 12px', backgroundColor: '#F9FAFB', borderRadius: '6px', border: '1px solid #E5E7EB' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#374151', whiteSpace: 'nowrap' }}>Abonar:</span>
+                                            <div style={{ display: 'flex', gap: '4px' }}>
+                                                {metodosPago.map(metodo => (
+                                                    <button
+                                                        key={metodo.id}
+                                                        onClick={() => setMetodoSeleccionado(metodo.id)}
+                                                        style={{
+                                                            display: 'flex', alignItems: 'center', gap: '4px',
+                                                            padding: '5px 10px', borderRadius: '4px', border: '1px solid',
+                                                            borderColor: metodoSeleccionado === metodo.id ? '#1A1A2E' : '#D1D5DB',
+                                                            backgroundColor: metodoSeleccionado === metodo.id ? '#1A1A2E' : '#fff',
+                                                            color: metodoSeleccionado === metodo.id ? '#fff' : '#4B5563',
+                                                            cursor: 'pointer', fontWeight: 600, fontSize: '11px', transition: 'all 0.15s'
+                                                        }}
+                                                    >
+                                                        <metodo.icon size={12} color={metodoSeleccionado === metodo.id ? '#fff' : metodo.color} />
+                                                        {metodo.label}
+                                                    </button>
+                                                ))}
                                             </div>
-                                            <div style={{ flex: 1, minWidth: '200px' }}>
-                                                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '10px', color: '#1A1A2E' }}>CUENTA / BANCO DESTINO</label>
-                                                <select
-                                                    value={selectedAccountId}
-                                                    onChange={(e) => setSelectedAccountId(e.target.value)}
-                                                    style={{ width: '100%', padding: '12px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '14px', outline: 'none', appearance: 'none', backgroundColor: '#fff' }}
-                                                >
-                                                    <option value="">Seleccione cuenta...</option>
-                                                    {cuentasFinancieras.filter(c => metodoSeleccionado === 'efectivo' ? c.tipo === 'caja' : c.tipo === 'banco').map(c => (
-                                                        <option key={c.id} value={c.id}>{c.nombre}</option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '20px' }}>
-                                            <div style={{ width: '200px' }}>
-                                                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '10px', color: '#1A1A2E' }}>MONTO</label>
-                                                <input
-                                                    type="text"
-                                                    value={pagoMonto ? formatPesos(pagoMonto) : ''}
-                                                    onChange={handleCurrencyInput}
-                                                    style={{ width: '100%', padding: '12px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '16px', fontWeight: 800, color: '#1A1A2E' }}
-                                                    placeholder="$ 0"
-                                                />
-                                            </div>
+                                            <select
+                                                value={selectedAccountId}
+                                                onChange={(e) => setSelectedAccountId(e.target.value)}
+                                                style={{ padding: '5px 8px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '12px', outline: 'none', backgroundColor: '#fff', minWidth: '140px' }}
+                                            >
+                                                <option value="">Cuenta...</option>
+                                                {cuentasFinancieras.filter(c => metodoSeleccionado === 'efectivo' ? c.tipo === 'caja' : c.tipo === 'banco').map(c => (
+                                                    <option key={c.id} value={c.id}>{c.nombre}</option>
+                                                ))}
+                                            </select>
+                                            <input
+                                                type="text"
+                                                value={pagoMonto ? formatPesos(pagoMonto) : ''}
+                                                onChange={handleCurrencyInput}
+                                                style={{ width: '130px', padding: '5px 8px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '13px', fontWeight: 700, color: '#1A1A2E' }}
+                                                placeholder="$ 0"
+                                            />
                                             <Button
                                                 onClick={handleRegistrarPago}
-                                                style={{ padding: '0 40px', height: '46px', fontSize: '14px', fontWeight: 800, backgroundColor: '#1A365D' }}
+                                                style={{ padding: '5px 16px', height: '30px', fontSize: '12px', fontWeight: 700, backgroundColor: '#1A365D' }}
                                                 disabled={!selectedAccountId || !pagoMonto || (!isCajaOpen && metodoSeleccionado === 'efectivo')}
                                             >
-                                                {isCajaOpen || metodoSeleccionado !== 'efectivo' ? 'Aplicar Abono' : 'Caja Cerrada'}
+                                                {isCajaOpen || metodoSeleccionado !== 'efectivo' ? 'Aplicar' : 'Caja Cerrada'}
                                             </Button>
                                         </div>
                                     </div>
                                 ) : (
-                                    <div style={{ textAlign: 'center', padding: '20px 0' }}>
-                                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '15px 30px', backgroundColor: '#F0FDF4', color: '#166534', borderRadius: '10px', fontWeight: 800 }}>
-                                            <CheckCircle size={24} />
-                                            <span>Esta cuenta ha sido pagada en su totalidad</span>
+                                    <div style={{ textAlign: 'center', padding: '10px 0' }}>
+                                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', backgroundColor: '#F0FDF4', color: '#166534', borderRadius: '6px', fontWeight: 700, fontSize: '13px' }}>
+                                            <CheckCircle size={16} />
+                                            <span>Cuenta pagada en su totalidad</span>
                                         </div>
                                     </div>
                                 )}

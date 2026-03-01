@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { usePersistedState } from '../../../hooks/usePersistedState';
 
 export function useCart() {
-    const [cart, setCart] = useState([]);
+    const [cart, setCart, clearPersistedCart] = usePersistedState('pos_cart', []);
 
     // Add product to cart from location popup
     const addToCart = (product, locationQuantities, overridePrice) => {
@@ -132,9 +132,9 @@ export function useCart() {
         }));
     };
 
-    // Clear cart (only clears cart items)
+    // Clear cart (clears cart items + localStorage)
     const clearCart = () => {
-        setCart([]);
+        clearPersistedCart();
     };
 
     return { cart, addToCart, addServiceToCart, updateQty, removeFromCart, togglePrecioMayor, clearCart };
