@@ -57,7 +57,7 @@ export default function Compras() {
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                         <tr style={{ backgroundColor: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
-                            {['#', 'Proveedor', 'Fecha', 'Total', 'Estado', 'Acciones'].map(h => (
+                            {['#', 'Proveedor', 'Fecha', 'Total', 'Estado', 'Registrado por', 'Acciones'].map(h => (
                                 <th key={h} style={{ padding: '12px 20px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>{h}</th>
                             ))}
                         </tr>
@@ -86,6 +86,9 @@ export default function Compras() {
                                             {p.estado}
                                         </span>
                                     </td>
+                                    <td data-label="Registrado por" style={{ padding: '14px 20px', fontSize: '13px', color: '#1A1A2E', fontWeight: 500 }}>
+                                        {p.usuario?.username || '-'}
+                                    </td>
                                     <td data-label="Acciones" style={{ padding: '14px 20px' }}>
                                         <div style={{ display: 'flex', gap: '8px' }}>
                                             <button
@@ -112,7 +115,7 @@ export default function Compras() {
                             );
                         }) : (
                             <tr>
-                                <td colSpan={6} style={{ padding: '24px', textAlign: 'center', color: '#6B7280', fontSize: '14px' }}>
+                                <td colSpan={7} style={{ padding: '24px', textAlign: 'center', color: '#6B7280', fontSize: '14px' }}>
                                     No hay compras registradas aún.
                                 </td>
                             </tr>

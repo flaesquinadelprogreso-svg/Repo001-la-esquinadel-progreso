@@ -296,6 +296,11 @@ export default function HistorialVentas() {
                                                 <span style={{ fontSize: '11px', padding: '1px 6px', borderRadius: '4px', backgroundColor: '#E0E7FF', color: '#4338CA', fontWeight: 500 }}>
                                                     {venta.cliente?.nombre || 'Cliente General'}
                                                 </span>
+                                                {venta.usuario?.username && (
+                                                    <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '4px', backgroundColor: '#F0FDF4', color: '#15803D', fontWeight: 500 }}>
+                                                        {venta.usuario.username}
+                                                    </span>
+                                                )}
                                                 {venta.totalDevuelto > 0 && (
                                                     <span style={{ fontSize: '11px', padding: '1px 6px', borderRadius: '4px', backgroundColor: '#FEF2F2', color: '#DC2626', fontWeight: 500 }}>
                                                         Con Devoluciones

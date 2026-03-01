@@ -61,11 +61,23 @@ async function reset() {
         console.log(`  ✓ ${label}: ${count.count} registros eliminados`);
     }
 
-    // Resetear saldos de cuentas financieras a 0
-    const cuentas = await prisma.cuentaFinanciera.updateMany({
-        data: { saldoActual: 0 }
+    // Caja Principal: la primera cuenta tipo 'caja' (persiste siempre)
+    const cajaPrincipal = await prisma.cuentaFinanciera.findFirst({
+        where: { tipo: 'caja' },
+        orderBy: { id: 'asc' }
     });
-    console.log(`  ✓ Cuentas financieras: ${cuentas.count} saldos reseteados a 0`);
+
+    if (cajaPrincipal) {
+        const eliminadas = await prisma.cuentaFinanciera.deleteMany({
+            where: { id: { not: cajaPrincipal.id } }
+        });
+        console.log(`  ✓ Cuentas financieras secundarias: ${eliminadas.count} eliminadas`);
+        await prisma.cuentaFinanciera.update({
+            where: { id: cajaPrincipal.id },
+            data: { saldoActual: 0 }
+        });
+        console.log(`  ✓ Caja Principal: saldo reseteado a $0`);
+    }
 
     // Resetear resoluciones: actual = desde
     const resoluciones = await prisma.resolucion.findMany();

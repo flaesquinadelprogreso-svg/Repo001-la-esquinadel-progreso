@@ -3,7 +3,7 @@ import {
     Wallet, Building, Plus, ArrowDownCircle, ArrowUpCircle,
     Clock, Search, AlertCircle, FileText, ChevronRight,
     TrendingUp, TrendingDown, Landmark, X, ArrowRightLeft,
-    Lock, CheckCircle
+    Lock, CheckCircle, Trash2
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
@@ -97,7 +97,7 @@ export default function CajaBancos() {
         if (movimientos.length === 0) return alert('No hay datos para exportar');
 
         // CSV Creation (Excel compatible)
-        const headers = ["Fecha", "Hora", "Cuenta", "Tipo", "Categoría", "Descripción", "Monto"];
+        const headers = ["Fecha", "Hora", "Cuenta", "Tipo", "Categoría", "Descripción", "Usuario", "Monto"];
         const rows = movimientos.map(m => [
             new Date(m.fecha).toLocaleDateString(),
             m.hora,
@@ -105,7 +105,8 @@ export default function CajaBancos() {
             m.tipo.toUpperCase(),
             m.categoria,
             m.descripcion || '',
-            m.monto
+            m.usuario?.username || '-',
+            m.tipo === 'salida' ? -m.monto : m.monto
         ]);
 
         const csvContent = [
@@ -198,7 +199,18 @@ export default function CajaBancos() {
         }
     };
 
+    const handleDeleteAccount = async (accountId) => {
+        if (!confirm('¿Está seguro de eliminar esta cuenta? Se eliminarán los cierres asociados.')) return;
+        try {
+            await api.delete(`/cuentas-financieras/${accountId}`);
+            fetchData();
+        } catch (error) {
+            alert(error.response?.data?.error || 'Error al eliminar la cuenta');
+        }
+    };
+
     const totalDisponible = cuentas.reduce((sum, c) => sum + c.saldoActual, 0);
+    const cajaPrincipalId = cuentas.find(c => c.tipo === 'caja')?.id;
 
     if (loading) {
         return (
@@ -321,6 +333,15 @@ export default function CajaBancos() {
                                     </div>
                                     <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '12px' }}>
                                         <p style={{ fontSize: '15px', fontWeight: 700, color: '#1A1A2E' }}>{formatPesos(cuenta.saldoActual)}</p>
+                                        {cuenta.id !== cajaPrincipalId && cuenta.saldoActual === 0 && (
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleDeleteAccount(cuenta.id); }}
+                                                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                title="Eliminar cuenta"
+                                            >
+                                                <Trash2 size={14} color="#DC2626" />
+                                            </button>
+                                        )}
                                         <ChevronRight size={14} color="#D1D5DB" />
                                     </div>
                                 </div>
@@ -428,6 +449,7 @@ export default function CajaBancos() {
                                     <th style={{ padding: '12px 20px', textAlign: 'left', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Cuenta</th>
                                     <th style={{ padding: '12px 20px', textAlign: 'left', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Categoría</th>
                                     <th style={{ padding: '12px 20px', textAlign: 'left', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Desc / Referencia</th>
+                                    <th style={{ padding: '12px 20px', textAlign: 'left', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Usuario</th>
                                     <th style={{ padding: '12px 20px', textAlign: 'right', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Monto</th>
                                 </tr>
                             </thead>
@@ -450,6 +472,7 @@ export default function CajaBancos() {
                                                 </div>
                                             )}
                                         </td>
+                                        <td style={{ padding: '14px 20px', fontSize: '13px', color: '#6B7280' }}>{mov.usuario?.username || '-'}</td>
                                         <td style={{ padding: '14px 20px', textAlign: 'right', fontSize: '14px', fontWeight: 700, color: mov.tipo === 'entrada' ? '#16A34A' : '#DC2626' }}>
                                             {mov.tipo === 'entrada' ? '+' : '-'} {formatPesos(mov.monto)}
                                         </td>
@@ -457,7 +480,7 @@ export default function CajaBancos() {
                                 ))}
                                 {!loading && movimientos.length === 0 && (
                                     <tr>
-                                        <td colSpan="5" style={{ padding: '40px', textAlign: 'center', color: '#6B7280' }}>
+                                        <td colSpan="6" style={{ padding: '40px', textAlign: 'center', color: '#6B7280' }}>
                                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
                                                 <AlertCircle size={40} opacity={0.3} />
                                                 <div>No se encontraron movimientos para los filtros seleccionados</div>
@@ -489,6 +512,7 @@ export default function CajaBancos() {
                                     <th style={{ padding: '12px 20px', textAlign: 'right', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Saldo Teórico</th>
                                     <th style={{ padding: '12px 20px', textAlign: 'right', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Saldo Físico</th>
                                     <th style={{ padding: '12px 20px', textAlign: 'right', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Dif.</th>
+                                    <th style={{ padding: '12px 20px', textAlign: 'left', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Operador</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -515,11 +539,12 @@ export default function CajaBancos() {
                                         <td style={{ padding: '14px 20px', textAlign: 'right', fontSize: '13px', fontWeight: 600, color: c.diferencia < 0 ? '#DC2626' : c.diferencia > 0 ? '#D97706' : '#16A34A' }}>
                                             {c.saldoReal !== null ? formatPesos(c.diferencia) : '-'}
                                         </td>
+                                        <td style={{ padding: '14px 20px', fontSize: '13px', color: '#6B7280' }}>{c.usuario?.username || '-'}</td>
                                     </tr>
                                 ))}
                                 {cierres.length === 0 && (
                                     <tr>
-                                        <td colSpan="8" style={{ padding: '40px', textAlign: 'center', color: '#6B7280' }}>No hay registros de cierres de caja.</td>
+                                        <td colSpan="9" style={{ padding: '40px', textAlign: 'center', color: '#6B7280' }}>No hay registros de cierres de caja.</td>
                                     </tr>
                                 )}
                             </tbody>

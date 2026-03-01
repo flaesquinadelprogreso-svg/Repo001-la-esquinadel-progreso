@@ -117,6 +117,7 @@ model Venta {
   id              Int       @id @default(autoincrement())
   numeroRecibo    String    @unique
   clienteId       Int?
+  usuarioId       Int?
   subtotal        Int
   iva             Int
   ivaTasa         Int       // 19, 5, 0
@@ -128,8 +129,9 @@ model Venta {
   ventaOriginalId Int?      // Para devoluciones: ID de la venta original
   fechaVencimiento String?  // Para ventas a crédito
   createdAt       DateTime  @default(now())
-  
+
   cliente         Cliente?  @relation(fields: [clienteId], references: [id])
+  usuario         Usuario?  @relation("VentaUsuario", fields: [usuarioId], references: [id])
   ventaOriginal   Venta?    @relation("DevolucionVenta", fields: [ventaOriginalId], references: [id])
   devolucionesRef Venta[]   @relation("DevolucionVenta")
   
@@ -183,6 +185,7 @@ model Devolucion {
   id              Int       @id @default(autoincrement())
   ventaId         Int       // Venta original
   clienteId       Int?
+  usuarioId       Int?
   numeroDevolucion String   @unique // Número único de devolución
   tipo            String    // parcial, total
   motivo          String?
@@ -192,9 +195,10 @@ model Devolucion {
   metodoReembolso String    // efectivo, credito, tarjeta, transferencia
   estado          String    @default("completada") // completada, anulada
   createdAt       DateTime  @default(now())
-  
+
   venta           Venta     @relation(fields: [ventaId], references: [id])
   cliente         Cliente?  @relation(fields: [clienteId], references: [id])
+  usuario         Usuario?  @relation("DevolucionUsuario", fields: [usuarioId], references: [id])
   
   items           ItemDevolucion[]
   movimientoCaja  MovimientoCajaDevolucion?
@@ -244,6 +248,7 @@ model Compra {
   tipoDocumento       String?   @default("OC - 1 - Orden de compra")
   fechaElaboracion    DateTime  @default(now())
   proveedorId         Int?
+  usuarioId           Int?
   contacto            String?
   centroCosto         String?
   moneda              String    @default("COP")
@@ -261,7 +266,8 @@ model Compra {
   createdAt           DateTime  @default(now())
   
   proveedor      Proveedor? @relation(fields: [proveedorId], references: [id])
-  
+  usuario        Usuario?   @relation("CompraUsuario", fields: [usuarioId], references: [id])
+
   items          ItemCompra[]
 }
 
@@ -310,12 +316,14 @@ model CuentaPorCobrar {
 model AbonoCobro {
   id                Int     @id @default(autoincrement())
   cuentaPorCobrarId Int
+  usuarioId         Int?
   monto             Int
   metodo            String  // efectivo, transferencia, tarjeta
   fecha             DateTime @default(now())
   hora              String
-  
+
   cuenta            CuentaPorCobrar @relation(fields: [cuentaPorCobrarId], references: [id], onDelete: Cascade)
+  usuario           Usuario?  @relation("AbonoCobroUsuario", fields: [usuarioId], references: [id])
   movimientoCaja    MovimientoCaja?
 }
 
@@ -338,12 +346,14 @@ model CuentaPorPagar {
 model AbonoPago {
   id               Int     @id @default(autoincrement())
   cuentaPorPagarId Int
+  usuarioId        Int?
   monto            Int
   metodo           String  // efectivo, transferencia, tarjeta
   fecha            DateTime @default(now())
   hora             String
-  
+
   cuenta           CuentaPorPagar @relation(fields: [cuentaPorPagarId], references: [id], onDelete: Cascade)
+  usuario          Usuario?  @relation("AbonoPagoUsuario", fields: [usuarioId], references: [id])
   movimientoCaja   MovimientoCaja?
 }
 
@@ -370,6 +380,7 @@ model CuentaFinanciera {
 model CierreCaja {
   id            Int       @id @default(autoincrement())
   cuentaId      Int
+  usuarioId     Int?
   fechaApertura DateTime  @default(now())
   fechaCierre   DateTime?
   saldoInicial  Float     @default(0)
@@ -382,6 +393,7 @@ model CierreCaja {
   estado        String    @default("abierta") // abierta, cerrada
   
   cuenta        CuentaFinanciera @relation(fields: [cuentaId], references: [id])
+  usuario       Usuario?  @relation("CierreUsuario", fields: [usuarioId], references: [id])
 }
 
 model MovimientoCaja {
@@ -394,9 +406,11 @@ model MovimientoCaja {
   descripcion  String?
   fecha        DateTime @default(now())
   hora         String
-  
+  usuarioId    Int?
+
   cuentaId     Int?     // Referencia a CuentaFinanciera
   cuenta       CuentaFinanciera? @relation(fields: [cuentaId], references: [id])
+  usuario      Usuario?  @relation("MovimientoUsuario", fields: [usuarioId], references: [id])
 
   ventaId      Int?
   venta        Venta?   @relation(fields: [ventaId], references: [id])
@@ -421,6 +435,15 @@ model Usuario {
   activo    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Auditoría
+  ventas          Venta[]          @relation("VentaUsuario")
+  compras         Compra[]         @relation("CompraUsuario")
+  movimientos     MovimientoCaja[] @relation("MovimientoUsuario")
+  cierres         CierreCaja[]     @relation("CierreUsuario")
+  devoluciones    Devolucion[]     @relation("DevolucionUsuario")
+  abonosCobro     AbonoCobro[]     @relation("AbonoCobroUsuario")
+  abonosPago      AbonoPago[]      @relation("AbonoPagoUsuario")
 }
 
 model Rol {

@@ -166,11 +166,12 @@ export default function Configuracion() {
                                         <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#991B1B', marginBottom: '6px' }}>Resetear Sistema</h3>
                                         <p style={{ fontSize: '12px', color: '#6B7280', lineHeight: '1.5' }}>
                                             Elimina <strong>todos los datos</strong>: ventas, compras, movimientos de caja,
-                                            cierres, cuentas por cobrar/pagar, productos, servicios, stock y devoluciones.
+                                            cierres, cuentas por cobrar/pagar, productos, servicios, stock, devoluciones
+                                            y todas las cuentas bancarias/cajas secundarias.
                                         </p>
                                         <p style={{ fontSize: '12px', color: '#6B7280', lineHeight: '1.5', marginTop: '6px' }}>
-                                            <strong>Se mantienen:</strong> clientes, proveedores, usuarios, roles,
-                                            ubicaciones y configuración. Los saldos de cuentas financieras se ponen en $0.
+                                            <strong>Se mantiene:</strong> solo la Caja Principal (con saldo en $0),
+                                            clientes, proveedores, usuarios, roles, ubicaciones y configuración.
                                         </p>
                                     </div>
                                     <button
@@ -198,7 +199,8 @@ export default function Configuracion() {
                         <div style={{ fontSize: '13px', color: '#991B1B', lineHeight: '1.5' }}>
                             <strong>Esta acción es IRREVERSIBLE.</strong><br />
                             Se eliminarán todas las ventas, compras, movimientos de caja, cierres,
-                            cuentas por cobrar/pagar, productos, servicios, stock y devoluciones. Los saldos se pondrán en $0.
+                            cuentas por cobrar/pagar, productos, servicios, stock, devoluciones
+                            y todas las cuentas financieras excepto la Caja Principal (que quedará en $0).
                         </div>
                     </div>
 
