@@ -1,0 +1,164 @@
+/* =====================================================
+   Usuarios y Roles Mobile Responsive
+   Solo se activa en pantallas <=767px.
+   Usa !important para sobreescribir los estilos inline.
+   NO afecta desktop (>=768px) en absoluto.
+   ===================================================== */
+
+@media (max-width: 767px) {
+
+    /* ── Header Principal ── */
+    #usuarios-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 12px !important;
+    }
+
+    #usuarios-header > button,
+    #usuarios-header > div:last-child > button {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+
+    /* ── Tabs ── */
+    #usuarios-tabs {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    #usuarios-tabs button {
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* ══════════════════════════════════════════
+       TABLA DE USUARIOS → Tarjetas
+       ══════════════════════════════════════════ */
+
+    #usuarios-table {
+        border: none !important;
+        background-color: transparent !important;
+        border-radius: 0 !important;
+    }
+
+    #usuarios-table table,
+    #usuarios-table tbody {
+        display: block !important;
+        width: 100% !important;
+    }
+
+    #usuarios-table thead {
+        display: none !important;
+    }
+
+    #usuarios-table tr {
+        display: flex !important;
+        flex-direction: column !important;
+        background-color: #fff !important;
+        border: 1px solid #E5E7EB !important;
+        border-radius: 8px !important;
+        margin-bottom: 12px !important;
+        padding: 16px !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+    }
+
+    #usuarios-table td {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 6px 0 !important;
+        border: none !important;
+        text-align: right !important;
+    }
+
+    #usuarios-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #6B7280;
+        text-transform: uppercase;
+        font-size: 11px;
+        text-align: left;
+        margin-right: 12px;
+    }
+
+    /* Acciones row: center buttons */
+    #usuarios-table td:last-child {
+        justify-content: flex-end !important;
+        padding-top: 10px !important;
+        border-top: 1px solid #F0F2F5 !important;
+        margin-top: 4px !important;
+    }
+
+    /* ══════════════════════════════════════════
+       ROLES TAB — Permissions grid
+       ══════════════════════════════════════════ */
+
+    .usuarios-roles-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Role header: stack on mobile */
+    #usuarios-root div[style*="justifyContent: 'space-between'"][style*="padding: '16px 20px'"] > div:first-child {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+    }
+
+    /* ══════════════════════════════════════════
+       MODAL DE USUARIO (2 columnas → 1 columna)
+       ══════════════════════════════════════════ */
+
+    #user-modal-layout {
+        flex-direction: column !important;
+    }
+
+    /* Left column: remove fixed width */
+    #user-modal-layout > div:first-child {
+        flex: unset !important;
+        width: 100% !important;
+    }
+
+    /* Right column (permisos): remove left border, adjust */
+    #user-modal-layout > div:nth-child(2) {
+        flex: unset !important;
+        border-left: none !important;
+        padding-left: 0 !important;
+        border-top: 1px solid #E2E5EA !important;
+        padding-top: 16px !important;
+        max-height: 300px !important;
+    }
+
+    /* ══════════════════════════════════════════
+       MODAL DE ROL
+       ══════════════════════════════════════════ */
+
+    /* Remove min-width */
+    div[style*="minWidth: '500px'"] {
+        min-width: unset !important;
+        width: 100% !important;
+    }
+
+    /* Nombre + Descripción fields: stack */
+    div[style*="minWidth: '500px'"] > div:first-child {
+        flex-direction: column !important;
+    }
+
+    /* ══════════════════════════════════════════
+       MODALES DE CONFIRMACIÓN
+       ══════════════════════════════════════════ */
+
+    div[style*="minWidth: '400px'"] {
+        min-width: unset !important;
+        width: 100% !important;
+    }
+
+    /* Modal footer buttons */
+    div[style*="justifyContent: 'flex-end'"][style*="gap: '12px'"] {
+        flex-direction: column-reverse !important;
+        gap: 8px !important;
+    }
+
+    div[style*="justifyContent: 'flex-end'"][style*="gap: '12px'"] button {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+}

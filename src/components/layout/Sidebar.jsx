@@ -23,7 +23,7 @@ const navItems = [
     { path: '/configuracion', label: 'Configuración', icon: Settings },
 ];
 
-export default function Sidebar({ collapsed, onToggle, isMobile }) {
+export default function Sidebar({ collapsed, onToggle, isMobile, mobileOpen, onMobileClose }) {
     const location = useLocation();
     const [currentUser, setCurrentUser] = useState({ name: 'Cargando...', role: '...', permisos: [] });
     const [businessName, setBusinessName] = useState(localStorage.getItem('businessName') || 'Cargando...');
@@ -69,18 +69,31 @@ export default function Sidebar({ collapsed, onToggle, isMobile }) {
     const width = collapsed ? 72 : 250;
 
     // Transition for hiding sidebar on mobile
+    const showSidebar = isMobile ? mobileOpen : true;
     const sidebarStyle = {
         position: 'fixed', left: 0, top: 0, height: '100vh',
-        width: `${width}px`, backgroundColor: '#FFFFFF',
+        width: isMobile ? '250px' : `${width}px`, backgroundColor: '#FFFFFF',
         borderRight: '1px solid #E2E5EA',
         display: 'flex', flexDirection: 'column',
         zIndex: 100, transition: 'all 300ms ease',
-        boxShadow: '2px 0 8px rgba(0,0,0,0.04)',
-        transform: isMobile && collapsed ? 'translateX(-100%)' : 'translateX(0)',
-        visibility: isMobile && collapsed ? 'hidden' : 'visible'
+        boxShadow: showSidebar ? '2px 0 8px rgba(0,0,0,0.08)' : '2px 0 8px rgba(0,0,0,0.04)',
+        transform: isMobile ? (mobileOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+        visibility: isMobile ? (mobileOpen ? 'visible' : 'hidden') : 'visible'
     };
 
     return (
+        <>
+        {/* Overlay oscuro en móvil */}
+        {isMobile && mobileOpen && (
+            <div
+                onClick={onMobileClose}
+                style={{
+                    position: 'fixed', inset: 0,
+                    backgroundColor: 'rgba(0,0,0,0.4)',
+                    zIndex: 99, transition: 'opacity 300ms ease'
+                }}
+            />
+        )}
         <aside style={sidebarStyle}>
             {/* Logo */}
             <div style={{
@@ -115,6 +128,7 @@ export default function Sidebar({ collapsed, onToggle, isMobile }) {
                             <li key={path}>
                                 <NavLink
                                     to={path}
+                                    onClick={() => { if (isMobile && onMobileClose) onMobileClose(); }}
                                     title={collapsed ? label : undefined}
                                     style={{
                                         display: 'flex', alignItems: 'center', gap: '12px',
@@ -174,23 +188,26 @@ export default function Sidebar({ collapsed, onToggle, isMobile }) {
                 </div>
             </div>
 
-            {/* Collapse toggle */}
-            <button
-                onClick={onToggle}
-                style={{
-                    position: 'absolute', right: '-12px', top: '72px',
-                    width: '24px', height: '24px', borderRadius: '50%',
-                    backgroundColor: '#FFFFFF', border: '1px solid #E2E5EA',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    cursor: 'pointer', zIndex: 40,
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                    transition: 'all 150ms ease'
-                }}
-                onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#EBF0F7'; }}
-                onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#FFFFFF'; }}
-            >
-                <ChevronLeft size={14} style={{ color: '#9CA3AF', transform: collapsed ? 'rotate(180deg)' : 'none', transition: 'transform 300ms ease' }} />
-            </button>
+            {/* Collapse toggle (desktop only) */}
+            {!isMobile && (
+                <button
+                    onClick={onToggle}
+                    style={{
+                        position: 'absolute', right: '-12px', top: '72px',
+                        width: '24px', height: '24px', borderRadius: '50%',
+                        backgroundColor: '#FFFFFF', border: '1px solid #E2E5EA',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        cursor: 'pointer', zIndex: 40,
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                        transition: 'all 150ms ease'
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#EBF0F7'; }}
+                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#FFFFFF'; }}
+                >
+                    <ChevronLeft size={14} style={{ color: '#9CA3AF', transform: collapsed ? 'rotate(180deg)' : 'none', transition: 'transform 300ms ease' }} />
+                </button>
+            )}
         </aside>
+        </>
     );
 }

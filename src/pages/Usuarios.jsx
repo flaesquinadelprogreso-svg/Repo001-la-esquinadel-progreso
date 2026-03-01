@@ -3,6 +3,7 @@ import { Plus, Pencil, Trash2, UserCheck, UserX, Eye, EyeOff, Shield, Users } fr
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import api from '../api/client';
+import '../styles/usuarios-mobile.css';
 
 const roleColors = {
     admin: { bg: '#DBEAFE', text: '#1E40AF' },
@@ -280,9 +281,9 @@ export default function Usuarios() {
     });
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div id="usuarios-root" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div id="usuarios-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
                     <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#1A1A2E' }}>Usuarios y Roles</h1>
                     <p style={{ fontSize: '13px', color: '#6B7280', marginTop: '4px' }}>Gestión de usuarios, roles y permisos del sistema</p>
@@ -295,7 +296,7 @@ export default function Usuarios() {
             </div>
 
             {/* Tabs */}
-            <div style={{ display: 'flex', borderBottom: '1px solid #E2E5EA', gap: '0' }}>
+            <div id="usuarios-tabs" style={{ display: 'flex', borderBottom: '1px solid #E2E5EA', gap: '0' }}>
                 <button style={tabStyle(tab === 'usuarios')} onClick={() => setTab('usuarios')}>
                     <Users size={15} style={{ marginRight: '6px', verticalAlign: 'middle' }} />Usuarios
                 </button>
@@ -306,7 +307,7 @@ export default function Usuarios() {
 
             {/* ═══ USUARIOS TAB ═══ */}
             {tab === 'usuarios' && (
-                <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E5EA', borderRadius: '10px', overflow: 'hidden' }}>
+                <div id="usuarios-table" style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E5EA', borderRadius: '10px', overflow: 'hidden' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr style={{ backgroundColor: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
@@ -326,14 +327,14 @@ export default function Usuarios() {
                                     <tr key={u.id} style={{ borderBottom: idx < usuarios.length - 1 ? '1px solid #F0F2F5' : 'none', transition: 'background 100ms' }}
                                         onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FAFBFC'}
                                         onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                        <td style={{ padding: '14px 20px', fontSize: '13px', color: '#6B7280', fontWeight: 500 }}>{u.id}</td>
-                                        <td style={{ padding: '14px 20px', fontSize: '13px', fontWeight: 500, color: '#1A1A2E' }}>{u.username}</td>
-                                        <td style={{ padding: '14px 20px' }}>
+                                        <td data-label="#" style={{ padding: '14px 20px', fontSize: '13px', color: '#6B7280', fontWeight: 500 }}>{u.id}</td>
+                                        <td data-label="Usuario" style={{ padding: '14px 20px', fontSize: '13px', fontWeight: 500, color: '#1A1A2E' }}>{u.username}</td>
+                                        <td data-label="Rol" style={{ padding: '14px 20px' }}>
                                             <span style={{ fontSize: '11px', fontWeight: 600, padding: '4px 10px', borderRadius: '4px', backgroundColor: rc.bg, color: rc.text, textTransform: 'capitalize' }}>
                                                 {u.role}
                                             </span>
                                         </td>
-                                        <td style={{ padding: '14px 20px' }}>
+                                        <td data-label="Estado" style={{ padding: '14px 20px' }}>
                                             <span style={{
                                                 fontSize: '11px', fontWeight: 600, padding: '4px 10px', borderRadius: '4px',
                                                 backgroundColor: u.activo ? '#DCFCE7' : '#FEE2E2',
@@ -342,10 +343,10 @@ export default function Usuarios() {
                                                 {u.activo ? 'Activo' : 'Inactivo'}
                                             </span>
                                         </td>
-                                        <td style={{ padding: '14px 20px', fontSize: '13px', color: '#6B7280' }}>
+                                        <td data-label="Creado" style={{ padding: '14px 20px', fontSize: '13px', color: '#6B7280' }}>
                                             {new Date(u.createdAt).toLocaleDateString()}
                                         </td>
-                                        <td style={{ padding: '14px 20px' }}>
+                                        <td data-label="Acciones" style={{ padding: '14px 20px' }}>
                                             <div style={{ display: 'flex', gap: '8px' }}>
                                                 <button onClick={() => openEditUser(u)} title="Editar"
                                                     style={{ padding: '6px', borderRadius: '6px', border: '1px solid #D1D5DB', backgroundColor: '#fff', cursor: 'pointer', color: '#4F46E5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -423,7 +424,7 @@ export default function Usuarios() {
                                     </div>
                                 </div>
                                 {/* Permissions grid */}
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
+                                <div className="usuarios-roles-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
                                     {MODULES.map((mod, idx) => (
                                         <div key={mod.key} style={{
                                             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -454,7 +455,7 @@ export default function Usuarios() {
             {/* ═══ USER MODAL ═══ */}
             {showUserModal && (
                 <Modal isOpen={true} onClose={() => setShowUserModal(false)} title={editUserId ? 'Editar Usuario' : 'Nuevo Usuario'} size="xl">
-                    <div style={{ display: 'flex', gap: '20px' }}>
+                    <div id="user-modal-layout" style={{ display: 'flex', gap: '20px' }}>
                         {/* Left: User data */}
                         <div style={{ flex: '0 0 260px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                             <div>

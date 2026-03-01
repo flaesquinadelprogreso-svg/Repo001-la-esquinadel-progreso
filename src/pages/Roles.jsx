@@ -30,13 +30,13 @@ export default function Roles() {
     }, []);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-8px' }}>
+        <div id="roles-config-root" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div id="roles-config-header" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-8px' }}>
                 <Button icon={Plus}>Nuevo Rol</Button>
             </div>
 
             {/* Roles table */}
-            <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E5EA', borderRadius: '10px', overflow: 'hidden' }}>
+            <div id="roles-config-table" style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E5EA', borderRadius: '10px', overflow: 'hidden' }}>
                 <div style={{ padding: '16px 20px', borderBottom: '1px solid #E2E5EA' }}>
                     <h2 style={{ fontSize: '15px', fontWeight: 600, color: '#1A1A2E' }}>Roles Definidos</h2>
                 </div>

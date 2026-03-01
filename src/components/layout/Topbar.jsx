@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, Wallet, User, LogOut, Settings, ChevronDown } from 'lucide-react';
+import { Search, Bell, Wallet, User, LogOut, Settings, ChevronDown, Menu } from 'lucide-react';
 import Dropdown, { DropdownItem } from '../ui/Dropdown';
 import Badge from '../ui/Badge';
 import api from '../../api/client';
 import { clearPersistedModule } from '../../hooks/usePersistedState';
 
-export default function Topbar() {
+export default function Topbar({ isMobile, onMenuToggle }) {
     const [searchFocused, setSearchFocused] = useState(false);
     const [currentUser, setCurrentUser] = useState(
         JSON.parse(localStorage.getItem('currentUser')) || { name: 'Cargando...', role: '...' }
@@ -65,13 +65,30 @@ export default function Topbar() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '0 28px',
+            padding: isMobile ? '0 12px' : '0 28px',
             flexShrink: 0,
             width: '100%',
-            zIndex: 50
+            zIndex: 50,
+            gap: isMobile ? '8px' : undefined
         }}>
+            {/* Hamburger (mobile only) */}
+            {isMobile && (
+                <button
+                    onClick={onMenuToggle}
+                    style={{
+                        padding: '8px', borderRadius: '8px',
+                        border: 'none', background: 'transparent',
+                        cursor: 'pointer', color: '#1E3A5F',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        flexShrink: 0
+                    }}
+                >
+                    <Menu size={22} />
+                </button>
+            )}
+
             {/* Search */}
-            <div style={{ position: 'relative', width: '100%', maxWidth: searchFocused ? '480px' : '380px', transition: 'max-width 200ms ease' }}>
+            <div style={{ position: 'relative', width: '100%', maxWidth: isMobile ? '100%' : (searchFocused ? '480px' : '380px'), transition: 'max-width 200ms ease', display: isMobile ? 'none' : 'block' }}>
                 <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }} />
                 <input
                     type="text"
@@ -186,17 +203,18 @@ export default function Topbar() {
                                 {userInitials}
                             </span>
                         </div>
-                        <div style={{ textAlign: 'left' }}>
-                            <p style={{ fontSize: '12px', fontWeight: 600, color: '#1A1A2E' }}>{currentUser.name}</p>
-                            <p style={{ fontSize: '10px', color: '#9CA3AF' }}>{currentUser.role}</p>
-                        </div>
-                        <ChevronDown size={12} style={{ color: '#9CA3AF' }} />
+                        {!isMobile && (
+                            <div style={{ textAlign: 'left' }}>
+                                <p style={{ fontSize: '12px', fontWeight: 600, color: '#1A1A2E' }}>{currentUser.name}</p>
+                                <p style={{ fontSize: '10px', color: '#9CA3AF' }}>{currentUser.role}</p>
+                            </div>
+                        )}
+                        {!isMobile && <ChevronDown size={12} style={{ color: '#9CA3AF' }} />}
                     </button>
                 }>
                     {(close) => (
                         <>
-                            <DropdownItem icon={User} onClick={close}>Mi Perfil</DropdownItem>
-                            <DropdownItem icon={Settings} onClick={close}>Configuración</DropdownItem>
+                            <DropdownItem icon={Settings} onClick={() => { close(); navigate('/configuracion'); }}>Configuración</DropdownItem>
                             <div style={{ borderTop: '1px solid #E2E5EA', margin: '4px 0' }} />
                             <DropdownItem icon={LogOut} danger onClick={() => { close(); handleLogout(); }}>Cerrar Sesión</DropdownItem>
                         </>

@@ -99,8 +99,8 @@ export default function ConfiguracionCajas() {
 
     if (view === 'create' || view === 'edit') {
         return (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '800px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div id="cajas-form" style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '800px' }}>
+                <div id="cajas-form-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div>
                         <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#1A1A2E' }}>
                             {editingCaja ? 'Editar Caja' : 'Crear Nueva Caja'}
@@ -114,7 +114,7 @@ export default function ConfiguracionCajas() {
                     {/* Datos Generales */}
                     <div>
                         <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#1A1A2E', marginBottom: '16px', borderBottom: '1px solid #E2E5EA', paddingBottom: '8px' }}>1. Datos generales de tu caja</h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        <div id="cajas-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                             <Input label="Nombre de la caja *" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="Ej: Caja Principal 01" maxLength={100} />
                             <Select label="Sucursal *" value={formData.sucursal} onChange={e => setFormData({ ...formData, sucursal: e.target.value })} options={[{ value: '', label: 'Seleccione...' }, ...ubicaciones.map(u => ({ value: u.nombre, label: u.nombre }))]} />
                             <Select label="Resolución DIAN *" value={formData.resolucion} onChange={e => setFormData({ ...formData, resolucion: e.target.value })} options={[{ value: '', label: 'Seleccione...' }, ...resoluciones.map(r => ({ value: r.numero, label: `${r.prefijo || ''} - ${r.numero}` }))]} />
@@ -158,15 +158,14 @@ export default function ConfiguracionCajas() {
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div id="cajas-config-root" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div id="cajas-config-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Input placeholder="Buscar por nombre o sucursal..." style={{ width: '320px' }} />
                 <Button icon={Plus} onClick={() => initForm()}>Crear Caja</Button>
             </div>
 
-            <div style={{ backgroundColor: '#fff', border: '1px solid #E2E5EA', borderRadius: '10px', overflow: 'hidden' }}>
+            <div id="cajas-config-table" style={{ backgroundColor: '#fff', border: '1px solid #E2E5EA', borderRadius: '10px', overflow: 'hidden' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                         <tr style={{ backgroundColor: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>

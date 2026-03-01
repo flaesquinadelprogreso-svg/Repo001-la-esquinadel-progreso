@@ -5,6 +5,7 @@ import Topbar from './Topbar';
 
 export default function MainLayout() {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
     // Responsive width logic
     const sidebarWidth = sidebarCollapsed ? 72 : 250;
 
@@ -12,7 +13,11 @@ export default function MainLayout() {
     const [isMobile, setIsMobile] = React.useState(window.innerWidth < 1024);
 
     React.useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 1024);
+        const handleResize = () => {
+            const mobile = window.innerWidth < 1024;
+            setIsMobile(mobile);
+            if (!mobile) setSidebarOpen(false);
+        };
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
@@ -25,9 +30,11 @@ export default function MainLayout() {
             overflow: 'hidden'
         }}>
             <Sidebar
-                collapsed={sidebarCollapsed || isMobile}
+                collapsed={isMobile ? !sidebarOpen : sidebarCollapsed}
                 onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
                 isMobile={isMobile}
+                mobileOpen={sidebarOpen}
+                onMobileClose={() => setSidebarOpen(false)}
             />
 
             <div style={{
@@ -42,7 +49,10 @@ export default function MainLayout() {
                 overflow: 'hidden'
             }}>
                 {/* Header fijo */}
-                <Topbar />
+                <Topbar
+                    isMobile={isMobile}
+                    onMenuToggle={() => setSidebarOpen(true)}
+                />
 
                 {/* Contenido scrollable */}
                 <main style={{

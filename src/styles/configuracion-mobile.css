@@ -1,0 +1,186 @@
+/* =====================================================
+   Configuración Mobile Responsive
+   Cubre: Configuracion.jsx, Roles.jsx, ConfiguracionCajas.jsx
+   Solo se activa en pantallas <=767px.
+   Usa !important para sobreescribir los estilos inline.
+   NO afecta desktop (>=768px) en absoluto.
+   ===================================================== */
+
+@media (max-width: 767px) {
+
+    /* ══════════════════════════════════════════
+       CONFIGURACIÓN PRINCIPAL
+       ══════════════════════════════════════════ */
+
+    /* Header */
+    #config-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 12px !important;
+    }
+
+    #config-header button {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+
+    /* Tabs: scroll horizontal */
+    #config-tabs {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+        white-space: nowrap !important;
+    }
+
+    #config-tabs::-webkit-scrollbar {
+        display: none !important;
+    }
+
+    #config-tabs button {
+        padding: 12px 16px !important;
+        font-size: 12px !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* Content area padding */
+    #config-root > div:nth-child(2) > div:last-child {
+        padding: 16px !important;
+        max-width: 100% !important;
+    }
+
+    /* Empresa: grid 2col → 1col */
+    #config-empresa-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Sistema (panic reset) — stack button below text */
+    #config-root div[style*="alignItems: 'flex-start'"][style*="justifyContent: 'space-between'"] {
+        flex-direction: column !important;
+        gap: 16px !important;
+    }
+
+    #config-root div[style*="alignItems: 'flex-start'"][style*="justifyContent: 'space-between'"] button {
+        width: 100% !important;
+    }
+
+    /* Panic reset modal */
+    div[style*="minWidth: '420px'"] {
+        min-width: unset !important;
+        width: 100% !important;
+    }
+
+    /* ══════════════════════════════════════════
+       ROLES (embebido en Configuración)
+       ══════════════════════════════════════════ */
+
+    #roles-config-header {
+        justify-content: stretch !important;
+    }
+
+    #roles-config-header button {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+
+    /* Tabla de roles: scroll horizontal */
+    #roles-config-table {
+        border-radius: 8px !important;
+    }
+
+    #roles-config-table table {
+        display: block !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+    }
+
+    #roles-config-table th,
+    #roles-config-table td {
+        padding: 10px 12px !important;
+        font-size: 13px !important;
+    }
+
+    /* ══════════════════════════════════════════
+       CONFIGURACIÓN CAJAS (embebido en Configuración)
+       ══════════════════════════════════════════ */
+
+    /* List view: header */
+    #cajas-config-header {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+    }
+
+    #cajas-config-header input {
+        width: 100% !important;
+    }
+
+    #cajas-config-header button {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+
+    /* List view: tabla scroll horizontal */
+    #cajas-config-table {
+        border-radius: 8px !important;
+    }
+
+    #cajas-config-table table {
+        display: block !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+    }
+
+    #cajas-config-table th,
+    #cajas-config-table td {
+        padding: 10px 12px !important;
+        font-size: 13px !important;
+    }
+
+    /* Form view: grid 2col → 1col */
+    #cajas-form {
+        max-width: 100% !important;
+    }
+
+    #cajas-form-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 12px !important;
+    }
+
+    #cajas-form-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Form footer buttons */
+    #cajas-form > div:last-of-type[style*="justifyContent: 'flex-end'"] {
+        flex-direction: column-reverse !important;
+        gap: 8px !important;
+    }
+
+    #cajas-form > div:last-of-type[style*="justifyContent: 'flex-end'"] button {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+
+    /* ══════════════════════════════════════════
+       MODALES GENERALES (dentro de Configuración)
+       ══════════════════════════════════════════ */
+
+    div[style*="minWidth"],
+    div[style*="min-width"] {
+        min-width: unset !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    div[style*="justifyContent: 'flex-end'"][style*="gap: '12px'"] {
+        flex-direction: column-reverse !important;
+        gap: 8px !important;
+    }
+
+    div[style*="justifyContent: 'flex-end'"][style*="gap: '12px'"] button {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+}

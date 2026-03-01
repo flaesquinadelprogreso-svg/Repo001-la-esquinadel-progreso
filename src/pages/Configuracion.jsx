@@ -8,6 +8,7 @@ import WhatsApp from './WhatsApp';
 import Roles from './Roles';
 import ConfiguracionCajas from './ConfiguracionCajas';
 import api from '../api/client';
+import '../styles/configuracion-mobile.css';
 
 const baseTabs = [
     { id: 'general', label: 'General', icon: Globe },
@@ -54,8 +55,8 @@ export default function Configuracion() {
         : baseTabs;
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div id="config-root" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div id="config-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
                     <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#1A1A2E' }}>Configuración</h1>
                     <p style={{ fontSize: '13px', color: '#6B7280', marginTop: '4px' }}>Ajustes del sistema</p>
@@ -65,7 +66,7 @@ export default function Configuracion() {
 
             <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E5EA', borderRadius: '10px', overflow: 'hidden' }}>
                 {/* Tabs */}
-                <div style={{ display: 'flex', borderBottom: '2px solid #E2E5EA' }}>
+                <div id="config-tabs" style={{ display: 'flex', borderBottom: '2px solid #E2E5EA' }}>
                     {tabs.map(t => (
                         <button key={t.id} onClick={() => setTab(t.id)} style={{
                             display: 'flex', alignItems: 'center', gap: '8px',
@@ -102,7 +103,7 @@ export default function Configuracion() {
                             </div>
                             <Input label="Razón Social" defaultValue="REFRIELECTRIC" />
                             <Input label="NIT" defaultValue="900.123.456-1" />
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                            <div id="config-empresa-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                                 <Input label="Teléfono" defaultValue="601-555-1234" />
                                 <Input label="Email" defaultValue="info@elconstructor.com" />
                             </div>

@@ -1,0 +1,22 @@
+/* =====================================================
+   Global Mobile Overrides
+   Solo se activa en pantallas <=767px.
+   Usa !important para sobreescribir los estilos inline.
+   NO afecta desktop (>=768px) en absoluto.
+   ===================================================== */
+
+@media (max-width: 767px) {
+
+    /* ── Inputs y Selects globales (prevenir zoom iOS) ── */
+    input[type="text"],
+    input[type="password"],
+    input[type="email"],
+    input[type="number"],
+    input[type="tel"],
+    input[type="search"],
+    input[type="date"],
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+}

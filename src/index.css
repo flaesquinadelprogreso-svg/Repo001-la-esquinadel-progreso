@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
+@import "./styles/global-mobile.css";
 @source "../src/**/*.{js,jsx,ts,tsx}";
 
 @theme {
