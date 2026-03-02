@@ -2801,6 +2801,7 @@ app.post('/api/cuentas-cobrar', async (req, res) => {
 // Eliminar cuenta por cobrar y sus abonos/movimientos
 app.delete('/api/cuentas-cobrar/:id', async (req, res) => {
     try {
+        if (req.user.role !== 'admin') return res.status(403).json({ error: 'Solo administradores pueden eliminar cuentas' });
         const id = parseInt(req.params.id);
         await prisma.$transaction(async (tx) => {
             const cuenta = await tx.cuentaPorCobrar.findUnique({ where: { id }, include: { abonos: { include: { movimientoCaja: true } } } });
@@ -2896,6 +2897,7 @@ app.post('/api/cuentas-pagar', async (req, res) => {
 // Eliminar cuenta por pagar y sus abonos/movimientos
 app.delete('/api/cuentas-pagar/:id', async (req, res) => {
     try {
+        if (req.user.role !== 'admin') return res.status(403).json({ error: 'Solo administradores pueden eliminar cuentas' });
         const id = parseInt(req.params.id);
         await prisma.$transaction(async (tx) => {
             const cuenta = await tx.cuentaPorPagar.findUnique({ where: { id }, include: { abonos: { include: { movimientoCaja: true } } } });

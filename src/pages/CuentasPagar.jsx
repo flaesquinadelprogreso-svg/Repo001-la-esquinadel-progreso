@@ -13,6 +13,8 @@ const metodosPago = [
 ];
 
 export default function CuentasPagar() {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    const isAdmin = currentUser.role === 'admin';
     const [cuentas, setCuentas] = useState([]);
     const [proveedores, setProveedores] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -407,18 +409,20 @@ export default function CuentasPagar() {
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                         <span style={{ fontSize: '11px', color: '#6B7280' }}>Vence: {cuentaActiva.fechaVencimiento ? new Date(cuentaActiva.fechaVencimiento).toLocaleDateString() : 'N/A'}</span>
-                                        <button
-                                            onClick={() => handleEliminarCuenta(cuentaActiva.id)}
-                                            title="Eliminar cuenta"
-                                            style={{
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                width: '28px', height: '28px', borderRadius: '6px',
-                                                border: '1px solid #FCA5A5', backgroundColor: '#FEF2F2',
-                                                cursor: 'pointer', transition: 'all 0.15s'
-                                            }}
-                                        >
-                                            <Trash2 size={14} color="#DC2626" />
-                                        </button>
+                                        {isAdmin && (
+                                            <button
+                                                onClick={() => handleEliminarCuenta(cuentaActiva.id)}
+                                                title="Eliminar cuenta"
+                                                style={{
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    width: '28px', height: '28px', borderRadius: '6px',
+                                                    border: '1px solid #FCA5A5', backgroundColor: '#FEF2F2',
+                                                    cursor: 'pointer', transition: 'all 0.15s'
+                                                }}
+                                            >
+                                                <Trash2 size={14} color="#DC2626" />
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
 
