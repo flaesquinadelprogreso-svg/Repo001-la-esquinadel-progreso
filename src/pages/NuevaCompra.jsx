@@ -43,6 +43,11 @@ export default function NuevaCompra() {
     const [cuentaId, setCuentaId] = usePersistedState(isEditing ? null : 'compra_cuentaId', '');
     const [isCajaOpen, setIsCajaOpen] = useState(true);
 
+    // Quick product creation modal
+    const [showQuickProduct, setShowQuickProduct] = useState(false);
+    const [quickProductRow, setQuickProductRow] = useState(null);
+    const [quickProduct, setQuickProduct] = useState({ nombre: '', codigo: '', costo: '', precio: '' });
+
     useEffect(() => {
         // Fetch Proveedores
         api.get('/proveedores')
@@ -223,6 +228,32 @@ export default function NuevaCompra() {
             }
         } catch (error) {
             alert(error?.response?.data?.error || 'Error al crear proveedor');
+        }
+    };
+
+    const handleQuickProductSave = async () => {
+        if (!quickProduct.nombre || !quickProduct.codigo) {
+            return alert('Nombre y código son requeridos');
+        }
+        try {
+            const res = await api.post('/productos', {
+                nombre: quickProduct.nombre,
+                codigo: quickProduct.codigo,
+                costo: parseInt(quickProduct.costo) || 0,
+                precio: parseInt(quickProduct.precio) || 0,
+                stockMinimo: 5
+            });
+            if (res.data) {
+                setProductos(prev => [...prev, res.data]);
+                if (quickProductRow) {
+                    handleItemChange(quickProductRow, 'productoId', res.data.id);
+                    handleItemChange(quickProductRow, 'showProductoDropdown', false);
+                }
+                setShowQuickProduct(false);
+                setQuickProduct({ nombre: '', codigo: '', costo: '', precio: '' });
+            }
+        } catch (error) {
+            alert(error?.response?.data?.error || 'Error al crear producto');
         }
     };
 
@@ -589,7 +620,8 @@ export default function NuevaCompra() {
                                     <td style={{ padding: '8px', color: '#6B7280' }}>{index + 1}</td>
                                     <td style={{ padding: '4px', position: 'relative' }}>
                                         {item.tipoItem === 'Producto' ? (
-                                            <div style={{ position: 'relative' }}>
+                                            <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                                                <div style={{ position: 'relative', flex: 1 }}>
                                                 <input
                                                     type="text"
                                                     placeholder="Buscar producto..."
@@ -618,6 +650,23 @@ export default function NuevaCompra() {
                                                         ))}
                                                     </div>
                                                 )}
+                                                </div>
+                                                <button
+                                                    onClick={() => {
+                                                        setQuickProductRow(item.id);
+                                                        setQuickProduct({ nombre: item.productoSearch || '', codigo: '', costo: '', precio: '' });
+                                                        setShowQuickProduct(true);
+                                                    }}
+                                                    title="Crear producto rápido"
+                                                    style={{
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                        width: '26px', height: '26px', borderRadius: '4px', flexShrink: 0,
+                                                        border: '1px solid #D1D5DB', backgroundColor: '#F9FAFB',
+                                                        cursor: 'pointer', fontSize: '14px', fontWeight: 700, color: '#1E3A5F'
+                                                    }}
+                                                >
+                                                    <Plus size={14} />
+                                                </button>
                                             </div>
                                         ) : (
                                             <input
@@ -756,6 +805,34 @@ export default function NuevaCompra() {
                     <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
                         <Button variant="secondary" onClick={() => setShowNewProveedor(false)}>Cancelar</Button>
                         <Button onClick={handleCreateProveedor}>Crear Proveedor</Button>
+                    </div>
+                </div>
+            </Modal>
+
+            {/* Modal Producto Rápido */}
+            <Modal isOpen={showQuickProduct} onClose={() => setShowQuickProduct(false)} title="Producto Rápido">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minWidth: '400px' }}>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Nombre *</label>
+                        <input type="text" value={quickProduct.nombre} onChange={e => setQuickProduct(prev => ({ ...prev, nombre: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="Nombre del producto" />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Código *</label>
+                        <input type="text" value={quickProduct.codigo} onChange={e => setQuickProduct(prev => ({ ...prev, codigo: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="Código del producto" />
+                    </div>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                        <div style={{ flex: 1 }}>
+                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Costo</label>
+                            <input type="number" value={quickProduct.costo} onChange={e => setQuickProduct(prev => ({ ...prev, costo: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="0" />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Precio Venta</label>
+                            <input type="number" value={quickProduct.precio} onChange={e => setQuickProduct(prev => ({ ...prev, precio: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="0" />
+                        </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
+                        <Button variant="secondary" onClick={() => setShowQuickProduct(false)}>Cancelar</Button>
+                        <Button onClick={handleQuickProductSave}>Crear</Button>
                     </div>
                 </div>
             </Modal>
