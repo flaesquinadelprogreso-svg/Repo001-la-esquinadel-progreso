@@ -2798,6 +2798,29 @@ app.post('/api/cuentas-cobrar', async (req, res) => {
     }
 });
 
+// Eliminar cuenta por cobrar y sus abonos/movimientos
+app.delete('/api/cuentas-cobrar/:id', async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        await prisma.$transaction(async (tx) => {
+            const cuenta = await tx.cuentaPorCobrar.findUnique({ where: { id }, include: { abonos: { include: { movimientoCaja: true } } } });
+            if (!cuenta) throw new Error('Cuenta no encontrada');
+            // Revertir movimientos de caja de los abonos
+            for (const abono of cuenta.abonos) {
+                if (abono.movimientoCaja) {
+                    await tx.movimientoCaja.delete({ where: { id: abono.movimientoCaja.id } });
+                }
+            }
+            // Cascade elimina abonos automáticamente
+            await tx.cuentaPorCobrar.delete({ where: { id } });
+        });
+        res.json({ success: true, message: 'Cuenta por cobrar eliminada' });
+    } catch (error) {
+        logger.error('Error al eliminar cuenta por cobrar:', error);
+        res.status(400).json({ error: error.message || 'Error al eliminar cuenta' });
+    }
+});
+
 app.get('/api/cuentas-pagar', async (req, res) => {
     try {
         const cuentas = await prisma.cuentaPorPagar.findMany({
@@ -2867,6 +2890,29 @@ app.post('/api/cuentas-pagar', async (req, res) => {
     } catch (error) {
         logger.error('Error al crear cuenta por pagar:', error);
         res.status(500).json({ error: 'Error al crear cuenta por pagar' });
+    }
+});
+
+// Eliminar cuenta por pagar y sus abonos/movimientos
+app.delete('/api/cuentas-pagar/:id', async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        await prisma.$transaction(async (tx) => {
+            const cuenta = await tx.cuentaPorPagar.findUnique({ where: { id }, include: { abonos: { include: { movimientoCaja: true } } } });
+            if (!cuenta) throw new Error('Cuenta no encontrada');
+            // Revertir movimientos de caja de los abonos
+            for (const abono of cuenta.abonos) {
+                if (abono.movimientoCaja) {
+                    await tx.movimientoCaja.delete({ where: { id: abono.movimientoCaja.id } });
+                }
+            }
+            // Cascade elimina abonos automáticamente
+            await tx.cuentaPorPagar.delete({ where: { id } });
+        });
+        res.json({ success: true, message: 'Cuenta por pagar eliminada' });
+    } catch (error) {
+        logger.error('Error al eliminar cuenta por pagar:', error);
+        res.status(400).json({ error: error.message || 'Error al eliminar cuenta' });
     }
 });
 

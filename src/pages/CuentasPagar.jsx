@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, ChevronRight, FileText, CheckCircle, Clock, AlertTriangle, Wallet, Building, CreditCard } from 'lucide-react';
+import { Search, Plus, ChevronRight, FileText, CheckCircle, Clock, AlertTriangle, Wallet, Building, CreditCard, Trash2 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import { formatPesos } from '../utils/currency';
@@ -181,6 +181,19 @@ export default function CuentasPagar() {
             }
         }
         setPagoMonto(val);
+    };
+
+    const handleEliminarCuenta = async (cuentaId) => {
+        if (!window.confirm('¿Está seguro de eliminar esta cuenta por pagar? Se eliminarán todos los abonos y movimientos asociados. Esta acción no se puede deshacer.')) return;
+        try {
+            await api.delete(`/cuentas-pagar/${cuentaId}`);
+            setShowDetalleModal(null);
+            fetchData();
+            alert('Cuenta eliminada exitosamente');
+        } catch (error) {
+            console.error('Error deleting cuenta:', error);
+            alert(error.response?.data?.error || 'Error al eliminar cuenta');
+        }
     };
 
     return (
@@ -392,7 +405,21 @@ export default function CuentasPagar() {
                                         <span style={{ fontSize: '11px', fontWeight: 700, color: '#1E3A5F', backgroundColor: '#EBF0F7', padding: '3px 8px', borderRadius: '4px' }}>CXP-{cuentaActiva.id.toString().padStart(4, '0')}</span>
                                         <span style={{ fontSize: '14px', fontWeight: 700, color: '#1A1A2E' }}>{cuentaActiva.proveedorNombre}</span>
                                     </div>
-                                    <span style={{ fontSize: '11px', color: '#6B7280' }}>Vence: {cuentaActiva.fechaVencimiento ? new Date(cuentaActiva.fechaVencimiento).toLocaleDateString() : 'N/A'}</span>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <span style={{ fontSize: '11px', color: '#6B7280' }}>Vence: {cuentaActiva.fechaVencimiento ? new Date(cuentaActiva.fechaVencimiento).toLocaleDateString() : 'N/A'}</span>
+                                        <button
+                                            onClick={() => handleEliminarCuenta(cuentaActiva.id)}
+                                            title="Eliminar cuenta"
+                                            style={{
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                width: '28px', height: '28px', borderRadius: '6px',
+                                                border: '1px solid #FCA5A5', backgroundColor: '#FEF2F2',
+                                                cursor: 'pointer', transition: 'all 0.15s'
+                                            }}
+                                        >
+                                            <Trash2 size={14} color="#DC2626" />
+                                        </button>
+                                    </div>
                                 </div>
 
                                 {/* Summary compacto en línea */}
