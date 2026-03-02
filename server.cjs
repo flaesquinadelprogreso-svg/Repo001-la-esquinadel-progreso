@@ -830,23 +830,10 @@ app.post('/api/ventas', async (req, res) => {
             }
         }
 
-        // Validar que haya una caja abierta para pagos no-crédito
+        // Validar que al menos una caja esté abierta para poder vender
         if (metodoPago !== 'credito') {
-            const targetCuentaId = cuentaId || (pagos && pagos[0]?.cuentaId);
-            if (targetCuentaId) {
-                const targetCuenta = await prisma.cuentaFinanciera.findUnique({ where: { id: parseInt(targetCuentaId) } });
-                if (targetCuenta?.tipo === 'caja') {
-                    // Si paga a una caja, verificar que ESA caja esté abierta
-                    const cajaAbierta = await prisma.cierreCaja.findFirst({
-                        where: { cuentaId: parseInt(targetCuentaId), estado: 'abierta' }
-                    });
-                    if (!cajaAbierta) return res.status(400).json({ error: 'La caja no está abierta. Debe abrir caja antes de vender.' });
-                } else {
-                    // Si paga a banco, verificar que al menos UNA caja esté abierta
-                    const cajaAbierta = await prisma.cierreCaja.findFirst({ where: { estado: 'abierta' } });
-                    if (!cajaAbierta) return res.status(400).json({ error: 'Debe tener al menos una caja abierta para registrar ventas.' });
-                }
-            }
+            const cajaAbierta = await prisma.cierreCaja.findFirst({ where: { estado: 'abierta' } });
+            if (!cajaAbierta) return res.status(400).json({ error: 'Debe tener al menos una caja abierta para registrar ventas.' });
         }
 
         logger.info('--- NUEVA VENTA RECIBIDA ---', { itemsCount: items?.length });
