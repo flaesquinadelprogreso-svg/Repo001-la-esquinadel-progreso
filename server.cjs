@@ -2753,6 +2753,51 @@ app.get('/api/cuentas-cobrar', async (req, res) => {
     }
 });
 
+// Crear cuenta por cobrar manualmente (acumula si ya existe una abierta para el mismo cliente)
+app.post('/api/cuentas-cobrar', async (req, res) => {
+    try {
+        const { clienteId, descripcion, monto, fechaVencimiento } = req.body;
+        if (!clienteId || !monto) return res.status(400).json({ error: 'Cliente y monto son requeridos' });
+
+        const resultado = await prisma.$transaction(async (tx) => {
+            // Buscar cuenta abierta existente para este cliente (cálculo matemático, no confiar en estado)
+            const cuentasCliente = await tx.cuentaPorCobrar.findMany({
+                where: { clienteId: parseInt(clienteId) },
+                orderBy: { fechaCreacion: 'asc' }
+            });
+            const cuentaAbierta = cuentasCliente.find(c => (c.monto - (c.abonado || 0)) > 0);
+
+            if (cuentaAbierta) {
+                // Acumular en la cuenta existente
+                return await tx.cuentaPorCobrar.update({
+                    where: { id: cuentaAbierta.id },
+                    data: {
+                        monto: { increment: parseInt(monto) },
+                        descripcion: `${cuentaAbierta.descripcion} | ${descripcion || 'Cuenta manual'}`,
+                        estado: 'pendiente'
+                    }
+                });
+            } else {
+                // Crear nueva cuenta
+                return await tx.cuentaPorCobrar.create({
+                    data: {
+                        clienteId: parseInt(clienteId),
+                        descripcion: descripcion || 'Cuenta manual',
+                        monto: parseInt(monto),
+                        fechaVencimiento: fechaVencimiento || new Date().toISOString().split('T')[0],
+                        estado: 'pendiente'
+                    }
+                });
+            }
+        });
+
+        res.json(resultado);
+    } catch (error) {
+        logger.error('Error al crear cuenta por cobrar:', error);
+        res.status(500).json({ error: 'Error al crear cuenta por cobrar' });
+    }
+});
+
 app.get('/api/cuentas-pagar', async (req, res) => {
     try {
         const cuentas = await prisma.cuentaPorPagar.findMany({
@@ -2777,6 +2822,51 @@ app.get('/api/cuentas-pagar', async (req, res) => {
     } catch (error) {
         logger.error('Error al obtener cuentas por pagar:', error);
         res.status(500).json({ error: 'Error al obtener cuentas por pagar' });
+    }
+});
+
+// Crear cuenta por pagar manualmente (acumula si ya existe una abierta para el mismo proveedor)
+app.post('/api/cuentas-pagar', async (req, res) => {
+    try {
+        const { proveedorId, descripcion, monto, fechaVencimiento } = req.body;
+        if (!proveedorId || !monto) return res.status(400).json({ error: 'Proveedor y monto son requeridos' });
+
+        const resultado = await prisma.$transaction(async (tx) => {
+            // Buscar cuenta abierta existente para este proveedor (cálculo matemático, no confiar en estado)
+            const cuentasProveedor = await tx.cuentaPorPagar.findMany({
+                where: { proveedorId: parseInt(proveedorId) },
+                orderBy: { fechaCreacion: 'asc' }
+            });
+            const cuentaAbierta = cuentasProveedor.find(c => (c.monto - (c.abonado || 0)) > 0);
+
+            if (cuentaAbierta) {
+                // Acumular en la cuenta existente
+                return await tx.cuentaPorPagar.update({
+                    where: { id: cuentaAbierta.id },
+                    data: {
+                        monto: { increment: parseInt(monto) },
+                        descripcion: `${cuentaAbierta.descripcion} | ${descripcion || 'Cuenta manual'}`,
+                        estado: 'pendiente'
+                    }
+                });
+            } else {
+                // Crear nueva cuenta
+                return await tx.cuentaPorPagar.create({
+                    data: {
+                        proveedorId: parseInt(proveedorId),
+                        descripcion: descripcion || 'Cuenta manual',
+                        monto: parseInt(monto),
+                        fechaVencimiento: fechaVencimiento || new Date().toISOString().split('T')[0],
+                        estado: 'pendiente'
+                    }
+                });
+            }
+        });
+
+        res.json(resultado);
+    } catch (error) {
+        logger.error('Error al crear cuenta por pagar:', error);
+        res.status(500).json({ error: 'Error al crear cuenta por pagar' });
     }
 });
 
