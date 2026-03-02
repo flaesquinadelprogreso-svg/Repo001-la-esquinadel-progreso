@@ -19,6 +19,7 @@ export function usePayment({ cart, total, subtotal, iva, ivaTasa, cuentas, selec
     const [creditDueDate, setCreditDueDate, clearCreditDueDate] = usePersistedState('pos_creditDueDate', '');
     const [clientSearch, setClientSearch] = useState('');
     const [showClientDropdown, setShowClientDropdown] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
 
     // Sync selectedAccountId when paymentMethod changes
     useEffect(() => {
@@ -56,6 +57,8 @@ export function usePayment({ cart, total, subtotal, iva, ivaTasa, cuentas, selec
     // Confirm sale
     const confirmSale = async () => {
         if (cart.length === 0) return;
+        if (isProcessing) return;
+        setIsProcessing(true);
 
         // Validate credit payment
         const isCredit = paymentMethod === 'credito';
@@ -177,6 +180,8 @@ export function usePayment({ cart, total, subtotal, iva, ivaTasa, cuentas, selec
         } catch (error) {
             console.error('Error creating sale:', error);
             alert(error?.response?.data?.error || 'Error al procesar la venta');
+        } finally {
+            setIsProcessing(false);
         }
     };
 
@@ -199,5 +204,6 @@ export function usePayment({ cart, total, subtotal, iva, ivaTasa, cuentas, selec
         setShowClientDropdown,
         resetPayment,
         confirmSale,
+        isProcessing,
     };
 }

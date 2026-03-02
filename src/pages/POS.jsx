@@ -187,6 +187,7 @@ export default function POS() {
                     showConfirm={showConfirm}
                     setShowConfirm={setShowConfirm}
                     confirmSale={payment.confirmSale}
+                    isProcessing={payment.isProcessing}
                 />
             </div>
 

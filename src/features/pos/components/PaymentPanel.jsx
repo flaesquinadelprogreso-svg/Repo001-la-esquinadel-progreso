@@ -55,6 +55,7 @@ export default function PaymentPanel({
     showConfirm,
     setShowConfirm,
     confirmSale,
+    isProcessing,
 }) {
     const [showNewClient, setShowNewClient] = useState(false);
     const [newClient, setNewClient] = useState({ nombre: '', documento: '', telefono: '', email: '', direccion: '' });
@@ -676,7 +677,7 @@ export default function PaymentPanel({
                         </div>
                         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
                             <Button variant="secondary" onClick={() => setShowConfirm(false)}>Cancelar</Button>
-                            <Button onClick={confirmSale}>Confirmar</Button>
+                            <Button onClick={confirmSale} disabled={isProcessing}>{isProcessing ? 'Procesando...' : 'Confirmar'}</Button>
                         </div>
                     </div>
                 </Modal>
