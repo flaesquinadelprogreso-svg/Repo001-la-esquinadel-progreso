@@ -1500,7 +1500,7 @@ app.get('/api/analisis-financiero', async (req, res) => {
                 },
                 orderBy: { createdAt: 'desc' }
             }),
-            prisma.compra.findMany({ where: { estado: "recibida", ...dateFilter } })
+            prisma.compra.findMany({ where: { estado: "recibida", ...dateFilter }, include: { proveedor: true } })
         ]);
 
         const reporteContable = [];
@@ -1736,9 +1736,10 @@ app.get('/api/cuentas-financieras', async (req, res) => {
 
 app.post('/api/cuentas-financieras', async (req, res) => {
     try {
-        const { nombre, tipo, saldoInicial } = req.body;
+        const { nombre, tipo, saldoInicial, numeroCuenta } = req.body;
+        const last4 = (tipo === 'banco' && numeroCuenta) ? numeroCuenta.replace(/\D/g, '').slice(-4) : null;
         const cuenta = await prisma.cuentaFinanciera.create({
-            data: { nombre, tipo, saldoActual: parseInt(saldoInicial) || 0, activo: true }
+            data: { nombre, tipo, saldoActual: parseInt(saldoInicial) || 0, activo: true, numeroCuenta: last4 }
         });
         if (parseInt(saldoInicial) > 0) {
             await prisma.movimientoCaja.create({
@@ -2421,7 +2422,7 @@ app.post('/api/whatsapp/prueba', waLimiter, async (req, res) => {
         const jid = `${phone}@s.whatsapp.net`;
 
         const config = await prisma.configuracion.findFirst();
-        const empresa = config?.nombreEmpresa || 'Mi Empresa';
+        const empresa = config?.nombreEmpresa || 'Almacén Refrielectric The Company';
 
         const msg = `*MENSAJE DE PRUEBA*\n\n` +
             `Este es un mensaje de prueba del sistema *${empresa}*.\n\n` +
@@ -2464,7 +2465,7 @@ app.post('/api/whatsapp/enviar-recibo', waLimiter, async (req, res) => {
 
         const jid = `${phone}@s.whatsapp.net`;
         const config = await prisma.configuracion.findFirst();
-        const empresa = config?.nombreEmpresa || 'Mi Empresa';
+        const empresa = config?.nombreEmpresa || 'Almacén Refrielectric The Company';
         const fmt = (v) => '$' + Math.round(Number(v) || 0).toLocaleString('es-CO');
 
         // Sanitizar filename

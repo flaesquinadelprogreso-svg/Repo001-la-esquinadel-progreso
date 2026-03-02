@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, LogIn, AlertCircle, Lock } from 'lucide-react';
 import api from '../api/client';
-import logoSrc from '../Logo/logo.png';
+import logoSrc from '../Logo/Logo1.jpeg';
 
 export default function Login() {
     const [username, setUsername] = useState('');

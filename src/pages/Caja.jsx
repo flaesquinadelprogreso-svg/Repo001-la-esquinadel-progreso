@@ -253,14 +253,16 @@ export default function CajaBancos() {
                     <Button onClick={() => setShowMovementModal(true)}>
                         <Plus size={16} /> <span style={{ marginLeft: '6px' }}>Gasto Manual</span>
                     </Button>
-                    {cierreActivo ? (
-                        <Button variant="danger" onClick={() => setShowCierreModal(true)}>
-                            <Lock size={16} /> <span style={{ marginLeft: '6px' }}>Cierre Diario (Caja Ppal)</span>
-                        </Button>
-                    ) : (
-                        <Button variant="success" onClick={() => setShowAperturaModal(true)}>
-                            <Plus size={16} /> <span style={{ marginLeft: '6px' }}>Abrir Caja (Caja Ppal)</span>
-                        </Button>
+                    {!loading && (
+                        cierreActivo ? (
+                            <Button variant="danger" onClick={() => setShowCierreModal(true)}>
+                                <Lock size={16} /> <span style={{ marginLeft: '6px' }}>Cierre Diario (Caja Ppal)</span>
+                            </Button>
+                        ) : (
+                            <Button variant="success" onClick={() => setShowAperturaModal(true)}>
+                                <Plus size={16} /> <span style={{ marginLeft: '6px' }}>Abrir Caja (Caja Ppal)</span>
+                            </Button>
+                        )
                     )}
                 </div>
             </div>
@@ -325,9 +327,9 @@ export default function CajaBancos() {
                                             {cuenta.tipo === 'caja' ? <Wallet size={16} color="#6B7280" /> : <Landmark size={16} color="#1E3A5F" />}
                                         </div>
                                         <div>
-                                            <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#1A1A2E' }}>{cuenta.nombre}</h3>
+                                            <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#1A1A2E' }}>{cuenta.nombre}{cuenta.tipo === 'banco' && cuenta.numeroCuenta ? ` ****${cuenta.numeroCuenta}` : ''}</h3>
                                             <p style={{ fontSize: '10px', color: '#9CA3AF', textTransform: 'uppercase' }}>
-                                                {cuenta.tipo} {cuenta.numeroCuenta ? `• ${cuenta.numeroCuenta}` : ''}
+                                                {cuenta.tipo}
                                             </p>
                                         </div>
                                     </div>
@@ -625,7 +627,7 @@ export default function CajaBancos() {
                             style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px' }}
                         >
                             <option value="">Seleccione cuenta (Efectivo / Banco)...</option>
-                            {cuentas.map(c => <option key={c.id} value={c.id}>{c.nombre} ({c.tipo === 'caja' ? 'Efectivo' : 'Banco'})</option>)}
+                            {cuentas.map(c => <option key={c.id} value={c.id}>{c.nombre}{c.tipo === 'banco' && c.numeroCuenta ? ` ****${c.numeroCuenta}` : ''} ({c.tipo === 'caja' ? 'Efectivo' : 'Banco'})</option>)}
                         </select>
                     </div>
                     <div style={{ display: 'flex', gap: '12px' }}>
@@ -705,7 +707,7 @@ export default function CajaBancos() {
                                 style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px' }}
                             >
                                 <option value="">Seleccione...</option>
-                                {cuentas.map(c => <option key={`orig-${c.id}`} value={c.id}>{c.nombre} — {formatPesos(c.saldoActual)}</option>)}
+                                {cuentas.map(c => <option key={`orig-${c.id}`} value={c.id}>{c.nombre}{c.tipo === 'banco' && c.numeroCuenta ? ` ****${c.numeroCuenta}` : ''} — {formatPesos(c.saldoActual)}</option>)}
                             </select>
                             {nuevoTraslado.origenId && (() => { const c = cuentas.find(x => x.id === parseInt(nuevoTraslado.origenId)); return c ? <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '4px' }}>Disponible: <strong style={{ color: c.saldoActual >= 0 ? '#16A34A' : '#DC2626' }}>{formatPesos(c.saldoActual)}</strong></div> : null; })()}
                         </div>
@@ -720,7 +722,7 @@ export default function CajaBancos() {
                                 style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px' }}
                             >
                                 <option value="">Seleccione...</option>
-                                {cuentas.map(c => <option key={`dest-${c.id}`} value={c.id}>{c.nombre} — {formatPesos(c.saldoActual)}</option>)}
+                                {cuentas.map(c => <option key={`dest-${c.id}`} value={c.id}>{c.nombre}{c.tipo === 'banco' && c.numeroCuenta ? ` ****${c.numeroCuenta}` : ''} — {formatPesos(c.saldoActual)}</option>)}
                             </select>
                             {nuevoTraslado.destinoId && (() => { const c = cuentas.find(x => x.id === parseInt(nuevoTraslado.destinoId)); return c ? <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '4px' }}>Saldo actual: <strong>{formatPesos(c.saldoActual)}</strong></div> : null; })()}
                         </div>

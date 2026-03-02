@@ -6,7 +6,7 @@ import {
     ChevronLeft, Store, CreditCard, Banknote, Landmark, ReceiptText
 } from 'lucide-react';
 import api from '../../api/client';
-import logo from '../../Logo/logo.png';
+import logo from '../../Logo/Logo1.jpeg';
 
 const navItems = [
     { path: '/analisis-financiero', label: 'Análisis Financiero', icon: BarChart3 },

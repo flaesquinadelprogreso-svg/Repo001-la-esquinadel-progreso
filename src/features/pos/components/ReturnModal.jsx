@@ -211,7 +211,7 @@ export default function ReturnModal({
                         >
                             <option value="">Seleccione cuenta...</option>
                             {cuentas.filter(c => c.tipo === 'banco').map(c => (
-                                <option key={c.id} value={c.id}>{c.nombre}</option>
+                                <option key={c.id} value={c.id}>{c.nombre}{c.numeroCuenta ? ` ****${c.numeroCuenta}` : ''}</option>
                             ))}
                         </select>
                     </div>

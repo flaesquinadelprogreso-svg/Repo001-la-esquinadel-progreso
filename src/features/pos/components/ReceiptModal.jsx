@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Modal from '../../../components/ui/Modal';
 import Button from '../../../components/ui/Button';
 import { formatPesos } from '../../../utils/currency';
-import logoSrc from '../../../Logo/logo.png';
+import logoSrc from '../../../Logo/Logo1.jpeg';
 import api from '../../../api/client';
 import { Send, CheckCircle, AlertTriangle, Phone } from 'lucide-react';
 
@@ -113,8 +113,11 @@ export default function ReceiptModal({ sale, onClose, onDownloadPDF }) {
                                 marginBottom: '8px'
                             }}
                         />
-                        <h2 style={{ fontSize: '18px', fontWeight: 800, margin: '0 0 2px 0' }}>{config.nombreEmpresa || 'MI NEGOCIO'}</h2>
-                        {config.nit && <p style={{ fontSize: '11px', margin: 0 }}>NIT: {config.nit}</p>}
+                        <h2 style={{ fontSize: '14px', fontWeight: 800, margin: '0 0 2px 0', lineHeight: '1.3' }}>ALMACÉN REFRIELECTRIC</h2>
+                        <p style={{ fontSize: '12px', fontWeight: 700, margin: '0 0 2px 0' }}>The Company</p>
+                        <p style={{ fontSize: '11px', margin: '0 0 1px 0' }}>NIT: 1083040891-1</p>
+                        <p style={{ fontSize: '11px', margin: '0 0 1px 0' }}>Calle 9 Carrera 15 Local 1</p>
+                        <p style={{ fontSize: '11px', margin: '0 0 1px 0' }}>Tel: 3234465603</p>
                         <p style={{ fontSize: '13px', fontWeight: 700, margin: '8px 0 0 0' }}>Recibo #{sale.receiptNumber}</p>
                     </div>
 

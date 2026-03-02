@@ -174,7 +174,7 @@ export default function PaymentPanel({
                         >
                             <option value="">Seleccione cuenta...</option>
                             {cuentas.filter(c => c.tipo === 'banco').map(c => (
-                                <option key={c.id} value={c.id}>{c.nombre}</option>
+                                <option key={c.id} value={c.id}>{c.nombre}{c.numeroCuenta ? ` ****${c.numeroCuenta}` : ''}</option>
                             ))}
                         </select>
                     </div>
@@ -387,7 +387,7 @@ export default function PaymentPanel({
                                                 >
                                                     <option value="">Cuenta...</option>
                                                     {cuentas.filter(c => pago.metodo === 'efectivo' ? c.tipo === 'caja' : c.tipo === 'banco').map(c => (
-                                                        <option key={c.id} value={c.id}>{c.nombre}</option>
+                                                        <option key={c.id} value={c.id}>{c.nombre}{c.tipo === 'banco' && c.numeroCuenta ? ` ****${c.numeroCuenta}` : ''}</option>
                                                     ))}
                                                 </select>
                                             )}
