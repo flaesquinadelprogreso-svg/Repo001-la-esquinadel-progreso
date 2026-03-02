@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Plus, Trash2, Check, AlertCircle, Search, X, Wallet, Building, CreditCard, ClipboardList, Layers } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Check, AlertCircle, Search, X, Wallet, Building, CreditCard, ClipboardList, Layers, Image } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
 import Modal from '../components/ui/Modal';
-import { formatPesos } from '../utils/currency';
+import { formatPesos, handleCurrencyChange } from '../utils/currency';
 import { usePersistedState, clearPersistedModule } from '../hooks/usePersistedState';
 
 import api from '../api/client';
@@ -46,7 +46,8 @@ export default function NuevaCompra() {
     // Quick product creation modal
     const [showQuickProduct, setShowQuickProduct] = useState(false);
     const [quickProductRow, setQuickProductRow] = useState(null);
-    const [quickProduct, setQuickProduct] = useState({ nombre: '', codigo: '', costo: '', precio: '' });
+    const [editProduct, setEditProduct] = useState(null);
+    const fileInputRef = useRef(null);
 
     useEffect(() => {
         // Fetch Proveedores
@@ -231,18 +232,34 @@ export default function NuevaCompra() {
         }
     };
 
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setEditProduct(prev => ({ ...prev, imagen: reader.result }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const handleQuickProductSave = async () => {
-        if (!quickProduct.nombre || !quickProduct.codigo) {
-            return alert('Nombre y código son requeridos');
+        if (!editProduct.nombre || !editProduct.codigo) {
+            return alert('Por favor complete el nombre y código');
         }
         try {
-            const res = await api.post('/productos', {
-                nombre: quickProduct.nombre,
-                codigo: quickProduct.codigo,
-                costo: parseInt(quickProduct.costo) || 0,
-                precio: parseInt(quickProduct.precio) || 0,
-                stockMinimo: 5
-            });
+            const payload = {
+                codigo: editProduct.codigo,
+                nombre: editProduct.nombre,
+                descripcion: editProduct.descripcion,
+                precio: editProduct.precio,
+                costo: editProduct.costo,
+                stockMinimo: editProduct.stockMinimo,
+                precioMayor: editProduct.precioMayor,
+                categoria: editProduct.categoria,
+                imagen: editProduct.imagen
+            };
+            const res = await api.post('/productos', payload);
             if (res.data) {
                 setProductos(prev => [...prev, res.data]);
                 if (quickProductRow) {
@@ -250,7 +267,7 @@ export default function NuevaCompra() {
                     handleItemChange(quickProductRow, 'showProductoDropdown', false);
                 }
                 setShowQuickProduct(false);
-                setQuickProduct({ nombre: '', codigo: '', costo: '', precio: '' });
+                setEditProduct(null);
             }
         } catch (error) {
             alert(error?.response?.data?.error || 'Error al crear producto');
@@ -654,7 +671,17 @@ export default function NuevaCompra() {
                                                 <button
                                                     onClick={() => {
                                                         setQuickProductRow(item.id);
-                                                        setQuickProduct({ nombre: item.productoSearch || '', codigo: '', costo: '', precio: '' });
+                                                        setEditProduct({
+                                                            codigo: '',
+                                                            nombre: item.productoSearch || '',
+                                                            descripcion: '',
+                                                            precio: 0,
+                                                            costo: 0,
+                                                            stockMinimo: 5,
+                                                            precioMayor: null,
+                                                            categoria: '',
+                                                            imagen: null
+                                                        });
                                                         setShowQuickProduct(true);
                                                     }}
                                                     title="Crear producto rápido"
@@ -809,33 +836,176 @@ export default function NuevaCompra() {
                 </div>
             </Modal>
 
-            {/* Modal Producto Rápido */}
-            <Modal isOpen={showQuickProduct} onClose={() => setShowQuickProduct(false)} title="Producto Rápido">
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minWidth: '400px' }}>
-                    <div>
-                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Nombre *</label>
-                        <input type="text" value={quickProduct.nombre} onChange={e => setQuickProduct(prev => ({ ...prev, nombre: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="Nombre del producto" />
-                    </div>
-                    <div>
-                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Código *</label>
-                        <input type="text" value={quickProduct.codigo} onChange={e => setQuickProduct(prev => ({ ...prev, codigo: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="Código del producto" />
-                    </div>
-                    <div style={{ display: 'flex', gap: '12px' }}>
-                        <div style={{ flex: 1 }}>
-                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Costo</label>
-                            <input type="number" value={quickProduct.costo} onChange={e => setQuickProduct(prev => ({ ...prev, costo: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="0" />
+            {/* Modal Producto Rápido - Mismo formulario que Inventario */}
+            {showQuickProduct && editProduct && (
+                <Modal isOpen={true} onClose={() => { setShowQuickProduct(false); setEditProduct(null); }} title="Nuevo Producto" size="lg">
+                    <div style={{ padding: '4px' }}>
+                        <div id="inventario-producto-layout" style={{ display: 'grid', gridTemplateColumns: '1fr 240px', gap: '32px' }}>
+                            {/* Left Column: Form */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#6B7280', marginBottom: '6px' }}>Nombre *</label>
+                                    <input
+                                        type="text"
+                                        value={editProduct.nombre || ''}
+                                        onChange={(e) => setEditProduct(prev => ({ ...prev, nombre: e.target.value }))}
+                                        style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                    />
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#6B7280', marginBottom: '6px' }}>Código *</label>
+                                        <input
+                                            type="text"
+                                            value={editProduct.codigo || ''}
+                                            onChange={(e) => setEditProduct(prev => ({ ...prev, codigo: e.target.value }))}
+                                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#6B7280', marginBottom: '6px' }}>Categoría</label>
+                                        <input
+                                            type="text"
+                                            value={editProduct.categoria || ''}
+                                            onChange={(e) => setEditProduct(prev => ({ ...prev, categoria: e.target.value }))}
+                                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#6B7280', marginBottom: '6px' }}>Costo</label>
+                                        <input
+                                            type="text"
+                                            value={formatPesos(editProduct.costo)}
+                                            onChange={(e) => handleCurrencyChange(e.target.value, (val) => setEditProduct(prev => ({ ...prev, costo: val })))}
+                                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#6B7280', marginBottom: '6px' }}>Stock Mínimo</label>
+                                        <input
+                                            type="number"
+                                            value={editProduct.stockMinimo || ''}
+                                            onChange={(e) => setEditProduct(prev => ({ ...prev, stockMinimo: parseInt(e.target.value) || 0 }))}
+                                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#6B7280', marginBottom: '6px' }}>Precio Venta *</label>
+                                        <input
+                                            type="text"
+                                            value={formatPesos(editProduct.precio)}
+                                            onChange={(e) => handleCurrencyChange(e.target.value, (val) => setEditProduct(prev => ({ ...prev, precio: val })))}
+                                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#6B7280', marginBottom: '6px' }}>Precio Mayor</label>
+                                        <input
+                                            type="text"
+                                            placeholder="Opcional"
+                                            value={formatPesos(editProduct.precioMayor)}
+                                            onChange={(e) => handleCurrencyChange(e.target.value, (val) => setEditProduct(prev => ({ ...prev, precioMayor: val })))}
+                                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#6B7280', marginBottom: '6px' }}>Descripción</label>
+                                    <textarea
+                                        value={editProduct.descripcion || ''}
+                                        onChange={(e) => setEditProduct(prev => ({ ...prev, descripcion: e.target.value }))}
+                                        rows={2}
+                                        style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', resize: 'none', outline: 'none' }}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Right Column: Image Section */}
+                            <div style={{
+                                border: '1px dashed #E5E7EB',
+                                borderRadius: '4px',
+                                padding: '24px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: '#FAFAFB'
+                            }}>
+                                <span style={{ fontSize: '13px', fontWeight: 500, color: '#1A1A2E', marginBottom: '20px' }}>Imagen</span>
+
+                                <div style={{
+                                    width: '120px',
+                                    height: '120px',
+                                    borderRadius: '4px',
+                                    backgroundColor: '#fff',
+                                    border: '4px solid #fff',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    overflow: 'hidden',
+                                    marginBottom: '24px'
+                                }}>
+                                    {editProduct.imagen ? (
+                                        <img src={editProduct.imagen} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    ) : (
+                                        <Image size={40} color="#9CA3AF" />
+                                    )}
+                                </div>
+
+                                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
+
+                                <button
+                                    onClick={() => fileInputRef.current?.click()}
+                                    style={{
+                                        padding: '10px 20px',
+                                        backgroundColor: '#2D4077',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        fontSize: '13px',
+                                        fontWeight: 600,
+                                        cursor: 'pointer',
+                                        width: '100%',
+                                        transition: 'background 150ms'
+                                    }}
+                                    onMouseEnter={e => e.currentTarget.style.backgroundColor = '#1E2D5A'}
+                                    onMouseLeave={e => e.currentTarget.style.backgroundColor = '#2D4077'}
+                                >
+                                    Seleccionar archivo
+                                </button>
+
+                                <p style={{ marginTop: '12px', fontSize: '11px', color: '#9CA3AF' }}>Max 5MB • JPG, PNG</p>
+
+                                {editProduct.imagen && (
+                                    <button
+                                        onClick={() => setEditProduct(prev => ({ ...prev, imagen: null }))}
+                                        style={{ marginTop: '8px', background: 'none', border: 'none', color: '#EF4444', fontSize: '12px', cursor: 'pointer', fontWeight: 500 }}
+                                    >
+                                        Eliminar imagen
+                                    </button>
+                                )}
+                            </div>
                         </div>
-                        <div style={{ flex: 1 }}>
-                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Precio Venta</label>
-                            <input type="number" value={quickProduct.precio} onChange={e => setQuickProduct(prev => ({ ...prev, precio: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="0" />
+
+                        {/* Footer */}
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '32px', paddingTop: '16px', borderTop: '1px solid #E5E7EB' }}>
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                                <Button variant="secondary" onClick={() => { setShowQuickProduct(false); setEditProduct(null); }}>Cancelar</Button>
+                                <Button onClick={handleQuickProductSave}>Guardar Cambios</Button>
+                            </div>
                         </div>
                     </div>
-                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
-                        <Button variant="secondary" onClick={() => setShowQuickProduct(false)}>Cancelar</Button>
-                        <Button onClick={handleQuickProductSave}>Crear</Button>
-                    </div>
-                </div>
-            </Modal>
+                </Modal>
+            )}
         </div>
     );
 }
