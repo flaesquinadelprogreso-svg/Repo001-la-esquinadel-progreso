@@ -33,6 +33,7 @@ export default function CajaBancos() {
     const [nuevaCuenta, setNuevaCuenta] = useState({ nombre: '', tipo: 'banco', saldoInicial: 0, bancoNombre: '', numeroCuenta: '' });
     const [nuevoMov, setNuevoMov] = useState({ tipo: 'salida', categoria: '', monto: '', cuentaId: '', descripcion: '', metodo: 'efectivo' });
     const [nuevoTraslado, setNuevoTraslado] = useState({ origenId: '', destinoId: '', monto: '', descripcion: '' });
+    const [isMovProcessing, setIsMovProcessing] = useState(false);
 
     // Navigation states
     const [viewMode, setViewMode] = useState('general'); // 'general', 'account', 'cierres'
@@ -137,6 +138,8 @@ export default function CajaBancos() {
     };
 
     const handleCreateMovement = async () => {
+        if (isMovProcessing) return;
+        setIsMovProcessing(true);
         try {
             await api.post('/movimientos-financieros', nuevoMov);
             setShowMovementModal(false);
@@ -145,6 +148,8 @@ export default function CajaBancos() {
         } catch (error) {
             alert(error.response?.data?.error || 'Error al guardar movimiento');
             console.error('Error creating movement:', error);
+        } finally {
+            setIsMovProcessing(false);
         }
     };
 
@@ -691,7 +696,7 @@ export default function CajaBancos() {
                     </div>
                     <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '10px' }}>
                         <Button variant="secondary" onClick={() => setShowMovementModal(false)}>Cancelar</Button>
-                        <Button onClick={handleCreateMovement}>Guardar Movimiento</Button>
+                        <Button onClick={handleCreateMovement} disabled={isMovProcessing}>{isMovProcessing ? 'Guardando...' : 'Guardar Movimiento'}</Button>
                     </div>
                 </div>
             </Modal >
