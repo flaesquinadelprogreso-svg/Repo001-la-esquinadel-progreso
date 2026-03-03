@@ -715,6 +715,49 @@ app.post('/api/productos/:id/transferir', async (req, res) => {
     }
 });
 
+// Entrada de stock (aumentar)
+app.post('/api/productos/:id/entrada', async (req, res) => {
+    try {
+        const { ubicacionId, cantidad } = req.body;
+        const productoId = parseInt(req.params.id);
+        if (!ubicacionId || !cantidad || cantidad <= 0) {
+            return res.status(400).json({ error: 'Ubicación y cantidad son requeridos' });
+        }
+        await prisma.stockUbicacion.upsert({
+            where: { productoId_ubicacionId: { productoId, ubicacionId: parseInt(ubicacionId) } },
+            update: { stock: { increment: parseInt(cantidad) } },
+            create: { productoId, ubicacionId: parseInt(ubicacionId), stock: parseInt(cantidad) }
+        });
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al agregar stock' });
+    }
+});
+
+// Disminuir stock
+app.post('/api/productos/:id/disminuir', async (req, res) => {
+    try {
+        const { ubicacionId, cantidad } = req.body;
+        const productoId = parseInt(req.params.id);
+        if (!ubicacionId || !cantidad || cantidad <= 0) {
+            return res.status(400).json({ error: 'Ubicación y cantidad son requeridos' });
+        }
+        const stockRecord = await prisma.stockUbicacion.findUnique({
+            where: { productoId_ubicacionId: { productoId, ubicacionId: parseInt(ubicacionId) } }
+        });
+        if (!stockRecord || stockRecord.stock < parseInt(cantidad)) {
+            return res.status(400).json({ error: 'Stock insuficiente en la ubicación seleccionada' });
+        }
+        await prisma.stockUbicacion.update({
+            where: { id: stockRecord.id },
+            data: { stock: { decrement: parseInt(cantidad) } }
+        });
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al disminuir stock' });
+    }
+});
+
 // ═══════════════════════════════════════════════════════════════
 // SERVICIOS
 // ═══════════════════════════════════════════════════════════════

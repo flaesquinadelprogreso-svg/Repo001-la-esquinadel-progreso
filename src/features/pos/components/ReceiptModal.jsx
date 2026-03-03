@@ -12,6 +12,7 @@ export default function ReceiptModal({ sale, onClose, onDownloadPDF }) {
     const [waPhone, setWaPhone] = useState('');
     const [waSending, setWaSending] = useState(false);
     const [waResult, setWaResult] = useState(null);
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
 
     useEffect(() => {
         api.get('/configuracion').then(r => {
@@ -113,11 +114,11 @@ export default function ReceiptModal({ sale, onClose, onDownloadPDF }) {
                                 marginBottom: '8px'
                             }}
                         />
-                        <h2 style={{ fontSize: '14px', fontWeight: 800, margin: '0 0 2px 0', lineHeight: '1.3' }}>ALMACÉN REFRIELECTRIC</h2>
-                        <p style={{ fontSize: '12px', fontWeight: 700, margin: '0 0 2px 0' }}>The Company</p>
-                        <p style={{ fontSize: '11px', margin: '0 0 1px 0', color: '#000', fontWeight: 600 }}>NIT: 1083040891-1</p>
-                        <p style={{ fontSize: '11px', margin: '0 0 1px 0', color: '#000', fontWeight: 600 }}>Calle 9 Carrera 15 Local 1</p>
-                        <p style={{ fontSize: '11px', margin: '0 0 1px 0', color: '#000', fontWeight: 600 }}>Tel: 3234465603</p>
+                        <h2 style={{ fontSize: '14px', fontWeight: 800, margin: '0 0 2px 0', lineHeight: '1.3' }}>SERVITEC THE COMPANY SAS</h2>
+                        <p style={{ fontSize: '11px', margin: '0 0 1px 0', color: '#000', fontWeight: 600 }}>Nit 901.923.623-8</p>
+                        <p style={{ fontSize: '11px', margin: '0 0 1px 0', color: '#000', fontWeight: 600 }}>CLL 9 CR 15 LC 1 BRR CENTRO</p>
+                        <p style={{ fontSize: '11px', margin: '0 0 1px 0', color: '#000', fontWeight: 600 }}>El Copey - Tel. (605) 3243001873</p>
+                        <p style={{ fontSize: '11px', margin: '0 0 1px 0', color: '#000', fontWeight: 600 }}>EDIERAVILA21@GMAIL.COM</p>
                         <p style={{ fontSize: '13px', fontWeight: 700, margin: '8px 0 0 0' }}>Recibo #{sale.receiptNumber}</p>
                     </div>
 
@@ -170,6 +171,9 @@ export default function ReceiptModal({ sale, onClose, onDownloadPDF }) {
                     )}
 
                     <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '11px', fontWeight: 600 }}>
+                        {currentUser.name && (
+                            <p style={{ margin: '0 0 4px 0', color: '#000' }}>Nombre del vendedor: {currentUser.name}</p>
+                        )}
                         <p style={{ margin: '0 0 4px 0' }}>¡GRACIAS POR SU COMPRA!</p>
                         <p style={{ margin: 0 }}>{new Date().toLocaleString()}</p>
                     </div>

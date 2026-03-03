@@ -645,6 +645,7 @@ export default function CajaBancos() {
                                 <option value="Arriendos">Arriendos</option>
                                 <option value="Cafeteria">Cafeteria</option>
                                 <option value="Combustible">Combustible</option>
+                                <option value="Costos de servicio">Costos de servicio</option>
                                 <option value="Dotación">Dotación</option>
                                 <option value="Drogas y botiquin">Drogas y botiquin</option>
                                 <option value="Energia">Energia</option>

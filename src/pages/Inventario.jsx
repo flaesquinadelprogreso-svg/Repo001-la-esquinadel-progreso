@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Plus, Grid3X3, List, Edit, AlertTriangle, Eye, Upload, X, Image, MapPin, ArrowRightLeft, PackagePlus, Trash2, MinusCircle, FileSpreadsheet } from 'lucide-react';
+import { Search, Plus, Grid3X3, List, Edit, AlertTriangle, Eye, Upload, X, Image, MapPin, ArrowRightLeft, PackagePlus, Trash2, MinusCircle, PlusCircle, FileSpreadsheet } from 'lucide-react';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
@@ -390,6 +390,29 @@ export default function Inventario() {
         } catch (error) {
             console.error('Error decreasing stock:', error);
             alert(error?.response?.data?.error || 'Error al disminuir stock');
+        }
+    };
+
+    // Increase stock
+    const handleIncreaseStock = async () => {
+        if (!editProduct || !editProduct.increaseLocation || !editProduct.increaseQty) {
+            alert('Por favor complete todos los campos');
+            return;
+        }
+
+        try {
+            const response = await api.post(`/productos/${editProduct.id}/entrada`, {
+                ubicacionId: parseInt(editProduct.increaseLocation),
+                cantidad: parseInt(editProduct.increaseQty)
+            });
+
+            if (response.data) {
+                fetchData();
+                setEditProduct(prev => ({ ...prev, increaseLocation: '', increaseQty: '' }));
+            }
+        } catch (error) {
+            console.error('Error adding stock:', error);
+            alert(error?.response?.data?.error || 'Error al aumentar stock');
         }
     };
 
@@ -1036,7 +1059,7 @@ export default function Inventario() {
                         {/* Tabs Bar - Only if editing product */}
                         {editProduct.id && canDisminuir && (
                             <div style={{ display: 'flex', gap: '4px', marginBottom: '24px', backgroundColor: '#F3F4F6', padding: '4px', borderRadius: '4px' }}>
-                                {['general', 'disminuir'].map(tab => (
+                                {['general', 'ajuste'].map(tab => (
                                     <button
                                         key={tab}
                                         onClick={() => setEditTab(tab)}
@@ -1053,7 +1076,7 @@ export default function Inventario() {
                                             textTransform: 'capitalize'
                                         }}
                                     >
-                                        {tab === 'general' ? 'General' : 'Disminuir'}
+                                        {tab === 'general' ? 'General' : 'Ajuste Stock'}
                                     </button>
                                 ))}
                             </div>
@@ -1218,35 +1241,77 @@ export default function Inventario() {
                             </div>
                         )}
 
-                        {/* Disminuir Tab Content */}
-                        {editTab === 'disminuir' && canDisminuir && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Ubicación</label>
-                                    <select
-                                        value={editProduct.decreaseLocation || ''}
-                                        onChange={(e) => setEditProduct(prev => ({ ...prev, decreaseLocation: e.target.value }))}
-                                        style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
-                                    >
-                                        <option value="">Seleccionar...</option>
-                                        {editProduct.stockLocations?.map((s, idx) => (
-                                            <option key={idx} value={s.ubicacionId}>{s.ubicacion} ({s.stock})</option>
-                                        ))}
-                                    </select>
+                        {/* Ajuste Stock Tab Content */}
+                        {editTab === 'ajuste' && canDisminuir && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
+                                {/* Aumentar */}
+                                <div style={{ padding: '16px', border: '1px solid #E5E7EB', borderRadius: '8px', backgroundColor: '#F9FAFB' }}>
+                                    <p style={{ fontSize: '13px', fontWeight: 700, color: '#1A1A2E', margin: '0 0 12px 0' }}>Aumentar Stock</p>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Ubicación</label>
+                                            <select
+                                                value={editProduct.increaseLocation || ''}
+                                                onChange={(e) => setEditProduct(prev => ({ ...prev, increaseLocation: e.target.value }))}
+                                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                            >
+                                                <option value="">Seleccionar...</option>
+                                                {ubicaciones.map((u) => {
+                                                    const stockActual = editProduct.stockLocations?.find(s => s.ubicacionId === u.id)?.stock || 0;
+                                                    return <option key={u.id} value={u.id}>{u.nombre} ({stockActual})</option>;
+                                                })}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Cantidad</label>
+                                            <input
+                                                type="number"
+                                                min="1"
+                                                value={editProduct.increaseQty || ''}
+                                                onChange={(e) => setEditProduct(prev => ({ ...prev, increaseQty: e.target.value }))}
+                                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                            />
+                                        </div>
+                                        <Button onClick={handleIncreaseStock} style={{ alignSelf: 'flex-start' }}>
+                                            <PlusCircle size={16} style={{ marginRight: '6px' }} />Aumentar Stock
+                                        </Button>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Cantidad a Disminuir</label>
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        value={editProduct.decreaseQty || ''}
-                                        onChange={(e) => setEditProduct(prev => ({ ...prev, decreaseQty: e.target.value }))}
-                                        style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
-                                    />
+
+                                {/* Disminuir */}
+                                <div style={{ padding: '16px', border: '1px solid #E5E7EB', borderRadius: '8px', backgroundColor: '#F9FAFB' }}>
+                                    <p style={{ fontSize: '13px', fontWeight: 700, color: '#1A1A2E', margin: '0 0 12px 0' }}>Disminuir Stock</p>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Ubicación</label>
+                                            <select
+                                                value={editProduct.decreaseLocation || ''}
+                                                onChange={(e) => setEditProduct(prev => ({ ...prev, decreaseLocation: e.target.value }))}
+                                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                            >
+                                                <option value="">Seleccionar...</option>
+                                                {editProduct.stockLocations?.map((s, idx) => (
+                                                    <option key={idx} value={s.ubicacionId}>{s.ubicacion} ({s.stock})</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Cantidad</label>
+                                            <input
+                                                type="number"
+                                                min="1"
+                                                value={editProduct.decreaseQty || ''}
+                                                onChange={(e) => setEditProduct(prev => ({ ...prev, decreaseQty: e.target.value }))}
+                                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                            />
+                                        </div>
+                                        <Button onClick={handleDecreaseStock} style={{ alignSelf: 'flex-start' }}>
+                                            <MinusCircle size={16} style={{ marginRight: '6px' }} />Disminuir Stock
+                                        </Button>
+                                    </div>
                                 </div>
-                                <Button onClick={handleDecreaseStock} style={{ alignSelf: 'flex-start' }}>
-                                    <MinusCircle size={16} style={{ marginRight: '6px' }} />Disminuir Stock
-                                </Button>
+
                             </div>
                         )}
 
