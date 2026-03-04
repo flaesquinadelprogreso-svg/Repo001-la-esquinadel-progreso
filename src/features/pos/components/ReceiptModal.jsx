@@ -119,7 +119,11 @@ export default function ReceiptModal({ sale, onClose, onDownloadPDF }) {
                         <p style={{ fontSize: '11px', margin: '0 0 1px 0', color: '#000', fontWeight: 600 }}>CLL 9 CR 15 LC 1 BRR CENTRO</p>
                         <p style={{ fontSize: '11px', margin: '0 0 1px 0', color: '#000', fontWeight: 600 }}>El Copey - Tel. (605) 3243001873</p>
                         <p style={{ fontSize: '11px', margin: '0 0 1px 0', color: '#000', fontWeight: 600 }}>EDIERAVILA21@GMAIL.COM</p>
-                        <p style={{ fontSize: '13px', fontWeight: 700, margin: '8px 0 0 0' }}>Recibo #{sale.receiptNumber}</p>
+                        <p style={{ fontSize: '14px', fontWeight: 800, margin: '8px 0 0 0', letterSpacing: '1px' }}>FACTURACIÓN</p>
+                        <p style={{ fontSize: '12px', fontWeight: 700, margin: '4px 0 0 0' }}>No. {sale.receiptNumber}</p>
+                        {sale.cliente?.nombre && (
+                            <p style={{ fontSize: '12px', fontWeight: 700, margin: '6px 0 0 0', color: '#000' }}>Cliente: {sale.cliente.nombre}</p>
+                        )}
                     </div>
 
                     <div style={{ borderTop: '1px dashed #E5E7EB', borderBottom: '1px dashed #E5E7EB', padding: '12px 0 8px 0', marginBottom: '12px' }}>

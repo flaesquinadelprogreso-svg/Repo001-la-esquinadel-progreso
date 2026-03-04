@@ -82,6 +82,131 @@ let waReconnectTimer = null;
 const WA_MAX_RECONNECTS = 3;
 const WA_AUTH_DIR = path.join(__dirname, '.baileys_auth');
 
+// --- CXC Auto-notification tracking ---
+const cxcNotificacionesEnviadas = new Set(); // Track "cuentaId-YYYY-MM-DD-tipo" to avoid duplicates
+
+async function checkCXCNotifications() {
+    if (whatsappStatus !== 'CONNECTED' || !waSock) return;
+
+    try {
+        const hoy = new Date();
+        const hoyStr = hoy.toISOString().split('T')[0];
+
+        // Check if already sent today
+        if (cxcNotificacionesEnviadas.has(hoyStr)) return;
+
+        // Get destination number (jefe/empresa)
+        const config = await prisma.configuracion.findFirst();
+        const destino = config?.whatsappDestino;
+        if (!destino) return;
+        const phone = validatePhone(destino);
+        if (!phone) return;
+        const jid = `${phone}@s.whatsapp.net`;
+
+        const empresa = config?.nombreEmpresa || 'SERVITEC THE COMPANY SAS';
+        const formatCOP = (v) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(v);
+
+        // Get date 3 days from now
+        const tresDias = new Date(hoy);
+        tresDias.setDate(tresDias.getDate() + 3);
+        const tresDiasStr = tresDias.toISOString().split('T')[0];
+
+        // Fetch all pending/vencida CXC with client data
+        const cuentas = await prisma.cuentaPorCobrar.findMany({
+            where: { estado: { in: ['pendiente', 'vencida'] } },
+            include: { cliente: true }
+        });
+
+        const proximas = []; // vencen en 1-3 días
+        const vencenHoy = []; // vencen hoy
+        const vencidas = []; // ya vencidas
+
+        for (const cuenta of cuentas) {
+            const saldo = cuenta.monto - (cuenta.abonado || 0);
+            if (saldo <= 0) continue;
+
+            const clienteNombre = cuenta.cliente?.nombre || 'Sin cliente';
+            const clienteTel = cuenta.cliente?.telefono || '';
+            const cxcId = `CXC-${cuenta.id.toString().padStart(4, '0')}`;
+            const fechaVenc = cuenta.fechaVencimiento;
+
+            const item = { cxcId, clienteNombre, clienteTel, saldo, fechaVenc, id: cuenta.id };
+
+            if (fechaVenc < hoyStr) {
+                vencidas.push(item);
+                // Mark as vencida in DB
+                if (cuenta.estado !== 'vencida') {
+                    await prisma.cuentaPorCobrar.update({
+                        where: { id: cuenta.id },
+                        data: { estado: 'vencida' }
+                    });
+                }
+            } else if (fechaVenc === hoyStr) {
+                vencenHoy.push(item);
+            } else if (fechaVenc <= tresDiasStr) {
+                const diasRestantes = Math.ceil((new Date(fechaVenc) - hoy) / (1000 * 60 * 60 * 24));
+                item.diasRestantes = diasRestantes;
+                proximas.push(item);
+            }
+        }
+
+        // If nothing to report, skip
+        if (proximas.length === 0 && vencenHoy.length === 0 && vencidas.length === 0) return;
+
+        // Build consolidated message for the boss/collector
+        let msg = `*ALERTA DE COBROS - ${empresa}*\n_${new Date().toLocaleDateString('es-CO')}_\n\n`;
+
+        if (vencidas.length > 0) {
+            const totalVencido = vencidas.reduce((s, c) => s + c.saldo, 0);
+            msg += `🔴 *VENCIDAS (${vencidas.length}):* ${formatCOP(totalVencido)}\n`;
+            msg += `────────────────\n`;
+            for (const c of vencidas) {
+                msg += `- *${c.clienteNombre}* (${c.cxcId})\n`;
+                msg += `  Saldo: ${formatCOP(c.saldo)} | Venció: ${c.fechaVenc}\n`;
+                if (c.clienteTel) msg += `  Tel: ${c.clienteTel}\n`;
+            }
+            msg += `\n`;
+        }
+
+        if (vencenHoy.length > 0) {
+            const totalHoy = vencenHoy.reduce((s, c) => s + c.saldo, 0);
+            msg += `🟡 *VENCEN HOY (${vencenHoy.length}):* ${formatCOP(totalHoy)}\n`;
+            msg += `────────────────\n`;
+            for (const c of vencenHoy) {
+                msg += `- *${c.clienteNombre}* (${c.cxcId})\n`;
+                msg += `  Saldo: ${formatCOP(c.saldo)}\n`;
+                if (c.clienteTel) msg += `  Tel: ${c.clienteTel}\n`;
+            }
+            msg += `\n`;
+        }
+
+        if (proximas.length > 0) {
+            const totalProx = proximas.reduce((s, c) => s + c.saldo, 0);
+            msg += `🟢 *PRÓXIMAS A VENCER (${proximas.length}):* ${formatCOP(totalProx)}\n`;
+            msg += `────────────────\n`;
+            for (const c of proximas) {
+                msg += `- *${c.clienteNombre}* (${c.cxcId})\n`;
+                msg += `  Saldo: ${formatCOP(c.saldo)} | Vence en ${c.diasRestantes} día${c.diasRestantes > 1 ? 's' : ''} (${c.fechaVenc})\n`;
+                if (c.clienteTel) msg += `  Tel: ${c.clienteTel}\n`;
+            }
+        }
+
+        const totalGeneral = [...vencidas, ...vencenHoy, ...proximas].reduce((s, c) => s + c.saldo, 0);
+        msg += `\n*TOTAL POR GESTIONAR: ${formatCOP(totalGeneral)}*`;
+
+        await waSock.sendMessage(jid, { text: msg });
+        cxcNotificacionesEnviadas.add(hoyStr);
+        logger.info(`CXC alerta enviada al número destino: ${vencidas.length} vencidas, ${vencenHoy.length} hoy, ${proximas.length} próximas`);
+
+        // Clean old tracking entries
+        for (const key of cxcNotificacionesEnviadas) {
+            if (key !== hoyStr) cxcNotificacionesEnviadas.delete(key);
+        }
+    } catch (error) {
+        logger.error('Error en checkCXCNotifications:', error.message);
+    }
+}
+
 // Validar número de teléfono (7-15 dígitos según E.164)
 function validatePhone(numero) {
     if (!numero) return null;
@@ -2427,6 +2552,24 @@ app.post('/api/whatsapp/notificar-vencidos', waLimiter, async (req, res) => {
     }
 });
 
+// Ejecutar manualmente el chequeo de notificaciones CXC (al WhatsApp del jefe/empresa)
+app.post('/api/whatsapp/cxc-notificar', waLimiter, async (req, res) => {
+    if (whatsappStatus !== 'CONNECTED' || !waSock) {
+        return res.status(400).json({ error: 'WhatsApp no está conectado' });
+    }
+    try {
+        // Allow manual trigger even if already sent today by clearing today's key
+        const hoyStr = new Date().toISOString().split('T')[0];
+        cxcNotificacionesEnviadas.delete(hoyStr);
+        await checkCXCNotifications();
+        const enviado = cxcNotificacionesEnviadas.has(hoyStr);
+        res.json({ success: true, message: enviado ? 'Alerta de cobros enviada al WhatsApp configurado' : 'No hay facturas próximas a vencer ni vencidas' });
+    } catch (error) {
+        logger.error('Error en CXC notificación manual:', error);
+        res.status(500).json({ error: 'Error al procesar notificaciones' });
+    }
+});
+
 // Enviar mensaje de texto libre a un número
 app.post('/api/whatsapp/enviar', waLimiter, async (req, res) => {
     if (whatsappStatus !== 'CONNECTED' || !waSock) {
@@ -2483,7 +2626,7 @@ app.post('/api/whatsapp/enviar-recibo', waLimiter, async (req, res) => {
         return res.status(400).json({ error: 'WhatsApp no está conectado' });
     }
     try {
-        const { numero, pdfBase64, filename, recibo } = req.body;
+        const { numero, pdfBase64, filename, recibo, tipo } = req.body;
         if (!numero) return res.status(400).json({ error: 'Número del cliente requerido' });
         if (!pdfBase64) return res.status(400).json({ error: 'PDF requerido' });
 
@@ -2509,10 +2652,18 @@ app.post('/api/whatsapp/enviar-recibo', waLimiter, async (req, res) => {
         // Sanitizar filename
         const safeName = (filename || 'Recibo.pdf').replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 100);
 
-        const caption = `*${empresa}* - Recibo #${recibo?.receiptNumber || ''}\n` +
-            `*Total: ${fmt(recibo?.total)}*` +
-            (recibo?.ivaTasa != null ? ` (IVA ${recibo.ivaTasa}%)` : '') +
-            `\n¡Gracias por su compra!`;
+        let caption;
+        if (tipo === 'cotizacion') {
+            caption = `*${empresa}* - Cotización ${recibo?.receiptNumber || ''}\n` +
+                `*Total: ${fmt(recibo?.total)}*` +
+                (recibo?.ivaTasa != null ? ` (IVA ${recibo.ivaTasa}%)` : '') +
+                `\nQuedamos atentos a su respuesta.`;
+        } else {
+            caption = `*${empresa}* - Recibo #${recibo?.receiptNumber || ''}\n` +
+                `*Total: ${fmt(recibo?.total)}*` +
+                (recibo?.ivaTasa != null ? ` (IVA ${recibo.ivaTasa}%)` : '') +
+                `\n¡Gracias por su compra!`;
+        }
 
         // Enviar PDF como documento
         await waSock.sendMessage(jid, {
@@ -3360,6 +3511,173 @@ app.post('/api/admin/panic-reset', async (req, res) => {
     }
 });
 
+// ═══════════════════════════════════════════════════════════════
+// COTIZACIONES
+// ═══════════════════════════════════════════════════════════════
+
+// Listar cotizaciones
+app.get('/api/cotizaciones', async (req, res) => {
+    try {
+        const cotizaciones = await prisma.cotizacion.findMany({
+            include: { cliente: true, items: true, usuario: { select: { username: true } } },
+            orderBy: { createdAt: 'desc' }
+        });
+        res.json(cotizaciones);
+    } catch (error) {
+        logger.error('Error listando cotizaciones:', error);
+        res.status(500).json({ error: 'Error al obtener cotizaciones' });
+    }
+});
+
+// Obtener cotización por ID
+app.get('/api/cotizaciones/:id', async (req, res) => {
+    try {
+        const cotizacion = await prisma.cotizacion.findUnique({
+            where: { id: parseInt(req.params.id) },
+            include: { cliente: true, items: { include: { producto: true, servicio: true } }, usuario: { select: { username: true } } }
+        });
+        if (!cotizacion) return res.status(404).json({ error: 'Cotización no encontrada' });
+        res.json(cotizacion);
+    } catch (error) {
+        logger.error('Error obteniendo cotización:', error);
+        res.status(500).json({ error: 'Error al obtener cotización' });
+    }
+});
+
+// Crear cotización
+app.post('/api/cotizaciones', async (req, res) => {
+    try {
+        const { clienteId, encabezado, condiciones, items, subtotal, descuentoTotal, iva, ivaTasa, total, validaHasta } = req.body;
+
+        if (!items || items.length === 0) {
+            return res.status(400).json({ error: 'La cotización debe tener al menos un ítem' });
+        }
+
+        const resultado = await prisma.$transaction(async (tx) => {
+            // Auto-generate numeroCotizacion
+            const lastCot = await tx.cotizacion.findFirst({ orderBy: { id: 'desc' }, select: { id: true } });
+            const nextNum = (lastCot?.id || 0) + 1;
+            const numeroCotizacion = `COT-${nextNum.toString().padStart(4, '0')}`;
+
+            const cotizacion = await tx.cotizacion.create({
+                data: {
+                    numeroCotizacion,
+                    clienteId: clienteId ? parseInt(clienteId) : null,
+                    usuarioId: req.user?.id || null,
+                    encabezado: encabezado || null,
+                    condiciones: condiciones || null,
+                    subtotal: parseInt(subtotal) || 0,
+                    descuentoTotal: parseInt(descuentoTotal) || 0,
+                    iva: parseInt(iva) || 0,
+                    ivaTasa: parseInt(ivaTasa) || 0,
+                    total: parseInt(total) || 0,
+                    validaHasta: validaHasta || null,
+                    items: {
+                        create: items.map(item => ({
+                            productoId: item.productoId ? parseInt(item.productoId) : null,
+                            servicioId: item.servicioId ? parseInt(item.servicioId) : null,
+                            nombre: item.nombre || 'Sin nombre',
+                            codigo: item.codigo || null,
+                            descripcion: item.descripcion || null,
+                            cantidad: parseInt(item.cantidad) || 1,
+                            precioUnit: parseInt(item.precioUnit) || 0,
+                            descuento: parseInt(item.descuento) || 0,
+                            subtotal: parseInt(item.subtotal) || 0
+                        }))
+                    }
+                },
+                include: { cliente: true, items: true }
+            });
+
+            return cotizacion;
+        });
+
+        res.json(resultado);
+    } catch (error) {
+        logger.error('Error creando cotización:', error);
+        res.status(500).json({ error: 'Error al crear cotización: ' + error.message });
+    }
+});
+
+// Actualizar cotización
+app.put('/api/cotizaciones/:id', async (req, res) => {
+    try {
+        const cotId = parseInt(req.params.id);
+        const { clienteId, encabezado, condiciones, items, subtotal, descuentoTotal, iva, ivaTasa, total, validaHasta } = req.body;
+
+        const resultado = await prisma.$transaction(async (tx) => {
+            // Delete old items
+            await tx.itemCotizacion.deleteMany({ where: { cotizacionId: cotId } });
+
+            const cotizacion = await tx.cotizacion.update({
+                where: { id: cotId },
+                data: {
+                    clienteId: clienteId ? parseInt(clienteId) : null,
+                    encabezado: encabezado || null,
+                    condiciones: condiciones || null,
+                    subtotal: parseInt(subtotal) || 0,
+                    descuentoTotal: parseInt(descuentoTotal) || 0,
+                    iva: parseInt(iva) || 0,
+                    ivaTasa: parseInt(ivaTasa) || 0,
+                    total: parseInt(total) || 0,
+                    validaHasta: validaHasta || null,
+                    items: {
+                        create: (items || []).map(item => ({
+                            productoId: item.productoId ? parseInt(item.productoId) : null,
+                            servicioId: item.servicioId ? parseInt(item.servicioId) : null,
+                            nombre: item.nombre || 'Sin nombre',
+                            codigo: item.codigo || null,
+                            descripcion: item.descripcion || null,
+                            cantidad: parseInt(item.cantidad) || 1,
+                            precioUnit: parseInt(item.precioUnit) || 0,
+                            descuento: parseInt(item.descuento) || 0,
+                            subtotal: parseInt(item.subtotal) || 0
+                        }))
+                    }
+                },
+                include: { cliente: true, items: true }
+            });
+
+            return cotizacion;
+        });
+
+        res.json(resultado);
+    } catch (error) {
+        logger.error('Error actualizando cotización:', error);
+        res.status(500).json({ error: 'Error al actualizar cotización: ' + error.message });
+    }
+});
+
+// Eliminar cotización
+app.delete('/api/cotizaciones/:id', async (req, res) => {
+    try {
+        await prisma.cotizacion.delete({ where: { id: parseInt(req.params.id) } });
+        res.json({ success: true });
+    } catch (error) {
+        logger.error('Error eliminando cotización:', error);
+        res.status(500).json({ error: 'Error al eliminar cotización' });
+    }
+});
+
+// Cambiar estado de cotización
+app.patch('/api/cotizaciones/:id/estado', async (req, res) => {
+    try {
+        const { estado } = req.body;
+        const validEstados = ['borrador', 'enviada', 'aceptada', 'rechazada'];
+        if (!validEstados.includes(estado)) {
+            return res.status(400).json({ error: 'Estado inválido' });
+        }
+        const cotizacion = await prisma.cotizacion.update({
+            where: { id: parseInt(req.params.id) },
+            data: { estado }
+        });
+        res.json(cotizacion);
+    } catch (error) {
+        logger.error('Error cambiando estado cotización:', error);
+        res.status(500).json({ error: 'Error al cambiar estado' });
+    }
+});
+
 // Servir archivos estáticos del Frontend (Vite build)
 app.use(express.static(path.join(__dirname, 'dist')));
 
@@ -3378,4 +3696,14 @@ app.listen(PORT, () => {
         logger.info('Sesion de WhatsApp encontrada, reconectando automaticamente...');
         startWhatsApp().catch(err => logger.error('Error en auto-reconexion WhatsApp: ' + err.message));
     }
+
+    // Programar chequeo automático de notificaciones CXC cada 4 horas
+    setInterval(() => {
+        checkCXCNotifications().catch(err => logger.error('Error en CXC auto-check:', err.message));
+    }, 4 * 60 * 60 * 1000); // 4 hours
+
+    // Primer chequeo 30 segundos después de iniciar (dar tiempo a WhatsApp de conectar)
+    setTimeout(() => {
+        checkCXCNotifications().catch(err => logger.error('Error en CXC check inicial:', err.message));
+    }, 30000);
 });

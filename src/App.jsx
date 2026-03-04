@@ -19,6 +19,8 @@ const Clientes           = lazy(() => import('./pages/Clientes'));
 const Proveedores        = lazy(() => import('./pages/Proveedores'));
 const CuentasCobrar      = lazy(() => import('./pages/CuentasCobrar'));
 const CuentasPagar       = lazy(() => import('./pages/CuentasPagar'));
+const Cotizaciones       = lazy(() => import('./pages/Cotizaciones'));
+const NuevaCotizacion    = lazy(() => import('./pages/NuevaCotizacion'));
 const Configuracion      = lazy(() => import('./pages/Configuracion'));
 const Usuarios           = lazy(() => import('./pages/Usuarios'));
 
@@ -49,6 +51,9 @@ export default function App() {
             <Route path="/compras" element={<Suspense fallback={<PageLoader />}><Compras /></Suspense>} />
             <Route path="/nueva-compra" element={<Suspense fallback={<PageLoader />}><NuevaCompra /></Suspense>} />
             <Route path="/editar-compra/:id" element={<Suspense fallback={<PageLoader />}><NuevaCompra /></Suspense>} />
+            <Route path="/cotizaciones" element={<Suspense fallback={<PageLoader />}><Cotizaciones /></Suspense>} />
+            <Route path="/nueva-cotizacion" element={<Suspense fallback={<PageLoader />}><NuevaCotizacion /></Suspense>} />
+            <Route path="/editar-cotizacion/:id" element={<Suspense fallback={<PageLoader />}><NuevaCotizacion /></Suspense>} />
             <Route path="/caja" element={<Suspense fallback={<PageLoader />}><Caja /></Suspense>} />
             <Route path="/clientes" element={<Suspense fallback={<PageLoader />}><Clientes /></Suspense>} />
             <Route path="/proveedores" element={<Suspense fallback={<PageLoader />}><Proveedores /></Suspense>} />

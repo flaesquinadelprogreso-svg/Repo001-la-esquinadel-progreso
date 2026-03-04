@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import {
     LayoutDashboard, Package, ShoppingCart, Receipt, Wallet,
     Users, Truck, MessageCircle, Shield, BarChart3, Settings,
-    ChevronLeft, Store, CreditCard, Banknote, Landmark, ReceiptText
+    ChevronLeft, Store, CreditCard, Banknote, Landmark, ReceiptText, FileText
 } from 'lucide-react';
 import api from '../../api/client';
 import logo from '../../Logo/Logo1.jpeg';
@@ -13,6 +13,7 @@ const navItems = [
     { path: '/inventario', label: 'Inventario', icon: Package },
     { path: '/pos', label: 'POS Ventas', icon: ShoppingCart },
     { path: '/historial-ventas', label: 'Historial Ventas', icon: ReceiptText },
+    { path: '/cotizaciones', label: 'Cotizaciones', icon: FileText },
     { path: '/compras', label: 'Compras', icon: Receipt },
     { path: '/caja', label: 'Caja y Bancos', icon: Landmark },
     { path: '/clientes', label: 'Clientes', icon: Users },

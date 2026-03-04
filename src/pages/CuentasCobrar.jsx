@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, ChevronRight, FileText, CheckCircle, Clock, AlertTriangle, Wallet, Building, CreditCard, MessageCircle, Trash2 } from 'lucide-react';
+import { Search, Plus, ChevronRight, FileText, CheckCircle, Clock, AlertTriangle, Wallet, Building, CreditCard, MessageCircle, Trash2, Bell } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import { formatPesos } from '../utils/currency';
@@ -209,19 +209,19 @@ export default function CuentasCobrar() {
                 <div style={{ display: 'flex', gap: '12px' }}>
                     <Button
                         variant="secondary"
-                        icon={MessageCircle}
+                        icon={Bell}
                         onClick={async () => {
-                            if (!window.confirm('Enviar resumen de cuentas por cobrar al WhatsApp configurado?')) return;
+                            if (!window.confirm('Enviar alerta de cobros al WhatsApp configurado? (vencidas, vencen hoy y próximas a vencer)')) return;
                             try {
-                                const res = await api.post('/whatsapp/notificar-vencidos');
+                                const res = await api.post('/whatsapp/cxc-notificar');
                                 const d = res.data;
-                                alert(d.message || `Enviado. Vencidas: ${d.cuentasVencidas}, Pendientes: ${d.cuentasPendientes}`);
+                                alert(d.message || 'Proceso completado');
                             } catch (err) {
-                                alert(err.response?.data?.error || 'Error: WhatsApp no conectado o sin numero destino');
+                                alert(err.response?.data?.error || 'Error: WhatsApp no conectado');
                             }
                         }}
                     >
-                        Enviar Resumen WhatsApp
+                        Alerta de Cobros
                     </Button>
                     <Button onClick={() => setShowModal(true)}><Plus size={16} style={{ marginRight: '6px' }} />Nueva Cuenta</Button>
                 </div>

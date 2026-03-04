@@ -29,6 +29,7 @@ model Cliente {
   cuentasPorCobrar CuentaPorCobrar[]
   ventas           Venta[]
   devoluciones     Devolucion[]
+  cotizaciones     Cotizacion[]
 }
 
 model Proveedor {
@@ -81,6 +82,7 @@ model Producto {
   itemsVenta       ItemVenta[]
   itemsCompra      ItemCompra[]
   itemsDevolucion  ItemDevolucion[]
+  itemsCotizacion  ItemCotizacion[]
 }
 
 model StockUbicacion {
@@ -106,7 +108,8 @@ model Servicio {
   updatedAt   DateTime @updatedAt
   
   // Relaciones
-  itemsVenta ItemVenta[]
+  itemsVenta      ItemVenta[]
+  itemsCotizacion ItemCotizacion[]
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -444,6 +447,7 @@ model Usuario {
   devoluciones    Devolucion[]     @relation("DevolucionUsuario")
   abonosCobro     AbonoCobro[]     @relation("AbonoCobroUsuario")
   abonosPago      AbonoPago[]      @relation("AbonoPagoUsuario")
+  cotizaciones    Cotizacion[]     @relation("CotizacionUsuario")
 }
 
 model Rol {
@@ -453,6 +457,50 @@ model Rol {
   descripcion String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COTIZACIONES
+// ═══════════════════════════════════════════════════════════════
+
+model Cotizacion {
+  id                Int       @id @default(autoincrement())
+  numeroCotizacion  String    @unique
+  clienteId         Int?
+  usuarioId         Int?
+  encabezado        String?
+  condiciones       String?
+  subtotal          Int       @default(0)
+  descuentoTotal    Int       @default(0)
+  iva               Int       @default(0)
+  ivaTasa           Int       @default(19)
+  total             Int       @default(0)
+  estado            String    @default("borrador") // borrador, enviada, aceptada, rechazada
+  validaHasta       String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  cliente           Cliente?  @relation(fields: [clienteId], references: [id])
+  usuario           Usuario?  @relation("CotizacionUsuario", fields: [usuarioId], references: [id])
+  items             ItemCotizacion[]
+}
+
+model ItemCotizacion {
+  id            Int     @id @default(autoincrement())
+  cotizacionId  Int
+  productoId    Int?
+  servicioId    Int?
+  nombre        String
+  codigo        String?
+  descripcion   String?
+  cantidad      Int     @default(1)
+  precioUnit    Int     @default(0)
+  descuento     Int     @default(0)
+  subtotal      Int     @default(0)
+
+  cotizacion    Cotizacion @relation(fields: [cotizacionId], references: [id], onDelete: Cascade)
+  producto      Producto?  @relation(fields: [productoId], references: [id])
+  servicio      Servicio?  @relation(fields: [servicioId], references: [id])
 }
 
 // ═══════════════════════════════════════════════════════════════
