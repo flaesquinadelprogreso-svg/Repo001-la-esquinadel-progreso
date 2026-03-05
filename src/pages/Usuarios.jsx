@@ -20,6 +20,7 @@ const MODULES = [
     ]},
     { key: 'pos', label: 'POS Ventas', desc: 'Punto de venta' },
     { key: 'historial-ventas', label: 'Historial Ventas', desc: 'Ver historial de ventas' },
+    { key: 'cotizaciones', label: 'Cotizaciones', desc: 'Crear y gestionar cotizaciones' },
     { key: 'compras', label: 'Compras', desc: 'Registro de compras y facturas' },
     { key: 'caja', label: 'Caja y Bancos', desc: 'Gestión de caja y cuentas bancarias' },
     { key: 'clientes', label: 'Clientes', desc: 'Directorio de clientes' },
