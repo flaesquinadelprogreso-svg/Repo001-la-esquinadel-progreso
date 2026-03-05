@@ -131,7 +131,10 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
     const addRow = () => setItems([...items, { ...emptyRow, id: Date.now() }]);
 
     const removeRow = (id) => {
-        if (items.length === 1) return;
+        if (items.length === 1) {
+            setItems([{ ...emptyRow, id: Date.now() }]);
+            return;
+        }
         setItems(items.filter(item => item.id !== id));
     };
 
