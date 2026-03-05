@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Plus, Trash2, Check, Search, X, Send, Download } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
-import { formatPesos, handleCurrencyChange } from '../utils/currency';
+import { formatPesos, parseCurrency } from '../utils/currency';
 import { usePersistedState, clearPersistedModule } from '../hooks/usePersistedState';
 import logoSrc from '../Logo/Logo1.jpeg';
 
@@ -31,7 +31,36 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
     // Dependencies
     const [clientes, setClientes] = useState([]);
     const [productos, setProductos] = useState([]);
+    const [servicios, setServicios] = useState([]);
     const [config, setConfig] = useState({});
+
+    // Combined catalog: productos + servicios
+    const catalogoItems = [
+        ...productos.map(p => ({ ...p, tipo: 'producto' })),
+        ...servicios.map(s => ({ ...s, tipo: 'servicio' }))
+    ];
+
+    // New client modal
+    const [showNewClient, setShowNewClient] = useState(false);
+    const [newClient, setNewClient] = useState({ nombre: '', documento: '', telefono: '', email: '', direccion: '' });
+
+    const handleCreateClient = async () => {
+        if (!newClient.nombre || !newClient.documento) {
+            return alert('Por favor complete el nombre y documento');
+        }
+        try {
+            const response = await api.post('/clientes', newClient);
+            const created = response.data;
+            setClientes(prev => [...prev, created]);
+            setClienteId(created.id);
+            setClienteSearch(created.nombre);
+            if (created.telefono) { const t = created.telefono.replace(/\D/g, ''); setWaPhone(t.startsWith('57') ? t : '57' + t); }
+            setShowNewClient(false);
+            setNewClient({ nombre: '', documento: '', telefono: '', email: '', direccion: '' });
+        } catch (error) {
+            alert(error.response?.data?.error || 'Error al crear cliente');
+        }
+    };
 
     // PDF/WhatsApp state
     const [showPreview, setShowPreview] = useState(false);
@@ -42,6 +71,7 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
     useEffect(() => {
         api.get('/clientes').then(r => setClientes(Array.isArray(r.data) ? r.data : [])).catch(console.error);
         api.get('/productos').then(r => setProductos(Array.isArray(r.data) ? r.data : [])).catch(console.error);
+        api.get('/servicios').then(r => setServicios(Array.isArray(r.data) ? r.data : [])).catch(console.error);
         api.get('/configuracion').then(r => { if (r.data) setConfig(r.data); }).catch(() => {});
         api.get('/whatsapp/status').then(r => setWaConnected(r.data?.status === 'CONNECTED')).catch(() => {});
     }, []);
@@ -64,7 +94,9 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
                     setItems(cot.items.map(item => ({
                         id: item.id,
                         productoId: item.productoId || '',
-                        productoSearch: item.producto?.nombre || item.nombre || '',
+                        servicioId: item.servicioId || '',
+                        tipo: item.servicioId ? 'servicio' : 'producto',
+                        productoSearch: item.producto?.nombre || item.servicio?.nombre || item.nombre || '',
                         showProductoDropdown: false,
                         descripcion: item.descripcion || item.nombre || '',
                         cantidad: item.cantidad,
@@ -83,6 +115,8 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
     const emptyRow = {
         id: Date.now(),
         productoId: '',
+        servicioId: '',
+        tipo: '',
         productoSearch: '',
         showProductoDropdown: false,
         descripcion: '',
@@ -106,14 +140,18 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
             if (item.id !== id) return item;
             const updated = { ...item, [field]: value };
 
-            if (field === 'productoSearch') updated.productoId = '';
+            if (field === 'productoSearch') { updated.productoId = ''; updated.servicioId = ''; updated.tipo = ''; }
 
-            if (field === 'productoId' && value) {
-                const prod = productos.find(p => p.id === parseInt(value));
-                if (prod) {
-                    updated.descripcion = prod.nombre;
-                    updated.precioUnit = prod.precio || 0;
-                    updated.productoSearch = prod.nombre;
+            if (field === 'catalogoSelect' && value) {
+                const cat = catalogoItems.find(c => `${c.tipo}-${c.id}` === value);
+                if (cat) {
+                    updated.descripcion = cat.nombre;
+                    updated.precioUnit = cat.precio || 0;
+                    updated.productoSearch = cat.nombre;
+                    updated.showProductoDropdown = false;
+                    updated.tipo = cat.tipo;
+                    if (cat.tipo === 'producto') { updated.productoId = cat.id; updated.servicioId = ''; }
+                    else { updated.servicioId = cat.id; updated.productoId = ''; }
                 }
             }
 
@@ -151,8 +189,14 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
     const [guardando, setGuardando] = useState(false);
 
     const handleGuardar = async () => {
-        if (items.length === 0 || !items.some(i => i.productoId)) {
-            return alert('Debe agregar al menos un producto');
+        if (!clienteId) {
+            return alert('Debe seleccionar un cliente');
+        }
+        if (!validaHasta) {
+            return alert('Debe indicar la fecha de validez');
+        }
+        if (items.length === 0 || !items.some(i => i.productoId || i.servicioId)) {
+            return alert('Debe agregar al menos un producto o servicio');
         }
         setGuardando(true);
         try {
@@ -166,16 +210,23 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
                 iva: Math.round(totales.iva),
                 ivaTasa: ivaTasa,
                 total: Math.round(totales.neto),
-                items: items.filter(i => i.productoId).map(i => ({
-                    productoId: parseInt(i.productoId),
-                    nombre: i.descripcion || i.productoSearch,
-                    codigo: productos.find(p => p.id === parseInt(i.productoId))?.codigo || null,
-                    descripcion: i.descripcion,
-                    cantidad: parseInt(i.cantidad) || 1,
-                    precioUnit: Math.round(parseFloat(i.precioUnit) || 0),
-                    descuento: Math.round(parseFloat(i.descuento) || 0),
-                    subtotal: Math.round(parseFloat(i.valor) || 0)
-                }))
+                items: items.filter(i => i.productoId || i.servicioId).map(i => {
+                    const catItem = catalogoItems.find(c =>
+                        (i.productoId && c.tipo === 'producto' && c.id === parseInt(i.productoId)) ||
+                        (i.servicioId && c.tipo === 'servicio' && c.id === parseInt(i.servicioId))
+                    );
+                    return {
+                        productoId: i.productoId ? parseInt(i.productoId) : null,
+                        servicioId: i.servicioId ? parseInt(i.servicioId) : null,
+                        nombre: i.descripcion || i.productoSearch,
+                        codigo: catItem?.codigo || null,
+                        descripcion: i.descripcion,
+                        cantidad: parseInt(i.cantidad) || 1,
+                        precioUnit: Math.round(parseFloat(i.precioUnit) || 0),
+                        descuento: Math.round(parseFloat(i.descuento) || 0),
+                        subtotal: Math.round(parseFloat(i.valor) || 0)
+                    };
+                })
             };
 
             if (isEditing) {
@@ -287,18 +338,19 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     {/* Cliente */}
                     <div>
-                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>Cliente</label>
-                        <div style={{ position: 'relative' }}>
-                            <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }} />
-                            <input
-                                type="text"
-                                placeholder="Buscar cliente..."
-                                value={clienteId ? (clientes.find(c => c.id === parseInt(clienteId))?.nombre || clienteSearch) : clienteSearch}
-                                onChange={e => { setClienteSearch(e.target.value); setClienteId(''); setShowClienteDropdown(e.target.value.length >= 2); }}
-                                onFocus={() => { if (clienteSearch.length >= 2) setShowClienteDropdown(true); }}
-                                onBlur={() => setTimeout(() => setShowClienteDropdown(false), 200)}
-                                style={{ width: '100%', padding: '10px 30px 10px 32px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
-                            />
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>Cliente <span style={{ color: '#EF4444' }}>*</span></label>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <div style={{ position: 'relative', flex: 1 }}>
+                                <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }} />
+                                <input
+                                    type="text"
+                                    placeholder="Buscar cliente..."
+                                    value={clienteId ? (clientes.find(c => c.id === parseInt(clienteId))?.nombre || clienteSearch) : clienteSearch}
+                                    onChange={e => { setClienteSearch(e.target.value); setClienteId(''); setShowClienteDropdown(e.target.value.length >= 2); }}
+                                    onFocus={() => { if (clienteSearch.length >= 2) setShowClienteDropdown(true); }}
+                                    onBlur={() => setTimeout(() => setShowClienteDropdown(false), 200)}
+                                    style={{ width: '100%', padding: '10px 30px 10px 32px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
+                                />
                             {clienteId && (
                                 <button onClick={() => { setClienteId(''); setClienteSearch(''); }} style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF' }}>
                                     <X size={14} />
@@ -316,14 +368,23 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
                                     ))}
                                 </div>
                             )}
+                            </div>
+                            <button
+                                onClick={() => setShowNewClient(true)}
+                                title="Nuevo Cliente"
+                                style={{ padding: '0 12px', backgroundColor: '#2563EB', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', flexShrink: 0 }}
+                            >
+                                <Plus size={18} />
+                            </button>
                         </div>
                     </div>
                     {/* Válida hasta */}
                     <div>
-                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>Válida hasta</label>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>Válida hasta <span style={{ color: '#EF4444' }}>*</span></label>
                         <input
                             type="date"
                             value={validaHasta}
+                            min={new Date().toISOString().split('T')[0]}
                             onChange={e => setValidaHasta(e.target.value)}
                             style={{ width: '100%', padding: '10px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
                         />
@@ -366,27 +427,32 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
                                     <div style={{ position: 'relative' }}>
                                         <input
                                             type="text"
-                                            placeholder="Buscar producto..."
-                                            value={item.productoId ? (productos.find(p => p.id === parseInt(item.productoId))?.nombre || item.productoSearch) : (item.productoSearch || '')}
+                                            placeholder="Buscar producto o servicio..."
+                                            value={(item.productoId || item.servicioId) ? item.productoSearch : (item.productoSearch || '')}
                                             onChange={e => handleItemChange(item.id, 'productoSearch', e.target.value)}
-                                            onFocus={() => handleItemChange(item.id, 'showProductoDropdown', true)}
+                                            onClick={() => handleItemChange(item.id, 'showProductoDropdown', true)}
                                             onBlur={() => setTimeout(() => handleItemChange(item.id, 'showProductoDropdown', false), 200)}
                                             style={{ width: '100%', padding: '6px 24px 6px 8px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
                                         />
-                                        {item.productoId && (
-                                            <button onClick={() => { handleItemChange(item.id, 'productoId', ''); handleItemChange(item.id, 'productoSearch', ''); }}
+                                        {(item.productoId || item.servicioId) && (
+                                            <button onClick={() => { handleItemChange(item.id, 'productoSearch', ''); }}
                                                 style={{ position: 'absolute', right: '4px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', padding: '2px' }}>
                                                 <X size={12} />
                                             </button>
                                         )}
-                                        {item.showProductoDropdown && !item.productoId && (
-                                            <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #D1D5DB', borderRadius: '4px', marginTop: '2px', maxHeight: '150px', overflowY: 'auto', zIndex: 30, boxShadow: '0 4px 10px rgba(0,0,0,0.15)' }}>
-                                                {productos.filter(p => !item.productoSearch || p.nombre.toLowerCase().includes((item.productoSearch || '').toLowerCase()) || (p.codigo || '').toLowerCase().includes((item.productoSearch || '').toLowerCase())).map(p => (
-                                                    <div key={p.id} onMouseDown={e => { e.preventDefault(); handleItemChange(item.id, 'productoId', p.id); handleItemChange(item.id, 'showProductoDropdown', false); }}
+                                        {item.showProductoDropdown && !item.productoId && !item.servicioId && (
+                                            <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #D1D5DB', borderRadius: '4px', marginTop: '2px', maxHeight: '200px', overflowY: 'auto', zIndex: 30, boxShadow: '0 4px 10px rgba(0,0,0,0.15)' }}>
+                                                {catalogoItems.filter(c => !item.productoSearch || c.nombre.toLowerCase().includes((item.productoSearch || '').toLowerCase()) || (c.codigo || '').toLowerCase().includes((item.productoSearch || '').toLowerCase())).map(c => (
+                                                    <div key={`${c.tipo}-${c.id}`} onMouseDown={e => { e.preventDefault(); handleItemChange(item.id, 'catalogoSelect', `${c.tipo}-${c.id}`); }}
                                                         style={{ padding: '8px 10px', cursor: 'pointer', fontSize: '12px', borderBottom: '1px solid #F3F4F6' }}
                                                         onMouseOver={e => e.target.style.backgroundColor = '#F3F4F6'} onMouseOut={e => e.target.style.backgroundColor = 'transparent'}>
-                                                        <div style={{ fontWeight: 600, color: '#111827', pointerEvents: 'none' }}>{p.nombre}</div>
-                                                        <div style={{ fontSize: '10px', color: '#6B7280', pointerEvents: 'none' }}>Código: {p.codigo || 'N/A'} • {formatPesos(p.precio)}</div>
+                                                        <div style={{ fontWeight: 600, color: '#111827', pointerEvents: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                            {c.nombre}
+                                                            <span style={{ fontSize: '9px', padding: '1px 5px', borderRadius: '3px', fontWeight: 700, backgroundColor: c.tipo === 'servicio' ? '#DBEAFE' : '#F3F4F6', color: c.tipo === 'servicio' ? '#1D4ED8' : '#6B7280' }}>
+                                                                {c.tipo === 'servicio' ? 'SERVICIO' : 'PRODUCTO'}
+                                                            </span>
+                                                        </div>
+                                                        <div style={{ fontSize: '10px', color: '#6B7280', pointerEvents: 'none' }}>Código: {c.codigo || 'N/A'} • {formatPesos(c.precio)}</div>
                                                     </div>
                                                 ))}
                                             </div>
@@ -402,7 +468,7 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
                                         style={{ width: '100%', padding: '6px 8px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '12px', textAlign: 'right', outline: 'none', boxSizing: 'border-box' }} />
                                 </td>
                                 <td style={{ padding: '4px' }}>
-                                    <input type="text" value={item.precioUnit ? formatPesos(item.precioUnit) : ''} onChange={e => { const val = handleCurrencyChange(e); handleItemChange(item.id, 'precioUnit', val); }}
+                                    <input type="text" value={item.precioUnit ? formatPesos(item.precioUnit) : ''} onChange={e => { const num = parseCurrency(e.target.value); handleItemChange(item.id, 'precioUnit', num); }}
                                         style={{ width: '100%', padding: '6px 8px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '12px', textAlign: 'right', outline: 'none', boxSizing: 'border-box' }} />
                                 </td>
                                 <td style={{ padding: '4px' }}>
@@ -542,7 +608,7 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
                                 </tr>
                             </thead>
                             <tbody>
-                                {items.filter(i => i.productoId).map((item, idx) => (
+                                {items.filter(i => i.productoId || i.servicioId).map((item, idx) => (
                                     <tr key={idx} style={{ borderBottom: '1px solid #E5E7EB' }}>
                                         <td style={{ padding: '8px' }}>{idx + 1}</td>
                                         <td style={{ padding: '8px' }}>{item.descripcion || item.productoSearch}</td>
@@ -613,6 +679,41 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
                             </>
                         )}
                         <Button variant="secondary" onClick={() => setShowPreview(false)}>Cerrar</Button>
+                    </div>
+                </div>
+            </Modal>
+
+            {/* New Client Modal */}
+            <Modal isOpen={showNewClient} onClose={() => setShowNewClient(false)} title="Nuevo Cliente">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minWidth: '400px' }}>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Nombre *</label>
+                        <input type="text" value={newClient.nombre} onChange={e => setNewClient(prev => ({ ...prev, nombre: e.target.value }))}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px', boxSizing: 'border-box' }} placeholder="Nombre completo" />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Documento *</label>
+                        <input type="text" value={newClient.documento} onChange={e => setNewClient(prev => ({ ...prev, documento: e.target.value }))}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px', boxSizing: 'border-box' }} placeholder="Número de documento" />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Teléfono</label>
+                        <input type="text" value={newClient.telefono} onChange={e => setNewClient(prev => ({ ...prev, telefono: e.target.value }))}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px', boxSizing: 'border-box' }} placeholder="Número de teléfono" />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Email</label>
+                        <input type="email" value={newClient.email} onChange={e => setNewClient(prev => ({ ...prev, email: e.target.value }))}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px', boxSizing: 'border-box' }} placeholder="correo@ejemplo.com" />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Dirección</label>
+                        <input type="text" value={newClient.direccion} onChange={e => setNewClient(prev => ({ ...prev, direccion: e.target.value }))}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px', boxSizing: 'border-box' }} placeholder="Dirección" />
+                    </div>
+                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
+                        <Button variant="secondary" onClick={() => setShowNewClient(false)}>Cancelar</Button>
+                        <Button onClick={handleCreateClient}>Crear Cliente</Button>
                     </div>
                 </div>
             </Modal>
