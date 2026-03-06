@@ -3,7 +3,7 @@ import {
     Wallet, Building, Plus, ArrowDownCircle, ArrowUpCircle,
     Clock, Search, AlertCircle, FileText, ChevronRight,
     TrendingUp, TrendingDown, Landmark, X, ArrowRightLeft,
-    Lock, CheckCircle, Trash2
+    CheckCircle, Trash2
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
@@ -20,14 +20,6 @@ export default function CajaBancos() {
     const [showMovementModal, setShowMovementModal] = useState(false);
     const [showTransferModal, setShowTransferModal] = useState(false);
 
-    // Cierre de Caja states
-    const [cierreActivo, setCierreActivo] = useState(null);
-    const [cierres, setCierres] = useState([]);
-    const [showAperturaModal, setShowAperturaModal] = useState(false);
-    const [showCierreModal, setShowCierreModal] = useState(false);
-    const [saldoInicialApertura, setSaldoInicialApertura] = useState('');
-    const [saldoRealCierre, setSaldoRealCierre] = useState('');
-    const [obsCierre, setObsCierre] = useState('');
 
     // Form states
     const [nuevaCuenta, setNuevaCuenta] = useState({ nombre: '', tipo: 'banco', saldoInicial: 0, bancoNombre: '', numeroCuenta: '' });
@@ -36,7 +28,7 @@ export default function CajaBancos() {
     const [isMovProcessing, setIsMovProcessing] = useState(false);
 
     // Navigation states
-    const [viewMode, setViewMode] = useState('general'); // 'general', 'account', 'cierres'
+    const [viewMode, setViewMode] = useState('general'); // 'general', 'account'
 
     // Filter states
     const [selectedCuentaId, setSelectedCuentaId] = useState('');
@@ -56,33 +48,10 @@ export default function CajaBancos() {
             const cuentasRes = await api.get('/cuentas-financieras');
             const cuentasData = cuentasRes.data;
 
-            // Assume the main cash register is the first one of type 'caja'
-            const cajaPrincipal = cuentasData.find(c => c.tipo === 'caja');
-            const targetCajaId = cajaPrincipal ? cajaPrincipal.id : 1;
-
-            const [movsRes, cierreHoyRes, cierresRes] = await Promise.all([
-                api.get(`/movimientos-financieros?${movParams.toString()}`),
-                api.get(`/cierres/hoy?cuentaId=${targetCajaId}`),
-                api.get('/cierres')
-            ]);
-
-            const movsData = movsRes.data;
-            const cierreHoyData = cierreHoyRes.data;
-            const cierresData = cierresRes.data;
+            const movsRes = await api.get(`/movimientos-financieros?${movParams.toString()}`);
 
             setCuentas(cuentasData);
-            setMovimientos(movsData);
-            setCierres(cierresData);
-
-            if (cierreHoyData.activo) {
-                setCierreActivo(cierreHoyData.cierre);
-            } else {
-                setCierreActivo(null);
-                // Solo pedir apertura si NO hay cierres previos en absoluto (primera vez)
-                if (viewMode === 'general' && !showAperturaModal && cierresData.length === 0) {
-                    setTimeout(() => setShowAperturaModal(true), 500);
-                }
-            }
+            setMovimientos(movsRes.data);
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
@@ -172,38 +141,6 @@ export default function CajaBancos() {
         }
     };
 
-    const handleAperturaCaja = async () => {
-        try {
-            const cajaPrincipal = cuentas.find(c => c.tipo === 'caja');
-            const targetCajaId = cajaPrincipal ? cajaPrincipal.id : 1;
-
-            await api.post('/cierres/abrir', { saldoInicial: saldoInicialApertura || 0, cuentaId: targetCajaId });
-            setShowAperturaModal(false);
-            fetchData();
-        } catch (error) {
-            alert(error.response?.data?.error || 'Error al abrir caja.');
-            console.error('Error opening register:', error);
-        }
-    };
-
-    const handleCierreCaja = async () => {
-        if (!cierreActivo) return;
-        try {
-            await api.post('/cierres/cerrar', {
-                id: cierreActivo.id,
-                saldoReal: saldoRealCierre || 0,
-                observaciones: obsCierre
-            });
-            setShowCierreModal(false);
-            setSaldoRealCierre('');
-            setObsCierre('');
-            fetchData();
-        } catch (error) {
-            alert(error.response?.data?.error || 'Error al cerrar caja.');
-            console.error('Error closing register:', error);
-        }
-    };
-
     const handleDeleteAccount = async (accountId) => {
         if (!confirm('¿Está seguro de eliminar esta cuenta? Se eliminarán los cierres asociados.')) return;
         try {
@@ -240,12 +177,6 @@ export default function CajaBancos() {
                         >
                             Resumen General
                         </button>
-                        <button
-                            onClick={() => setViewMode('cierres')}
-                            style={{ background: 'none', border: 'none', padding: 0, fontSize: '13px', fontWeight: viewMode === 'cierres' ? 600 : 400, color: viewMode === 'cierres' ? '#1E3A5F' : '#6B7280', cursor: 'pointer', borderBottom: viewMode === 'cierres' ? '2px solid #1E3A5F' : '2px solid transparent' }}
-                        >
-                            Cierres Diarios
-                        </button>
                     </div>
                 </div>
                 <div id="caja-actions" style={{ display: 'flex', gap: '10px' }}>
@@ -258,17 +189,6 @@ export default function CajaBancos() {
                     <Button onClick={() => setShowMovementModal(true)}>
                         <Plus size={16} /> <span style={{ marginLeft: '6px' }}>Gasto Manual</span>
                     </Button>
-                    {!loading && (
-                        cierreActivo ? (
-                            <Button variant="danger" onClick={() => setShowCierreModal(true)}>
-                                <Lock size={16} /> <span style={{ marginLeft: '6px' }}>Cierre Diario (Caja Ppal)</span>
-                            </Button>
-                        ) : (
-                            <Button variant="success" onClick={() => setShowAperturaModal(true)}>
-                                <Plus size={16} /> <span style={{ marginLeft: '6px' }}>Abrir Caja (Caja Ppal)</span>
-                            </Button>
-                        )
-                    )}
                 </div>
             </div>
 
@@ -393,7 +313,7 @@ export default function CajaBancos() {
             )}
 
             {/* History Table & Filters */}
-            {viewMode !== 'cierres' && (
+            {viewMode === 'general' && (
                 <div id="caja-history" style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
                     <div id="caja-filters" style={{ padding: '16px 20px', borderBottom: '1px solid #E5E7EB', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                         <h2 style={{ fontSize: '15px', fontWeight: 600, color: '#1A1A2E' }}>
@@ -501,64 +421,6 @@ export default function CajaBancos() {
                 </div>
             )}
 
-            {/* Cierres Diarios Table */}
-            {viewMode === 'cierres' && (
-                <div id="caja-cierres-history" style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
-                    <div style={{ padding: '16px 20px', borderBottom: '1px solid #E5E7EB', backgroundColor: '#F9FAFB' }}>
-                        <h2 style={{ fontSize: '15px', fontWeight: 600, color: '#1A1A2E' }}>Historial de Cierres Diarios</h2>
-                    </div>
-                    <div style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            <thead>
-                                <tr style={{ backgroundColor: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
-                                    <th style={{ padding: '12px 20px', textAlign: 'left', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Fecha</th>
-                                    <th style={{ padding: '12px 20px', textAlign: 'left', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Estado</th>
-                                    <th style={{ padding: '12px 20px', textAlign: 'right', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Saldo Inicial</th>
-                                    <th style={{ padding: '12px 20px', textAlign: 'right', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Ingresos</th>
-                                    <th style={{ padding: '12px 20px', textAlign: 'right', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Egresos</th>
-                                    <th style={{ padding: '12px 20px', textAlign: 'right', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Saldo Teórico</th>
-                                    <th style={{ padding: '12px 20px', textAlign: 'right', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Saldo Físico</th>
-                                    <th style={{ padding: '12px 20px', textAlign: 'right', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Dif.</th>
-                                    <th style={{ padding: '12px 20px', textAlign: 'left', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Operador</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {cierres.map(c => (
-                                    <tr key={c.id} style={{ borderBottom: '1px solid #F3F4F6' }}>
-                                        <td style={{ padding: '14px 20px', fontSize: '13px', color: '#1A1A2E', fontWeight: 500 }}>
-                                            {new Date(c.fechaApertura).toLocaleDateString()}
-                                            <div style={{ fontSize: '11px', color: '#9CA3AF' }}>{new Date(c.fechaApertura).toLocaleTimeString()}</div>
-                                        </td>
-                                        <td style={{ padding: '14px 20px' }}>
-                                            <span style={{
-                                                padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 600,
-                                                backgroundColor: c.estado === 'abierta' ? '#DCFCE7' : '#F3F4F6',
-                                                color: c.estado === 'abierta' ? '#16A34A' : '#6B7280'
-                                            }}>
-                                                {c.estado.toUpperCase()}
-                                            </span>
-                                        </td>
-                                        <td style={{ padding: '14px 20px', textAlign: 'right', fontSize: '13px', color: '#6B7280' }}>{formatPesos(c.saldoInicial)}</td>
-                                        <td style={{ padding: '14px 20px', textAlign: 'right', fontSize: '13px', color: '#16A34A' }}>+{formatPesos(c.totalIngresos)}</td>
-                                        <td style={{ padding: '14px 20px', textAlign: 'right', fontSize: '13px', color: '#DC2626' }}>-{formatPesos(c.totalEgresos)}</td>
-                                        <td style={{ padding: '14px 20px', textAlign: 'right', fontSize: '13px', fontWeight: 600, color: '#1E3A5F' }}>{formatPesos(c.saldoTeorico)}</td>
-                                        <td style={{ padding: '14px 20px', textAlign: 'right', fontSize: '13px', color: '#1A1A2E' }}>{c.saldoReal !== null ? formatPesos(c.saldoReal) : '-'}</td>
-                                        <td style={{ padding: '14px 20px', textAlign: 'right', fontSize: '13px', fontWeight: 600, color: c.diferencia < 0 ? '#DC2626' : c.diferencia > 0 ? '#D97706' : '#16A34A' }}>
-                                            {c.saldoReal !== null ? formatPesos(c.diferencia) : '-'}
-                                        </td>
-                                        <td style={{ padding: '14px 20px', fontSize: '13px', color: '#6B7280' }}>{c.usuario?.username || '-'}</td>
-                                    </tr>
-                                ))}
-                                {cierres.length === 0 && (
-                                    <tr>
-                                        <td colSpan="9" style={{ padding: '40px', textAlign: 'center', color: '#6B7280' }}>No hay registros de cierres de caja.</td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
 
             {/* Modal Nueva Cuenta */}
             <Modal isOpen={showAccountModal} onClose={() => setShowAccountModal(false)} title="Nueva Cuenta">
@@ -765,109 +627,6 @@ export default function CajaBancos() {
                 </div>
             </Modal >
 
-            {/* Modal Apertura de Caja */}
-            <Modal isOpen={showAperturaModal} onClose={() => {
-                if (!cierreActivo && viewMode === 'general') {
-                    // Force the user to open the cash register if they are in 'general' view and there is no active cash register.
-                    return alert("Debe establecer el Saldo Inicial para operar hoy.");
-                }
-                setShowAperturaModal(false);
-            }} title="Apertura de Caja">
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minWidth: '400px' }}>
-                    <div style={{ padding: '12px', backgroundColor: '#EFF6FF', color: '#1E3A5F', borderRadius: '6px', fontSize: '13px', display: 'flex', gap: '8px', alignItems: 'center' }}>
-                        <Lock size={16} />
-                        <div>
-                            <strong>Caja Principal</strong><br />
-                            No se ha realizado la apertura de caja para el día de hoy. Ingrese el dinero base.
-                        </div>
-                    </div>
-                    <div>
-                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Saldo Inicial (Físico en Base) *</label>
-                        <div style={{ position: 'relative' }}>
-                            <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#6B7280', fontWeight: 600, fontSize: '14px' }}>$</span>
-                            <input
-                                type="text"
-                                value={saldoInicialApertura ? parseInt(saldoInicialApertura).toLocaleString('es-CO') : ''}
-                                onChange={(e) => setSaldoInicialApertura(e.target.value.replace(/\D/g, ''))}
-                                style={{ width: '100%', padding: '10px 12px 10px 28px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
-                                placeholder="0"
-                            />
-                        </div>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
-                        <Button
-                            variant="primary"
-                            onClick={handleAperturaCaja}
-                            style={{ flex: 1, padding: '12px' }}
-                            disabled={!saldoInicialApertura}
-                        >
-                            Abir Caja y Comenzar
-                        </Button>
-                    </div>
-                </div>
-            </Modal>
-
-            {/* Modal Cierre de Caja */}
-            <Modal isOpen={showCierreModal} onClose={() => setShowCierreModal(false)} title="Cierre de Caja (Cuadre)">
-                {cierreActivo ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minWidth: '450px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px', backgroundColor: '#F9FAFB', borderRadius: '6px', border: '1px solid #E5E7EB' }}>
-                            <div>
-                                <p style={{ fontSize: '12px', color: '#6B7280', textTransform: 'uppercase', fontWeight: 600 }}>Saldo Inicial</p>
-                                <p style={{ fontSize: '15px', fontWeight: 700, color: '#1A1A2E' }}>{formatPesos(cierreActivo.saldoInicial)}</p>
-                            </div>
-                            <div style={{ textAlign: 'right' }}>
-                                <p style={{ fontSize: '12px', color: '#6B7280', textTransform: 'uppercase', fontWeight: 600 }}>Ingresos del día (Est.)</p>
-                                <p style={{ fontSize: '15px', fontWeight: 700, color: '#16A34A' }}>Calculado aut.</p>
-                            </div>
-                        </div>
-
-                        <div style={{ padding: '12px', backgroundColor: '#FFFBEB', color: '#D97706', borderRadius: '6px', fontSize: '13px', display: 'flex', gap: '8px', alignItems: 'center', border: '1px solid #FEF3C7' }}>
-                            <AlertCircle size={16} />
-                            El sistema calculará el Saldo Teórico uniendo Ventas y Salidas Automáticas en el servidor. Compare con el Saldo Real.
-                        </div>
-
-                        <div>
-                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Saldo Real (Dinero Físico Comprobado) *</label>
-                            <div style={{ position: 'relative' }}>
-                                <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#6B7280', fontWeight: 600, fontSize: '14px' }}>$</span>
-                                <input
-                                    type="text"
-                                    value={saldoRealCierre ? parseInt(saldoRealCierre).toLocaleString('es-CO') : ''}
-                                    onChange={(e) => setSaldoRealCierre(e.target.value.replace(/\D/g, ''))}
-                                    style={{ width: '100%', padding: '14px 12px 14px 28px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '20px', fontWeight: 700, color: '#1E3A5F' }}
-                                    placeholder="0"
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Observaciones (Opcional)</label>
-                            <textarea
-                                value={obsCierre}
-                                onChange={e => setObsCierre(e.target.value)}
-                                rows={3}
-                                style={{ width: '100%', padding: '10px', border: '1px solid #E5E7EB', borderRadius: '6px', resize: 'none' }}
-                                placeholder="Explicar faltantes/sobrantes si los hay..."
-                            ></textarea>
-                        </div>
-
-                        <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
-                            <Button variant="secondary" onClick={() => setShowCierreModal(false)} style={{ flex: 1 }}>Cancelar</Button>
-                            <Button
-                                variant="primary"
-                                onClick={handleCierreCaja}
-                                style={{ flex: 1, backgroundColor: '#DC2626' }}
-                            >
-                                Guardar Cierre
-                            </Button>
-                        </div>
-                    </div>
-                ) : (
-                    <div>Caja no está abierta.</div>
-                )}
-            </Modal>
         </div >
     );
 }

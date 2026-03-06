@@ -13,6 +13,14 @@ const { PrismaClient } = require('@prisma/client');
 const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 8080;
+
+// Hora y fecha en zona horaria Colombia (UTC-5)
+function horaColombia() {
+    return new Date().toLocaleTimeString('es-CO', { timeZone: 'America/Bogota', hour: '2-digit', minute: '2-digit', hour12: true });
+}
+function fechaColombia() {
+    return new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Bogota' }));
+}
 const path = require('path');
 
 // Helpers para formato en descripciones (Backend)
@@ -1184,8 +1192,8 @@ app.post('/api/ventas', async (req, res) => {
                             monto: p.monto,
                             metodo: p.metodo,
                             referencia: numeroRecibo,
-                            fecha: new Date(),
-                            hora: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', hour12: true }),
+                            fecha: fechaColombia(),
+                            hora: horaColombia(),
                             ventaId: venta.id,
                             cuentaId: targetCuentaId,
                             usuarioId: req.user?.id || null
@@ -1384,7 +1392,7 @@ app.post('/api/devoluciones-venta', async (req, res) => {
                         descripcion: `Devolución - Ref: ${ventaOriginal.numeroRecibo}${motivo ? ` - ${motivo}` : ''}`,
                         cuentaId: parseInt(cuentaId),
                         ventaId: ventaDevolucion.id,
-                        hora: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }),
+                        hora: horaColombia(),
                         usuarioId: req.user?.id || null
                     }
                 });
@@ -1415,8 +1423,8 @@ app.post('/api/devoluciones-venta', async (req, res) => {
                             cuentaPorCobrarId: cta.id,
                             monto: montoAbonar,
                             metodo: 'credito-devolucion',
-                            fecha: new Date(),
-                            hora: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }),
+                            fecha: fechaColombia(),
+                            hora: horaColombia(),
                             usuarioId: req.user?.id || null
                         }
                     });
@@ -1555,7 +1563,7 @@ app.post('/api/devoluciones', async (req, res) => {
                     data: {
                         tipo: 'salida', categoria: 'Devolución', monto: totalDevuelto, metodo: metodoReembolso,
                         referencia: numeroDevolucion, descripcion: `Reembolso devolución ${numeroDevolucion}`,
-                        fecha: new Date(), hora: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }),
+                        fecha: fechaColombia(), hora: horaColombia(),
                         cuentaId: parseInt(cuentaId), devolucionId: devolucion.id
                     }
                 });
@@ -1577,7 +1585,7 @@ app.post('/api/devoluciones', async (req, res) => {
                     await tx.abonoCobro.create({
                         data: {
                             cuentaPorCobrarId: cta.id, monto: montoAbonarAca, metodo: 'credito-devolucion',
-                            fecha: new Date(), hora: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }),
+                            fecha: fechaColombia(), hora: horaColombia(),
                             usuarioId: req.user?.id || null
                         }
                     });
@@ -1906,7 +1914,7 @@ app.post('/api/cuentas-financieras', async (req, res) => {
         });
         if (parseInt(saldoInicial) > 0) {
             await prisma.movimientoCaja.create({
-                data: { tipo: 'entrada', categoria: 'Saldo inicial', monto: parseInt(saldoInicial), metodo: 'apertura', cuentaId: cuenta.id, hora: new Date().toLocaleTimeString('es-CO'), usuarioId: req.user?.id || null }
+                data: { tipo: 'entrada', categoria: 'Saldo inicial', monto: parseInt(saldoInicial), metodo: 'apertura', cuentaId: cuenta.id, hora: horaColombia(), usuarioId: req.user?.id || null }
             });
         }
         res.json(cuenta);
@@ -1954,12 +1962,14 @@ app.get('/api/movimientos-financieros', async (req, res) => {
         if (startDate || endDate) {
             whereClause.fecha = {};
             if (startDate) {
-                // Agregar filtro desde el inicio del dia
-                whereClause.fecha.gte = new Date(startDate + 'T00:00:00');
+                // Inicio del día en hora Colombia (UTC-5)
+                whereClause.fecha.gte = new Date(startDate + 'T05:00:00.000Z');
             }
             if (endDate) {
-                // Agregar filtro hasta el final del dia
-                whereClause.fecha.lte = new Date(endDate + 'T23:59:59.999');
+                // Final del día en hora Colombia (UTC-5) = inicio del día siguiente en UTC
+                whereClause.fecha.lte = new Date(endDate + 'T05:00:00.000Z');
+                whereClause.fecha.lte.setDate(whereClause.fecha.lte.getDate() + 1);
+                whereClause.fecha.lte.setMilliseconds(whereClause.fecha.lte.getMilliseconds() - 1);
             }
         }
 
@@ -1990,7 +2000,7 @@ app.post('/api/movimientos-financieros', async (req, res) => {
             if (!cuenta) throw new Error('Cuenta financiera no encontrada');
             if (tipo === 'salida' && cuenta.saldoActual < amount) throw new Error('Saldo insuficiente');
             const mov = await tx.movimientoCaja.create({
-                data: { tipo, categoria, monto: amount, cuentaId: accId, descripcion, metodo, hora: new Date().toLocaleTimeString('es-CO'), usuarioId: req.user?.id || null }
+                data: { tipo, categoria, monto: amount, cuentaId: accId, descripcion, metodo, hora: horaColombia(), usuarioId: req.user?.id || null }
             });
             await tx.cuentaFinanciera.update({
                 where: { id: accId },
@@ -2015,7 +2025,7 @@ app.post('/api/movimientos-financieros/traslado', async (req, res) => {
             if (!origen) throw new Error('Cuenta origen no encontrada');
             if (origen.saldoActual < amount) throw new Error(`Saldo insuficiente en ${origen.nombre}. Disponible: ${origen.saldoActual}`);
 
-            const hora = new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+            const hora = horaColombia();
             await tx.cuentaFinanciera.update({ where: { id: parseInt(origenId) }, data: { saldoActual: { decrement: amount } } });
             await tx.cuentaFinanciera.update({ where: { id: parseInt(destinoId) }, data: { saldoActual: { increment: amount } } });
             await tx.movimientoCaja.create({ data: { tipo: 'salida', categoria: 'Traslado', monto: amount, metodo: 'efectivo', hora, cuentaId: parseInt(origenId), descripcion: descripcion || `Traslado a cuenta ${destinoId}`, usuarioId: req.user?.id || null } });
@@ -2039,31 +2049,8 @@ app.get('/api/cierres', async (req, res) => {
 });
 
 app.get('/api/cierres/hoy', async (req, res) => {
-    try {
-        const { cuentaId } = req.query;
-        if (!cuentaId) return res.status(400).json({ error: 'cuentaId requerido' });
-        const cId = parseInt(cuentaId);
-
-        // Buscar caja abierta sin filtro de fecha
-        let cierre = await prisma.cierreCaja.findFirst({ where: { cuentaId: cId, estado: 'abierta' } });
-
-        // Auto-recovery: si no hay caja abierta pero sí hay cierres previos,
-        // crear automáticamente una nueva apertura usando el saldoReal del último cierre.
-        // Esto garantiza que el usuario solo abre caja manualmente la PRIMERA vez.
-        if (!cierre) {
-            const lastClosed = await prisma.cierreCaja.findFirst({
-                where: { cuentaId: cId, estado: 'cerrada' },
-                orderBy: { fechaCierre: 'desc' }
-            });
-            if (lastClosed) {
-                cierre = await prisma.cierreCaja.create({
-                    data: { saldoInicial: lastClosed.saldoReal, cuentaId: cId, estado: 'abierta', usuarioId: req.user?.id || null }
-                });
-            }
-        }
-
-        res.json({ activo: !!cierre, cierre });
-    } catch (error) { res.json({ activo: false }); }
+    // La caja siempre está activa - los saldos se calculan desde los movimientos reales
+    res.json({ activo: true });
 });
 
 app.post('/api/cierres/abrir', async (req, res) => {
@@ -2083,18 +2070,7 @@ app.post('/api/cierres/abrir', async (req, res) => {
                 data: { saldoInicial: monto, cuentaId: cId, estado: 'abierta', usuarioId: req.user?.id || null }
             });
 
-            // Actualizar saldo de la cuenta financiera con el saldo inicial
-            await tx.cuentaFinanciera.update({
-                where: { id: cId },
-                data: { saldoActual: monto }
-            });
-
-            // Crear movimiento de entrada por apertura
-            if (monto > 0) {
-                await tx.movimientoCaja.create({
-                    data: { tipo: 'entrada', categoria: 'Apertura de caja', monto, metodo: 'apertura', cuentaId: cId, hora: new Date().toLocaleTimeString('es-CO'), usuarioId: req.user?.id || null }
-                });
-            }
+            // El saldo de la cuenta NO se sobreescribe - siempre refleja los movimientos reales
 
             return cierre;
         });
@@ -2112,9 +2088,9 @@ app.post('/api/cierres/cerrar', async (req, res) => {
             const cierre = await tx.cierreCaja.findUnique({ where: { id: parseInt(id) } });
             if (!cierre) throw new Error('Cierre no encontrado');
 
-            // Capturar todos los movimientos desde la apertura de caja (no solo hoy)
+            // Capturar todos los movimientos desde la apertura de caja (excluyendo el movimiento de apertura)
             const movimientos = await tx.movimientoCaja.findMany({
-                where: { fecha: { gte: cierre.fechaApertura }, cuentaId: cierre.cuentaId }
+                where: { fecha: { gte: cierre.fechaApertura }, cuentaId: cierre.cuentaId, categoria: { not: 'Apertura de caja' } }
             });
 
             let totalIngresos = 0, totalEgresos = 0;
@@ -2135,23 +2111,9 @@ app.post('/api/cierres/cerrar', async (req, res) => {
                 }
             });
 
-            // 2. Actualizar saldo de la cuenta al saldo real contado
-            await tx.cuentaFinanciera.update({
-                where: { id: cierre.cuentaId },
-                data: { saldoActual: sReal }
-            });
+            // El saldo de la cuenta NO se sobreescribe - siempre refleja los movimientos reales
 
-            // 3. Crear el nuevo periodo automáticamente (Rollover)
-            const nuevaApertura = await tx.cierreCaja.create({
-                data: {
-                    saldoInicial: sReal,
-                    cuentaId: cierre.cuentaId,
-                    estado: 'abierta',
-                    usuarioId: req.user?.id || null
-                }
-            });
-
-            return { cierreActualizado, nuevaApertura };
+            return { cierreActualizado };
         });
 
         res.json(resultado.cierreActualizado);
@@ -2381,7 +2343,7 @@ app.put('/api/compras/:id', async (req, res) => {
                         }
                     } else if (pago.cuentaId) {
                         await tx.movimientoCaja.create({
-                            data: { tipo: 'salida', categoria: 'Compra', monto: parseInt(pago.monto), metodo: pago.metodo, referencia: `Compra ${compra.id}`, fecha: new Date(), hora: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }), cuentaId: parseInt(pago.cuentaId), usuarioId: req.user?.id || null }
+                            data: { tipo: 'salida', categoria: 'Compra', monto: parseInt(pago.monto), metodo: pago.metodo, referencia: `Compra ${compra.id}`, fecha: fechaColombia(), hora: horaColombia(), cuentaId: parseInt(pago.cuentaId), usuarioId: req.user?.id || null }
                         });
                         await tx.cuentaFinanciera.update({
                             where: { id: parseInt(pago.cuentaId) },
@@ -2391,7 +2353,7 @@ app.put('/api/compras/:id', async (req, res) => {
                 }
             } else if (metodoPago !== 'credito' && cuentaId) {
                 await tx.movimientoCaja.create({
-                    data: { tipo: 'salida', categoria: 'Compra', monto: parseInt(total), metodo: metodoPago, referencia: `Compra ${compra.id}`, fecha: new Date(), hora: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }), cuentaId: parseInt(cuentaId), usuarioId: req.user?.id || null }
+                    data: { tipo: 'salida', categoria: 'Compra', monto: parseInt(total), metodo: metodoPago, referencia: `Compra ${compra.id}`, fecha: fechaColombia(), hora: horaColombia(), cuentaId: parseInt(cuentaId), usuarioId: req.user?.id || null }
                 });
                 await tx.cuentaFinanciera.update({
                     where: { id: parseInt(cuentaId) },
@@ -3172,8 +3134,8 @@ app.post('/api/clientes/:id/abono-fifo', async (req, res) => {
                         cuentaPorCobrarId: cta.id,
                         monto: montoAbonarAca,
                         metodo: metodo,
-                        fecha: new Date(),
-                        hora: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }),
+                        fecha: fechaColombia(),
+                        hora: horaColombia(),
                         usuarioId: req.user?.id || null
                     }
                 });
@@ -3197,8 +3159,8 @@ app.post('/api/clientes/:id/abono-fifo', async (req, res) => {
                     monto: amount,
                     metodo: metodo,
                     referencia: `Abono Cliente ${clienteId}`,
-                    fecha: new Date(),
-                    hora: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }),
+                    fecha: fechaColombia(),
+                    hora: horaColombia(),
                     cuentaId: accId,
                     usuarioId: req.user?.id || null
                 }
@@ -3259,8 +3221,8 @@ app.post('/api/proveedores/:id/abono-fifo', async (req, res) => {
                         cuentaPorPagarId: cta.id,
                         monto: montoAbonarAca,
                         metodo: metodo,
-                        fecha: new Date(),
-                        hora: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }),
+                        fecha: fechaColombia(),
+                        hora: horaColombia(),
                         usuarioId: req.user?.id || null
                     }
                 });
@@ -3284,8 +3246,8 @@ app.post('/api/proveedores/:id/abono-fifo', async (req, res) => {
                     monto: amount,
                     metodo: metodo,
                     referencia: `Abono Proveedor ${proveedorId}`,
-                    fecha: new Date(),
-                    hora: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }),
+                    fecha: fechaColombia(),
+                    hora: horaColombia(),
                     cuentaId: accId,
                     usuarioId: req.user?.id || null
                 }
@@ -3381,8 +3343,8 @@ app.post('/api/compras', async (req, res) => {
                         await tx.movimientoCaja.create({
                             data: {
                                 tipo: 'salida', categoria: 'Compra', monto: parseInt(pago.monto), metodo: pago.metodo,
-                                referencia: `Compra ${compra.id}`, fecha: new Date(),
-                                hora: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }),
+                                referencia: `Compra ${compra.id}`, fecha: fechaColombia(),
+                                hora: horaColombia(),
                                 cuentaId: parseInt(pago.cuentaId),
                                 usuarioId: req.user?.id || null
                             }
@@ -3397,8 +3359,8 @@ app.post('/api/compras', async (req, res) => {
                 await tx.movimientoCaja.create({
                     data: {
                         tipo: 'salida', categoria: 'Compra', monto: parseInt(total), metodo: metodoPago,
-                        referencia: `Compra ${compra.id}`, fecha: new Date(),
-                        hora: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }),
+                        referencia: `Compra ${compra.id}`, fecha: fechaColombia(),
+                        hora: horaColombia(),
                         cuentaId: parseInt(cuentaId),
                         usuarioId: req.user?.id || null
                     }
