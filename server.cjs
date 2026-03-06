@@ -14,9 +14,15 @@ const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 8080;
 
-// Hora y fecha en zona horaria Colombia (UTC-5)
+// Hora y fecha en zona horaria Colombia (UTC-5) - cálculo manual para evitar problemas de locale en servidores
 function horaColombia() {
-    return new Date().toLocaleTimeString('es-CO', { timeZone: 'America/Bogota', hour: '2-digit', minute: '2-digit', hour12: true });
+    const now = new Date();
+    const co = new Date(now.toLocaleString('en-US', { timeZone: 'America/Bogota' }));
+    let h = co.getHours();
+    const m = co.getMinutes().toString().padStart(2, '0');
+    const ampm = h >= 12 ? 'p.\u00a0m.' : 'a.\u00a0m.';
+    h = h % 12 || 12;
+    return `${h}:${m} ${ampm}`;
 }
 function fechaColombia() {
     return new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Bogota' }));
