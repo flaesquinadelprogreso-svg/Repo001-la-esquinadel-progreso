@@ -313,7 +313,7 @@ export default function CajaBancos() {
             )}
 
             {/* History Table & Filters */}
-            {viewMode === 'general' && (
+            {(viewMode === 'general' || viewMode === 'account') && (
                 <div id="caja-history" style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
                     <div id="caja-filters" style={{ padding: '16px 20px', borderBottom: '1px solid #E5E7EB', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                         <h2 style={{ fontSize: '15px', fontWeight: 600, color: '#1A1A2E' }}>
