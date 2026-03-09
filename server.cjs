@@ -28,6 +28,8 @@ function fechaColombia() {
     return new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Bogota' }));
 }
 const path = require('path');
+const cron = require('node-cron');
+const { google } = require('googleapis');
 
 // Helpers para formato en descripciones (Backend)
 const formatPesos = (valor) => {
@@ -721,7 +723,8 @@ app.post('/api/inventario/importar', async (req, res) => {
         let ubicacionDefecto = await prisma.ubicacion.findFirst({
             where: {
                 nombre: {
-                    contains: 'principal', // Ignorar mayúsculas depende del motor, mejor fallback
+                    contains: 'principal',
+                    mode: 'insensitive'
                 }
             }
         });
@@ -3418,6 +3421,258 @@ app.use((err, req, res, next) => {
 });
 
 // ═══════════════════════════════════════════════════════════════
+// BACKUP / RESTAURACIÓN (Solo admin)
+// ═══════════════════════════════════════════════════════════════
+
+app.get('/api/admin/backup', async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Solo el administrador puede descargar backups' });
+        }
+
+        const [
+            configuracion, usuarios, roles, ubicaciones, cuentasFinancieras, resoluciones,
+            clientes, proveedores, productos, servicios, stockUbicaciones,
+            ventas, itemsVenta, pagosVenta, compras, itemsCompra,
+            devoluciones, itemsDevolucion, movimientosCajaDevolucion,
+            cuentasPorCobrar, abonosCobro, cuentasPorPagar, abonosPago,
+            movimientosCaja, cierresCaja, cotizaciones, itemsCotizacion
+        ] = await Promise.all([
+            prisma.configuracion.findMany(),
+            prisma.usuario.findMany({ select: { id: true, username: true, role: true, activo: true, createdAt: true, permisos: true } }),
+            prisma.rol.findMany(),
+            prisma.ubicacion.findMany(),
+            prisma.cuentaFinanciera.findMany(),
+            prisma.resolucion.findMany(),
+            prisma.cliente.findMany(),
+            prisma.proveedor.findMany(),
+            prisma.producto.findMany(),
+            prisma.servicio.findMany(),
+            prisma.stockUbicacion.findMany(),
+            prisma.venta.findMany(),
+            prisma.itemVenta.findMany(),
+            prisma.pagoVenta.findMany(),
+            prisma.compra.findMany(),
+            prisma.itemCompra.findMany(),
+            prisma.devolucion.findMany(),
+            prisma.itemDevolucion.findMany(),
+            prisma.movimientoCajaDevolucion.findMany(),
+            prisma.cuentaPorCobrar.findMany(),
+            prisma.abonoCobro.findMany(),
+            prisma.cuentaPorPagar.findMany(),
+            prisma.abonoPago.findMany(),
+            prisma.movimientoCaja.findMany(),
+            prisma.cierreCaja.findMany(),
+            prisma.cotizacion.findMany(),
+            prisma.itemCotizacion.findMany()
+        ]);
+
+        const backup = {
+            version: '1.0',
+            fecha: new Date().toISOString(),
+            datos: {
+                configuracion, usuarios, roles, ubicaciones, cuentasFinancieras, resoluciones,
+                clientes, proveedores, productos, servicios, stockUbicaciones,
+                ventas, itemsVenta, pagosVenta, compras, itemsCompra,
+                devoluciones, itemsDevolucion, movimientosCajaDevolucion,
+                cuentasPorCobrar, abonosCobro, cuentasPorPagar, abonosPago,
+                movimientosCaja, cierresCaja, cotizaciones, itemsCotizacion
+            }
+        };
+
+        const filename = `backup-${new Date().toISOString().slice(0, 10)}.json`;
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Type', 'application/json');
+        res.json(backup);
+    } catch (error) {
+        logger.error('Error generando backup:', error);
+        res.status(500).json({ error: 'Error al generar backup: ' + error.message });
+    }
+});
+
+app.post('/api/admin/restore', async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Solo el administrador puede restaurar backups' });
+        }
+
+        const { confirmCode, datos } = req.body;
+        if (confirmCode !== 'RESTAURAR') {
+            return res.status(400).json({ error: 'Código de confirmación incorrecto' });
+        }
+
+        if (!datos || !datos.productos) {
+            return res.status(400).json({ error: 'Archivo de backup inválido' });
+        }
+
+        await prisma.$transaction(async (tx) => {
+            // 1. Borrar todo en orden (hijos primero)
+            await tx.movimientoCajaDevolucion.deleteMany();
+            await tx.movimientoCaja.deleteMany();
+            await tx.pagoVenta.deleteMany();
+            await tx.itemDevolucion.deleteMany();
+            await tx.itemVenta.deleteMany();
+            await tx.itemCompra.deleteMany();
+            await tx.itemCotizacion.deleteMany();
+            await tx.devolucion.deleteMany();
+            await tx.abonoCobro.deleteMany();
+            await tx.abonoPago.deleteMany();
+            await tx.cuentaPorCobrar.deleteMany();
+            await tx.cuentaPorPagar.deleteMany();
+            await tx.venta.deleteMany();
+            await tx.compra.deleteMany();
+            await tx.cotizacion.deleteMany();
+            await tx.cierreCaja.deleteMany();
+            await tx.stockUbicacion.deleteMany();
+            await tx.producto.deleteMany();
+            await tx.servicio.deleteMany();
+            await tx.cliente.deleteMany();
+            await tx.proveedor.deleteMany();
+            await tx.cuentaFinanciera.deleteMany();
+            await tx.ubicacion.deleteMany();
+            await tx.resolucion.deleteMany();
+            await tx.configuracion.deleteMany();
+
+            // 2. Restaurar en orden (padres primero)
+            const insertMany = async (model, data) => {
+                if (data && data.length > 0) {
+                    for (const record of data) {
+                        await tx[model].create({ data: record });
+                    }
+                }
+            };
+
+            await insertMany('configuracion', datos.configuracion);
+            await insertMany('ubicacion', datos.ubicaciones);
+            await insertMany('cuentaFinanciera', datos.cuentasFinancieras);
+            await insertMany('resolucion', datos.resoluciones);
+            await insertMany('cliente', datos.clientes);
+            await insertMany('proveedor', datos.proveedores);
+            await insertMany('producto', datos.productos);
+            await insertMany('servicio', datos.servicios);
+            await insertMany('stockUbicacion', datos.stockUbicaciones);
+            await insertMany('venta', datos.ventas);
+            await insertMany('itemVenta', datos.itemsVenta);
+            await insertMany('pagoVenta', datos.pagosVenta);
+            await insertMany('compra', datos.compras);
+            await insertMany('itemCompra', datos.itemsCompra);
+            await insertMany('devolucion', datos.devoluciones);
+            await insertMany('itemDevolucion', datos.itemsDevolucion);
+            await insertMany('movimientoCajaDevolucion', datos.movimientosCajaDevolucion);
+            await insertMany('cuentaPorCobrar', datos.cuentasPorCobrar);
+            await insertMany('abonoCobro', datos.abonosCobro);
+            await insertMany('cuentaPorPagar', datos.cuentasPorPagar);
+            await insertMany('abonoPago', datos.abonosPago);
+            await insertMany('movimientoCaja', datos.movimientosCaja);
+            await insertMany('cierreCaja', datos.cierresCaja);
+            await insertMany('cotizacion', datos.cotizaciones);
+            await insertMany('itemCotizacion', datos.itemsCotizacion);
+        });
+
+        // Reset sequences para PostgreSQL
+        const tables = [
+            'Configuracion', 'Ubicacion', 'CuentaFinanciera', 'Resolucion',
+            'Cliente', 'Proveedor', 'Producto', 'Servicio', 'StockUbicacion',
+            'Venta', 'ItemVenta', 'PagoVenta', 'Compra', 'ItemCompra',
+            'Devolucion', 'ItemDevolucion', 'MovimientoCajaDevolucion',
+            'CuentaPorCobrar', 'AbonoCobro', 'CuentaPorPagar', 'AbonoPago',
+            'MovimientoCaja', 'CierreCaja', 'Cotizacion', 'ItemCotizacion'
+        ];
+        for (const table of tables) {
+            try {
+                await prisma.$executeRawUnsafe(`SELECT setval(pg_get_serial_sequence('"${table}"', 'id'), COALESCE((SELECT MAX(id) FROM "${table}"), 0) + 1, false)`);
+            } catch (e) { /* some tables may not have sequences */ }
+        }
+
+        res.json({ success: true, message: 'Backup restaurado correctamente' });
+    } catch (error) {
+        logger.error('Error restaurando backup:', error);
+        res.status(500).json({ error: 'Error al restaurar: ' + error.message });
+    }
+});
+
+app.post('/api/admin/backup-drive', async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Solo el administrador' });
+        }
+        const backupData = await generarBackupJSON();
+        const subido = await subirBackupGoogleDrive(backupData);
+        if (subido) {
+            res.json({ success: true, message: 'Backup subido a Google Drive exitosamente' });
+        } else {
+            res.status(500).json({ error: 'No se pudo subir a Google Drive. Configure las credenciales en Configuración > Sistema.' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Error: ' + error.message });
+    }
+});
+
+// Obtener config Google Drive
+app.get('/api/admin/gdrive-config', async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ error: 'Solo admin' });
+        const config = await prisma.configuracion.findFirst();
+        res.json({
+            configured: !!(config?.gdriveCredentials && config?.gdriveFolderId),
+            folderId: config?.gdriveFolderId || '',
+            hasCredentials: !!config?.gdriveCredentials
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Guardar config Google Drive
+app.post('/api/admin/gdrive-config', async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ error: 'Solo admin' });
+        const { credentials, folderId } = req.body;
+
+        // Validar que el JSON de credenciales sea válido
+        if (credentials) {
+            try {
+                const parsed = JSON.parse(credentials);
+                if (!parsed.client_email || !parsed.private_key) {
+                    return res.status(400).json({ error: 'El JSON de credenciales no tiene los campos requeridos (client_email, private_key)' });
+                }
+            } catch (e) {
+                return res.status(400).json({ error: 'El JSON de credenciales no es válido' });
+            }
+        }
+
+        const updateData = {};
+        if (credentials !== undefined) updateData.gdriveCredentials = credentials || null;
+        if (folderId !== undefined) updateData.gdriveFolderId = folderId || null;
+
+        await prisma.configuracion.updateMany({ data: updateData });
+
+        // Si tiene ambos, hacer una prueba de conexión
+        if (credentials && folderId) {
+            try {
+                const auth = new google.auth.GoogleAuth({
+                    credentials: JSON.parse(credentials),
+                    scopes: ['https://www.googleapis.com/auth/drive.file']
+                });
+                const drive = google.drive({ version: 'v3', auth });
+                await drive.files.list({
+                    q: `'${folderId}' in parents`,
+                    pageSize: 1,
+                    fields: 'files(id)'
+                });
+                res.json({ success: true, message: 'Configuración guardada y conexión verificada correctamente' });
+            } catch (driveErr) {
+                res.json({ success: true, warning: 'Configuración guardada pero no se pudo verificar la conexión: ' + driveErr.message });
+            }
+        } else {
+            res.json({ success: true, message: 'Configuración guardada' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════
 // BOTÓN DE PÁNICO — RESET TOTAL (Solo admin)
 // ═══════════════════════════════════════════════════════════════
 app.post('/api/admin/panic-reset', async (req, res) => {
@@ -3654,6 +3909,138 @@ app.get('/{*path}', (req, res) => {
     if (!req.path.startsWith('/api')) {
         res.sendFile(path.join(__dirname, 'dist', 'index.html'));
     }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// BACKUP AUTOMÁTICO A GOOGLE DRIVE (cada 15 días)
+// ═══════════════════════════════════════════════════════════════
+
+async function generarBackupJSON() {
+    const [
+        configuracion, usuarios, roles, ubicaciones, cuentasFinancieras, resoluciones,
+        clientes, proveedores, productos, servicios, stockUbicaciones,
+        ventas, itemsVenta, pagosVenta, compras, itemsCompra,
+        devoluciones, itemsDevolucion, movimientosCajaDevolucion,
+        cuentasPorCobrar, abonosCobro, cuentasPorPagar, abonosPago,
+        movimientosCaja, cierresCaja, cotizaciones, itemsCotizacion
+    ] = await Promise.all([
+        prisma.configuracion.findMany(),
+        prisma.usuario.findMany({ select: { id: true, username: true, role: true, activo: true, createdAt: true, permisos: true } }),
+        prisma.rol.findMany(),
+        prisma.ubicacion.findMany(),
+        prisma.cuentaFinanciera.findMany(),
+        prisma.resolucion.findMany(),
+        prisma.cliente.findMany(),
+        prisma.proveedor.findMany(),
+        prisma.producto.findMany(),
+        prisma.servicio.findMany(),
+        prisma.stockUbicacion.findMany(),
+        prisma.venta.findMany(),
+        prisma.itemVenta.findMany(),
+        prisma.pagoVenta.findMany(),
+        prisma.compra.findMany(),
+        prisma.itemCompra.findMany(),
+        prisma.devolucion.findMany(),
+        prisma.itemDevolucion.findMany(),
+        prisma.movimientoCajaDevolucion.findMany(),
+        prisma.cuentaPorCobrar.findMany(),
+        prisma.abonoCobro.findMany(),
+        prisma.cuentaPorPagar.findMany(),
+        prisma.abonoPago.findMany(),
+        prisma.movimientoCaja.findMany(),
+        prisma.cierreCaja.findMany(),
+        prisma.cotizacion.findMany(),
+        prisma.itemCotizacion.findMany()
+    ]);
+
+    return {
+        version: '1.0',
+        fecha: new Date().toISOString(),
+        datos: {
+            configuracion, usuarios, roles, ubicaciones, cuentasFinancieras, resoluciones,
+            clientes, proveedores, productos, servicios, stockUbicaciones,
+            ventas, itemsVenta, pagosVenta, compras, itemsCompra,
+            devoluciones, itemsDevolucion, movimientosCajaDevolucion,
+            cuentasPorCobrar, abonosCobro, cuentasPorPagar, abonosPago,
+            movimientosCaja, cierresCaja, cotizaciones, itemsCotizacion
+        }
+    };
+}
+
+async function subirBackupGoogleDrive(backupData) {
+    try {
+        const config = await prisma.configuracion.findFirst();
+        const credentials = config?.gdriveCredentials;
+        const folderId = config?.gdriveFolderId;
+
+        if (!credentials || !folderId) {
+            logger.warn('Backup Google Drive: no configurado (Configuración > Sistema)');
+            return false;
+        }
+
+        const auth = new google.auth.GoogleAuth({
+            credentials: JSON.parse(credentials),
+            scopes: ['https://www.googleapis.com/auth/drive.file']
+        });
+
+        const drive = google.drive({ version: 'v3', auth });
+        const fecha = new Date().toISOString().slice(0, 10);
+        const hora = new Date().toISOString().slice(11, 16).replace(':', '-');
+        const fileName = `backup-${fecha}_${hora}.json`;
+        const content = JSON.stringify(backupData);
+
+        const response = await drive.files.create({
+            requestBody: {
+                name: fileName,
+                mimeType: 'application/json',
+                parents: [folderId]
+            },
+            media: {
+                mimeType: 'application/json',
+                body: require('stream').Readable.from([content])
+            }
+        });
+
+        logger.info(`Backup subido a Google Drive: ${fileName} (ID: ${response.data.id})`);
+
+        // Limpiar backups antiguos (mantener últimos 6 = ~3 meses)
+        const list = await drive.files.list({
+            q: `'${folderId}' in parents and name contains 'backup-' and mimeType='application/json'`,
+            orderBy: 'createdTime desc',
+            fields: 'files(id, name, createdTime)'
+        });
+
+        if (list.data.files && list.data.files.length > 6) {
+            const toDelete = list.data.files.slice(6);
+            for (const file of toDelete) {
+                await drive.files.delete({ fileId: file.id });
+                logger.info(`Backup antiguo eliminado: ${file.name}`);
+            }
+        }
+
+        return true;
+    } catch (error) {
+        logger.error('Error subiendo backup a Google Drive:', error.message);
+        return false;
+    }
+}
+
+async function ejecutarBackupAutomatico() {
+    try {
+        logger.info('Iniciando backup automático...');
+        const backupData = await generarBackupJSON();
+        const subido = await subirBackupGoogleDrive(backupData);
+        if (subido) {
+            logger.info('Backup automático completado exitosamente');
+        }
+    } catch (error) {
+        logger.error('Error en backup automático:', error.message);
+    }
+}
+
+// Cron: cada 15 días (días 1 y 15 de cada mes a las 2AM Colombia = 7AM UTC)
+cron.schedule('0 7 1,15 * *', () => {
+    ejecutarBackupAutomatico();
 });
 
 app.listen(PORT, () => {

@@ -517,8 +517,10 @@ model Configuracion {
   logo            String?
   moneda          String   @default("COP")
   ivaDefecto      Int      @default(19)
-  whatsappDestino String?  // Número WhatsApp donde se envían alertas (ej: 573001234567)
-  updatedAt       DateTime @updatedAt
+  whatsappDestino   String?  // Número WhatsApp donde se envían alertas (ej: 573001234567)
+  gdriveCredentials String?  // JSON cuenta de servicio Google
+  gdriveFolderId    String?  // ID carpeta Google Drive para backups
+  updatedAt         DateTime @updatedAt
 }
 
 model Resolucion {

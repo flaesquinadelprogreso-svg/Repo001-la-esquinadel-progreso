@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Building2, Receipt, Printer, Save, MessageCircle, Shield, AlertTriangle } from 'lucide-react';
+import { Globe, Building2, Receipt, Printer, Save, MessageCircle, Shield, AlertTriangle, Download, Upload, Database } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
@@ -26,6 +26,18 @@ export default function Configuracion() {
     const [showPanicModal, setShowPanicModal] = useState(false);
     const [panicConfirmText, setPanicConfirmText] = useState('');
     const [panicLoading, setPanicLoading] = useState(false);
+    const [backupLoading, setBackupLoading] = useState(false);
+    const [driveLoading, setDriveLoading] = useState(false);
+    const [restoreLoading, setRestoreLoading] = useState(false);
+    const [showRestoreModal, setShowRestoreModal] = useState(false);
+    const [restoreConfirmText, setRestoreConfirmText] = useState('');
+    const [restoreFile, setRestoreFile] = useState(null);
+    const restoreInputRef = React.useRef(null);
+    const [gdriveCredentials, setGdriveCredentials] = useState('');
+    const [gdriveFolderId, setGdriveFolderId] = useState('');
+    const [gdriveConfigured, setGdriveConfigured] = useState(false);
+    const [gdriveSaving, setGdriveSaving] = useState(false);
+    const [showGdriveConfig, setShowGdriveConfig] = useState(false);
 
     useEffect(() => {
         api.get('/perfil').then(res => {
@@ -33,6 +45,94 @@ export default function Configuracion() {
             setIsAdmin(user.role === 'admin' || (user.permisos && user.permisos.includes('all')));
         }).catch(() => {});
     }, []);
+
+    useEffect(() => {
+        if (isAdmin) {
+            api.get('/admin/gdrive-config').then(res => {
+                setGdriveConfigured(res.data?.configured || false);
+                setGdriveFolderId(res.data?.folderId || '');
+                if (res.data?.hasCredentials) setGdriveCredentials('__saved__');
+            }).catch(() => {});
+        }
+    }, [isAdmin]);
+
+    const handleSaveGdriveConfig = async () => {
+        setGdriveSaving(true);
+        try {
+            const payload = { folderId: gdriveFolderId };
+            if (gdriveCredentials && gdriveCredentials !== '__saved__') {
+                payload.credentials = gdriveCredentials;
+            }
+            const response = await api.post('/admin/gdrive-config', payload);
+            if (response.data?.warning) {
+                alert(response.data.warning);
+            } else {
+                alert(response.data?.message || 'Guardado');
+            }
+            setGdriveConfigured(!!(gdriveCredentials && gdriveFolderId));
+            if (gdriveCredentials && gdriveCredentials !== '__saved__') setGdriveCredentials('__saved__');
+        } catch (error) {
+            alert(error?.response?.data?.error || 'Error al guardar');
+        } finally {
+            setGdriveSaving(false);
+        }
+    };
+
+    const handleDownloadBackup = async () => {
+        setBackupLoading(true);
+        try {
+            const response = await api.get('/admin/backup', { responseType: 'blob' });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            const fecha = new Date().toISOString().slice(0, 10);
+            link.setAttribute('download', `backup-${fecha}.json`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            alert(error?.response?.data?.error || 'Error al descargar backup');
+        } finally {
+            setBackupLoading(false);
+        }
+    };
+
+    const handleRestore = async () => {
+        if (restoreConfirmText !== 'RESTAURAR' || !restoreFile) return;
+        setRestoreLoading(true);
+        try {
+            const text = await restoreFile.text();
+            const backup = JSON.parse(text);
+            if (!backup.datos || !backup.datos.productos) {
+                alert('El archivo no es un backup válido');
+                setRestoreLoading(false);
+                return;
+            }
+            await api.post('/admin/restore', { confirmCode: 'RESTAURAR', datos: backup.datos });
+            alert('Backup restaurado correctamente. Se recargará la página.');
+            window.location.reload();
+        } catch (error) {
+            alert(error?.response?.data?.error || 'Error al restaurar backup');
+        } finally {
+            setRestoreLoading(false);
+            setShowRestoreModal(false);
+            setRestoreConfirmText('');
+            setRestoreFile(null);
+        }
+    };
+
+    const handleBackupDrive = async () => {
+        setDriveLoading(true);
+        try {
+            const response = await api.post('/admin/backup-drive');
+            alert(response.data?.message || 'Backup subido a Google Drive');
+        } catch (error) {
+            alert(error?.response?.data?.error || 'Error al subir backup a Google Drive');
+        } finally {
+            setDriveLoading(false);
+        }
+    };
 
     const handlePanicReset = async () => {
         if (panicConfirmText !== 'RESETEAR') return;
@@ -153,7 +253,186 @@ export default function Configuracion() {
 
                     {tab === 'sistema' && isAdmin && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '600px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 20px', backgroundColor: '#FEF2F2', borderRadius: '10px', border: '1px solid #FECACA' }}>
+                            {/* Backup Section */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 20px', backgroundColor: '#EBF0F7', borderRadius: '10px', border: '1px solid #C7D2E0' }}>
+                                <Database size={20} style={{ color: '#1E3A5F' }} />
+                                <div>
+                                    <p style={{ fontSize: '13px', fontWeight: 600, color: '#1A1A2E' }}>Respaldo de Base de Datos</p>
+                                    <p style={{ fontSize: '11px', color: '#6B7280' }}>Descarga y restaura copias de seguridad</p>
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                                <div style={{ padding: '20px', backgroundColor: '#FFF', border: '1px solid #E2E5EA', borderRadius: '10px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                        <Download size={18} color="#1E3A5F" />
+                                        <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#1A1A2E' }}>Descargar</h3>
+                                    </div>
+                                    <p style={{ fontSize: '12px', color: '#6B7280', lineHeight: '1.5', marginBottom: '14px' }}>
+                                        Descarga toda la base de datos como archivo JSON.
+                                    </p>
+                                    <button
+                                        onClick={handleDownloadBackup}
+                                        disabled={backupLoading}
+                                        style={{
+                                            width: '100%', padding: '10px 16px', backgroundColor: '#1E3A5F', color: '#FFF',
+                                            border: 'none', borderRadius: '8px', fontWeight: 600, fontSize: '13px',
+                                            cursor: backupLoading ? 'not-allowed' : 'pointer', opacity: backupLoading ? 0.7 : 1,
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+                                        }}
+                                    >
+                                        <Download size={16} />
+                                        {backupLoading ? 'Generando...' : 'Descargar'}
+                                    </button>
+                                </div>
+
+                                <div style={{ padding: '20px', backgroundColor: '#FFF', border: '1px solid #E2E5EA', borderRadius: '10px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z" fill="#4285F4"/><path d="M12 2v16l6.79 3 .71-.71z" fill="#0066DA"/><path d="M4.5 20.29l.71.71L12 18V2z" fill="#00AC47"/><path d="M22 12l-5.5-9.5L12 2v10z" fill="#EA4335"/><path d="M12 12v6l6.79 3L22 12z" fill="#00832D"/><path d="M2 12l2.5 8.29L12 18V12z" fill="#2684FC"/><path d="M12 2L6.5 11.5 2 12h10z" fill="#FFBA00"/></svg>
+                                        <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#1A1A2E' }}>Google Drive</h3>
+                                    </div>
+                                    <p style={{ fontSize: '12px', color: '#6B7280', lineHeight: '1.5', marginBottom: '14px' }}>
+                                        Sube el backup directamente a Google Drive. Automático cada 15 días.
+                                    </p>
+                                    <button
+                                        onClick={handleBackupDrive}
+                                        disabled={driveLoading}
+                                        style={{
+                                            width: '100%', padding: '10px 16px', backgroundColor: '#4285F4', color: '#FFF',
+                                            border: 'none', borderRadius: '8px', fontWeight: 600, fontSize: '13px',
+                                            cursor: driveLoading ? 'not-allowed' : 'pointer', opacity: driveLoading ? 0.7 : 1,
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+                                        }}
+                                    >
+                                        <Upload size={16} />
+                                        {driveLoading ? 'Subiendo...' : 'Subir a Drive'}
+                                    </button>
+                                </div>
+
+                                <div style={{ padding: '20px', backgroundColor: '#FFF', border: '1px solid #E2E5EA', borderRadius: '10px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                                        <Upload size={18} color="#D97706" />
+                                        <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#1A1A2E' }}>Restaurar</h3>
+                                    </div>
+                                    <p style={{ fontSize: '12px', color: '#6B7280', lineHeight: '1.5', marginBottom: '14px' }}>
+                                        Restaura desde un archivo. <strong style={{ color: '#DC2626' }}>Reemplaza todo.</strong>
+                                    </p>
+                                    <button
+                                        onClick={() => setShowRestoreModal(true)}
+                                        style={{
+                                            width: '100%', padding: '10px 16px', backgroundColor: '#FFF', color: '#D97706',
+                                            border: '2px solid #D97706', borderRadius: '8px', fontWeight: 600, fontSize: '13px',
+                                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+                                        }}
+                                    >
+                                        <Upload size={16} />
+                                        Restaurar
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div style={{ padding: '12px 16px', backgroundColor: gdriveConfigured ? '#F0FDF4' : '#FFFBEB', borderRadius: '8px', border: `1px solid ${gdriveConfigured ? '#BBF7D0' : '#FDE68A'}` }}>
+                                <p style={{ fontSize: '12px', color: gdriveConfigured ? '#166534' : '#92400E', lineHeight: '1.5' }}>
+                                    {gdriveConfigured
+                                        ? <><strong>Backup automático activo:</strong> Se genera y sube a Google Drive los días 1 y 15 de cada mes a las 2:00 AM (Colombia). Se conservan los últimos 6 backups (~3 meses).</>
+                                        : <><strong>Google Drive no configurado.</strong> Configure las credenciales abajo para activar el backup automático.</>
+                                    }
+                                </p>
+                            </div>
+
+                            {/* Google Drive Config */}
+                            <div style={{ padding: '20px', backgroundColor: '#FFF', border: '1px solid #E2E5EA', borderRadius: '10px' }}>
+                                <div
+                                    onClick={() => setShowGdriveConfig(!showGdriveConfig)}
+                                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}
+                                >
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <svg width="20" height="20" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8H1c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/>
+                                            <path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0-1.2 4.5h27.5z" fill="#00ac47"/>
+                                            <path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H59.8l5.95 10.3z" fill="#ea4335"/>
+                                            <path d="M43.65 25 57.4 1.2C56.05.4 54.5 0 52.9 0H34.4c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/>
+                                            <path d="M59.8 53H27.5L13.75 76.8c1.35.8 2.9 1.2 4.5 1.2h32.6c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/>
+                                            <path d="M73.4 26.5 60.65 4.5c-.8-1.4-1.95-2.5-3.3-3.3L43.6 25l16.2 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>
+                                        </svg>
+                                        <div>
+                                            <p style={{ fontSize: '14px', fontWeight: 600, color: '#1A1A2E' }}>Configurar Google Drive</p>
+                                            <p style={{ fontSize: '11px', color: '#6B7280' }}>
+                                                {gdriveConfigured ? 'Conectado' : 'No configurado'} — click para {showGdriveConfig ? 'ocultar' : 'expandir'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <span style={{ fontSize: '18px', color: '#6B7280', transition: 'transform 200ms', transform: showGdriveConfig ? 'rotate(180deg)' : 'rotate(0)' }}>▼</span>
+                                </div>
+
+                                {showGdriveConfig && (
+                                    <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                                        <div style={{ padding: '12px', backgroundColor: '#F8FAFC', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+                                            <p style={{ fontSize: '12px', color: '#475569', lineHeight: '1.6' }}>
+                                                <strong>Pasos:</strong><br/>
+                                                1. Ir a <strong>console.cloud.google.com</strong> → Crear proyecto<br/>
+                                                2. Activar <strong>Google Drive API</strong> en Biblioteca<br/>
+                                                3. Crear <strong>Cuenta de servicio</strong> en Credenciales → Descargar clave JSON<br/>
+                                                4. Crear una carpeta en Google Drive y <strong>compartirla</strong> con el email de la cuenta de servicio<br/>
+                                                5. Copiar el <strong>ID de la carpeta</strong> (última parte de la URL)
+                                            </p>
+                                        </div>
+
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px', color: '#374151' }}>
+                                                Credenciales JSON (cuenta de servicio):
+                                            </label>
+                                            <textarea
+                                                value={gdriveCredentials === '__saved__' ? '' : gdriveCredentials}
+                                                onChange={(e) => setGdriveCredentials(e.target.value)}
+                                                placeholder={gdriveCredentials === '__saved__' ? 'Credenciales guardadas. Pegue nuevas para reemplazar.' : 'Pegue aquí el contenido del archivo JSON...'}
+                                                rows={4}
+                                                style={{
+                                                    width: '100%', padding: '10px', border: '1px solid #D1D5DB', borderRadius: '8px',
+                                                    fontSize: '12px', fontFamily: 'monospace', resize: 'vertical',
+                                                    backgroundColor: gdriveCredentials === '__saved__' ? '#F0FDF4' : '#FFF'
+                                                }}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px', color: '#374151' }}>
+                                                ID de la carpeta en Google Drive:
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={gdriveFolderId}
+                                                onChange={(e) => setGdriveFolderId(e.target.value)}
+                                                placeholder="Ej: 1ABCdefGHijKLMnopQRStuvWXyz"
+                                                style={{
+                                                    width: '100%', padding: '10px', border: '1px solid #D1D5DB', borderRadius: '8px',
+                                                    fontSize: '13px', fontFamily: 'monospace'
+                                                }}
+                                            />
+                                            <p style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '4px' }}>
+                                                De la URL: drive.google.com/drive/folders/<strong>ESTE_ES_EL_ID</strong>
+                                            </p>
+                                        </div>
+
+                                        <button
+                                            onClick={handleSaveGdriveConfig}
+                                            disabled={gdriveSaving || (!gdriveFolderId)}
+                                            style={{
+                                                padding: '10px 20px', backgroundColor: gdriveFolderId ? '#059669' : '#9CA3AF', color: '#FFF',
+                                                border: 'none', borderRadius: '8px', fontWeight: 600, fontSize: '13px',
+                                                cursor: gdriveFolderId ? 'pointer' : 'not-allowed', opacity: gdriveSaving ? 0.7 : 1,
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+                                            }}
+                                        >
+                                            <Save size={16} />
+                                            {gdriveSaving ? 'Guardando y verificando...' : 'Guardar y Verificar Conexión'}
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Danger Zone */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 20px', backgroundColor: '#FEF2F2', borderRadius: '10px', border: '1px solid #FECACA', marginTop: '12px' }}>
                                 <AlertTriangle size={20} style={{ color: '#DC2626' }} />
                                 <div>
                                     <p style={{ fontSize: '13px', fontWeight: 600, color: '#991B1B' }}>Zona de Peligro</p>
@@ -191,6 +470,72 @@ export default function Configuracion() {
                     )}
                 </div>
             </div>
+
+            {/* Modal de Restaurar Backup */}
+            <Modal isOpen={showRestoreModal} onClose={() => { setShowRestoreModal(false); setRestoreConfirmText(''); setRestoreFile(null); }} title="Restaurar Backup">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minWidth: '420px' }}>
+                    <div style={{ padding: '14px', backgroundColor: '#FFFBEB', borderRadius: '8px', border: '1px solid #FDE68A', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                        <AlertTriangle size={20} style={{ color: '#D97706', flexShrink: 0, marginTop: '2px' }} />
+                        <div style={{ fontSize: '13px', color: '#92400E', lineHeight: '1.5' }}>
+                            <strong>Esta acción reemplazará TODOS los datos actuales</strong> con los del archivo de backup.
+                            Asegúrese de tener un backup actual antes de continuar.
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '8px', color: '#374151' }}>
+                            Seleccionar archivo de backup (.json):
+                        </label>
+                        <input
+                            ref={restoreInputRef}
+                            type="file"
+                            accept=".json"
+                            onChange={(e) => setRestoreFile(e.target.files[0] || null)}
+                            style={{ width: '100%', padding: '8px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '13px' }}
+                        />
+                        {restoreFile && (
+                            <p style={{ fontSize: '12px', color: '#059669', marginTop: '6px' }}>
+                                Archivo: {restoreFile.name} ({(restoreFile.size / 1024 / 1024).toFixed(2)} MB)
+                            </p>
+                        )}
+                    </div>
+
+                    <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '8px', color: '#374151' }}>
+                            Para confirmar, escriba <strong style={{ color: '#D97706' }}>RESTAURAR</strong>:
+                        </label>
+                        <input
+                            type="text"
+                            value={restoreConfirmText}
+                            onChange={(e) => setRestoreConfirmText(e.target.value)}
+                            placeholder="Escriba RESTAURAR"
+                            style={{
+                                width: '100%', padding: '10px 14px', border: '2px solid #E5E7EB', borderRadius: '8px',
+                                fontSize: '15px', fontWeight: 600, textAlign: 'center', letterSpacing: '2px',
+                                borderColor: restoreConfirmText === 'RESTAURAR' ? '#D97706' : '#E5E7EB'
+                            }}
+                        />
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
+                        <Button variant="secondary" onClick={() => { setShowRestoreModal(false); setRestoreConfirmText(''); setRestoreFile(null); }}>
+                            Cancelar
+                        </Button>
+                        <button
+                            onClick={handleRestore}
+                            disabled={restoreConfirmText !== 'RESTAURAR' || !restoreFile || restoreLoading}
+                            style={{
+                                padding: '10px 24px', backgroundColor: (restoreConfirmText === 'RESTAURAR' && restoreFile) ? '#D97706' : '#9CA3AF',
+                                color: '#FFF', border: 'none', borderRadius: '8px', fontWeight: 600, fontSize: '13px',
+                                cursor: (restoreConfirmText === 'RESTAURAR' && restoreFile) ? 'pointer' : 'not-allowed',
+                                opacity: restoreLoading ? 0.7 : 1
+                            }}
+                        >
+                            {restoreLoading ? 'Restaurando...' : 'Confirmar Restauración'}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
 
             {/* Modal de confirmación Panic Reset */}
             <Modal isOpen={showPanicModal} onClose={() => { setShowPanicModal(false); setPanicConfirmText(''); }} title="Confirmar Reset del Sistema">
