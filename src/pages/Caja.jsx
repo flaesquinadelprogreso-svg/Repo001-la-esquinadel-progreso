@@ -67,7 +67,7 @@ export default function CajaBancos() {
         if (movimientos.length === 0) return alert('No hay datos para exportar');
 
         // CSV Creation (Excel compatible)
-        const headers = ["Fecha", "Hora", "Cuenta", "Tipo", "Categoría", "Descripción", "Usuario", "Monto"];
+        const headers = ["Fecha", "Hora", "Cuenta", "Tipo", "Categoría", "Descripción", "Usuario", "Monto", "Saldo"];
         const rows = movimientos.map(m => [
             new Date(m.fecha).toLocaleDateString(),
             m.hora,
@@ -76,7 +76,8 @@ export default function CajaBancos() {
             m.categoria,
             m.descripcion || '',
             m.usuario?.username || '-',
-            m.tipo === 'salida' ? -m.monto : m.monto
+            m.tipo === 'salida' ? -m.monto : m.monto,
+            m.saldoDespues != null ? m.saldoDespues : ''
         ]);
 
         const csvContent = [
@@ -378,6 +379,7 @@ export default function CajaBancos() {
                                     <th style={{ padding: '12px 20px', textAlign: 'left', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Desc / Referencia</th>
                                     <th style={{ padding: '12px 20px', textAlign: 'left', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Usuario</th>
                                     <th style={{ padding: '12px 20px', textAlign: 'right', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Monto</th>
+                                    <th style={{ padding: '12px 20px', textAlign: 'right', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Saldo</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -403,11 +405,14 @@ export default function CajaBancos() {
                                         <td style={{ padding: '14px 20px', textAlign: 'right', fontSize: '14px', fontWeight: 700, color: mov.tipo === 'entrada' ? '#16A34A' : '#DC2626' }}>
                                             {mov.tipo === 'entrada' ? '+' : '-'} {formatPesos(mov.monto)}
                                         </td>
+                                        <td style={{ padding: '14px 20px', textAlign: 'right', fontSize: '14px', fontWeight: 600, color: '#1A1A2E' }}>
+                                            {mov.saldoDespues != null ? formatPesos(mov.saldoDespues) : '-'}
+                                        </td>
                                     </tr>
                                 ))}
                                 {!loading && movimientos.length === 0 && (
                                     <tr>
-                                        <td colSpan="6" style={{ padding: '40px', textAlign: 'center', color: '#6B7280' }}>
+                                        <td colSpan="7" style={{ padding: '40px', textAlign: 'center', color: '#6B7280' }}>
                                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
                                                 <AlertCircle size={40} opacity={0.3} />
                                                 <div>No se encontraron movimientos para los filtros seleccionados</div>

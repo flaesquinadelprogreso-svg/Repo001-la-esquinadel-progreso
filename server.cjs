@@ -31,6 +31,27 @@ const path = require('path');
 const cron = require('node-cron');
 const { google } = require('googleapis');
 
+// Helper: crear movimiento de caja y actualizar saldo (guarda saldoDespues automáticamente)
+async function crearMovimiento(tx, { tipo, categoria, monto, metodo, cuentaId, descripcion, referencia, fecha, hora, ventaId, usuarioId, abonoCobroId, abonoPagoId }) {
+    const cid = parseInt(cuentaId);
+    // Actualizar saldo primero para obtener el valor resultante
+    const cuentaActualizada = await tx.cuentaFinanciera.update({
+        where: { id: cid },
+        data: { saldoActual: tipo === 'entrada' ? { increment: monto } : { decrement: monto } }
+    });
+    // Crear movimiento con el saldo resultante
+    return tx.movimientoCaja.create({
+        data: {
+            tipo, categoria, monto, metodo: metodo || 'efectivo',
+            cuentaId: cid, descripcion, referencia,
+            fecha: fecha || fechaColombia(), hora: hora || horaColombia(),
+            ventaId, usuarioId,
+            abonoCobroId, abonoPagoId,
+            saldoDespues: cuentaActualizada.saldoActual
+        }
+    });
+}
+
 // Helpers para formato en descripciones (Backend)
 const formatPesos = (valor) => {
     const rounded = Math.round(Number(valor) || 0);
@@ -1194,23 +1215,10 @@ app.post('/api/ventas', async (req, res) => {
                     await tx.pagoVenta.create({
                         data: { ventaId: venta.id, monto: p.monto, metodo: p.metodo }
                     });
-                    await tx.movimientoCaja.create({
-                        data: {
-                            tipo: 'entrada',
-                            categoria: 'Venta POS',
-                            monto: p.monto,
-                            metodo: p.metodo,
-                            referencia: numeroRecibo,
-                            fecha: fechaColombia(),
-                            hora: horaColombia(),
-                            ventaId: venta.id,
-                            cuentaId: targetCuentaId,
-                            usuarioId: req.user?.id || null
-                        }
-                    });
-                    await tx.cuentaFinanciera.update({
-                        where: { id: targetCuentaId },
-                        data: { saldoActual: { increment: p.monto } }
+                    await crearMovimiento(tx, {
+                        tipo: 'entrada', categoria: 'Venta POS', monto: p.monto, metodo: p.metodo,
+                        referencia: numeroRecibo, ventaId: venta.id, cuentaId: targetCuentaId,
+                        usuarioId: req.user?.id || null
                     });
                 }
             }
@@ -1391,25 +1399,13 @@ app.post('/api/devoluciones-venta', async (req, res) => {
                     throw new Error(`Saldo insuficiente en el medio de pago seleccionado para el reembolso`);
                 }
 
-                await tx.movimientoCaja.create({
-                    data: {
-                        tipo: 'salida',
-                        categoria: 'Devolución',
-                        monto: totalDevuelto,
-                        metodo: metodoReembolso === 'efectivo' ? 'efectivo' : 'banco',
-                        referencia: numeroDevolucion,
-                        descripcion: `Devolución - Ref: ${ventaOriginal.numeroRecibo}${motivo ? ` - ${motivo}` : ''}`,
-                        cuentaId: parseInt(cuentaId),
-                        ventaId: ventaDevolucion.id,
-                        hora: horaColombia(),
-                        usuarioId: req.user?.id || null
-                    }
-                });
-
-                // Descontar saldo de la cuenta
-                await tx.cuentaFinanciera.update({
-                    where: { id: parseInt(cuentaId) },
-                    data: { saldoActual: { decrement: totalDevuelto } }
+                await crearMovimiento(tx, {
+                    tipo: 'salida', categoria: 'Devolución', monto: totalDevuelto,
+                    metodo: metodoReembolso === 'efectivo' ? 'efectivo' : 'banco',
+                    referencia: numeroDevolucion,
+                    descripcion: `Devolución - Ref: ${ventaOriginal.numeroRecibo}${motivo ? ` - ${motivo}` : ''}`,
+                    cuentaId: parseInt(cuentaId), ventaId: ventaDevolucion.id,
+                    usuarioId: req.user?.id || null
                 });
             } else if (metodoReembolso === 'credito' && ventaOriginal.clienteId) {
                 // 9. Si es crédito, abonar a cuentas por cobrar existentes
@@ -1923,7 +1919,7 @@ app.post('/api/cuentas-financieras', async (req, res) => {
         });
         if (parseInt(saldoInicial) > 0) {
             await prisma.movimientoCaja.create({
-                data: { tipo: 'entrada', categoria: 'Saldo inicial', monto: parseInt(saldoInicial), metodo: 'apertura', cuentaId: cuenta.id, hora: horaColombia(), usuarioId: req.user?.id || null }
+                data: { tipo: 'entrada', categoria: 'Saldo inicial', monto: parseInt(saldoInicial), metodo: 'apertura', cuentaId: cuenta.id, hora: horaColombia(), usuarioId: req.user?.id || null, saldoDespues: parseInt(saldoInicial) }
             });
         }
         res.json(cuenta);
@@ -2008,12 +2004,9 @@ app.post('/api/movimientos-financieros', async (req, res) => {
             const cuenta = await tx.cuentaFinanciera.findUnique({ where: { id: accId } });
             if (!cuenta) throw new Error('Cuenta financiera no encontrada');
             if (tipo === 'salida' && cuenta.saldoActual < amount) throw new Error('Saldo insuficiente');
-            const mov = await tx.movimientoCaja.create({
-                data: { tipo, categoria, monto: amount, cuentaId: accId, descripcion, metodo, hora: horaColombia(), usuarioId: req.user?.id || null }
-            });
-            await tx.cuentaFinanciera.update({
-                where: { id: accId },
-                data: { saldoActual: tipo === 'entrada' ? { increment: amount } : { decrement: amount } }
+            const mov = await crearMovimiento(tx, {
+                tipo, categoria, monto: amount, cuentaId: accId, descripcion, metodo,
+                usuarioId: req.user?.id || null
             });
             return mov;
         });
@@ -2034,11 +2027,16 @@ app.post('/api/movimientos-financieros/traslado', async (req, res) => {
             if (!origen) throw new Error('Cuenta origen no encontrada');
             if (origen.saldoActual < amount) throw new Error(`Saldo insuficiente en ${origen.nombre}. Disponible: ${origen.saldoActual}`);
 
-            const hora = horaColombia();
-            await tx.cuentaFinanciera.update({ where: { id: parseInt(origenId) }, data: { saldoActual: { decrement: amount } } });
-            await tx.cuentaFinanciera.update({ where: { id: parseInt(destinoId) }, data: { saldoActual: { increment: amount } } });
-            await tx.movimientoCaja.create({ data: { tipo: 'salida', categoria: 'Traslado', monto: amount, metodo: 'efectivo', hora, cuentaId: parseInt(origenId), descripcion: descripcion || `Traslado a cuenta ${destinoId}`, usuarioId: req.user?.id || null } });
-            await tx.movimientoCaja.create({ data: { tipo: 'entrada', categoria: 'Traslado', monto: amount, metodo: 'efectivo', hora, cuentaId: parseInt(destinoId), descripcion: descripcion || `Traslado desde cuenta ${origenId}`, usuarioId: req.user?.id || null } });
+            await crearMovimiento(tx, {
+                tipo: 'salida', categoria: 'Traslado', monto: amount, metodo: 'efectivo',
+                cuentaId: parseInt(origenId), descripcion: descripcion || `Traslado a cuenta ${destinoId}`,
+                usuarioId: req.user?.id || null
+            });
+            await crearMovimiento(tx, {
+                tipo: 'entrada', categoria: 'Traslado', monto: amount, metodo: 'efectivo',
+                cuentaId: parseInt(destinoId), descripcion: descripcion || `Traslado desde cuenta ${origenId}`,
+                usuarioId: req.user?.id || null
+            });
         });
         res.json({ success: true });
     } catch (error) {
@@ -2351,22 +2349,16 @@ app.put('/api/compras/:id', async (req, res) => {
                             });
                         }
                     } else if (pago.cuentaId) {
-                        await tx.movimientoCaja.create({
-                            data: { tipo: 'salida', categoria: 'Compra', monto: parseInt(pago.monto), metodo: pago.metodo, referencia: `Compra ${compra.id}`, fecha: fechaColombia(), hora: horaColombia(), cuentaId: parseInt(pago.cuentaId), usuarioId: req.user?.id || null }
-                        });
-                        await tx.cuentaFinanciera.update({
-                            where: { id: parseInt(pago.cuentaId) },
-                            data: { saldoActual: { decrement: parseInt(pago.monto) } }
+                        await crearMovimiento(tx, {
+                            tipo: 'salida', categoria: 'Compra', monto: parseInt(pago.monto), metodo: pago.metodo,
+                            referencia: `Compra ${compra.id}`, cuentaId: parseInt(pago.cuentaId), usuarioId: req.user?.id || null
                         });
                     }
                 }
             } else if (metodoPago !== 'credito' && cuentaId) {
-                await tx.movimientoCaja.create({
-                    data: { tipo: 'salida', categoria: 'Compra', monto: parseInt(total), metodo: metodoPago, referencia: `Compra ${compra.id}`, fecha: fechaColombia(), hora: horaColombia(), cuentaId: parseInt(cuentaId), usuarioId: req.user?.id || null }
-                });
-                await tx.cuentaFinanciera.update({
-                    where: { id: parseInt(cuentaId) },
-                    data: { saldoActual: { decrement: parseInt(total) } }
+                await crearMovimiento(tx, {
+                    tipo: 'salida', categoria: 'Compra', monto: parseInt(total), metodo: metodoPago,
+                    referencia: `Compra ${compra.id}`, cuentaId: parseInt(cuentaId), usuarioId: req.user?.id || null
                 });
             } else if (metodoPago === 'credito' && proveedorId) {
                 const cuentasProv = await tx.cuentaPorPagar.findMany({
@@ -3161,23 +3153,10 @@ app.post('/api/clientes/:id/abono-fifo', async (req, res) => {
                 abonoRestante -= montoAbonarAca;
             }
 
-            await tx.movimientoCaja.create({
-                data: {
-                    tipo: 'entrada',
-                    categoria: 'Cobro de cartera',
-                    monto: amount,
-                    metodo: metodo,
-                    referencia: `Abono Cliente ${clienteId}`,
-                    fecha: fechaColombia(),
-                    hora: horaColombia(),
-                    cuentaId: accId,
-                    usuarioId: req.user?.id || null
-                }
-            });
-
-            await tx.cuentaFinanciera.update({
-                where: { id: accId },
-                data: { saldoActual: { increment: amount } }
+            await crearMovimiento(tx, {
+                tipo: 'entrada', categoria: 'Cobro de cartera', monto: amount, metodo: metodo,
+                referencia: `Abono Cliente ${clienteId}`, cuentaId: accId,
+                usuarioId: req.user?.id || null
             });
 
             return { success: true };
@@ -3248,23 +3227,10 @@ app.post('/api/proveedores/:id/abono-fifo', async (req, res) => {
                 abonoRestante -= montoAbonarAca;
             }
 
-            await tx.movimientoCaja.create({
-                data: {
-                    tipo: 'salida',
-                    categoria: 'Pago a proveedor',
-                    monto: amount,
-                    metodo: metodo,
-                    referencia: `Abono Proveedor ${proveedorId}`,
-                    fecha: fechaColombia(),
-                    hora: horaColombia(),
-                    cuentaId: accId,
-                    usuarioId: req.user?.id || null
-                }
-            });
-
-            await tx.cuentaFinanciera.update({
-                where: { id: accId },
-                data: { saldoActual: { decrement: amount } }
+            await crearMovimiento(tx, {
+                tipo: 'salida', categoria: 'Pago a proveedor', monto: amount, metodo: metodo,
+                referencia: `Abono Proveedor ${proveedorId}`, cuentaId: accId,
+                usuarioId: req.user?.id || null
             });
 
             return { success: true };
@@ -3349,34 +3315,16 @@ app.post('/api/compras', async (req, res) => {
                             });
                         }
                     } else if (pago.cuentaId) {
-                        await tx.movimientoCaja.create({
-                            data: {
-                                tipo: 'salida', categoria: 'Compra', monto: parseInt(pago.monto), metodo: pago.metodo,
-                                referencia: `Compra ${compra.id}`, fecha: fechaColombia(),
-                                hora: horaColombia(),
-                                cuentaId: parseInt(pago.cuentaId),
-                                usuarioId: req.user?.id || null
-                            }
-                        });
-                        await tx.cuentaFinanciera.update({
-                            where: { id: parseInt(pago.cuentaId) },
-                            data: { saldoActual: { decrement: parseInt(pago.monto) } }
+                        await crearMovimiento(tx, {
+                            tipo: 'salida', categoria: 'Compra', monto: parseInt(pago.monto), metodo: pago.metodo,
+                            referencia: `Compra ${compra.id}`, cuentaId: parseInt(pago.cuentaId), usuarioId: req.user?.id || null
                         });
                     }
                 }
             } else if (metodoPago !== 'credito' && cuentaId) {
-                await tx.movimientoCaja.create({
-                    data: {
-                        tipo: 'salida', categoria: 'Compra', monto: parseInt(total), metodo: metodoPago,
-                        referencia: `Compra ${compra.id}`, fecha: fechaColombia(),
-                        hora: horaColombia(),
-                        cuentaId: parseInt(cuentaId),
-                        usuarioId: req.user?.id || null
-                    }
-                });
-                await tx.cuentaFinanciera.update({
-                    where: { id: parseInt(cuentaId) },
-                    data: { saldoActual: { decrement: parseInt(total) } }
+                await crearMovimiento(tx, {
+                    tipo: 'salida', categoria: 'Compra', monto: parseInt(total), metodo: metodoPago,
+                    referencia: `Compra ${compra.id}`, cuentaId: parseInt(cuentaId), usuarioId: req.user?.id || null
                 });
             } else if (metodoPago === 'credito' && proveedorId) {
                 const cuentasProv = await tx.cuentaPorPagar.findMany({

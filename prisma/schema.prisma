@@ -409,6 +409,7 @@ model MovimientoCaja {
   descripcion  String?
   fecha        DateTime @default(now())
   hora         String
+  saldoDespues Int?     // Saldo de la cuenta después de este movimiento
   usuarioId    Int?
 
   cuentaId     Int?     // Referencia a CuentaFinanciera
