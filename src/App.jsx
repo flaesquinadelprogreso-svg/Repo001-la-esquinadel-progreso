@@ -28,7 +28,7 @@ const Usuarios           = lazy(() => import('./pages/Usuarios'));
 function PageLoader() {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: '200px' }}>
-      <div style={{ width: '32px', height: '32px', border: '3px solid #E2E5EA', borderTopColor: '#1E3A5F', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+      <div style={{ width: '32px', height: '32px', border: '3px solid #E2E5EA', borderTopColor: '#F2A900', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );

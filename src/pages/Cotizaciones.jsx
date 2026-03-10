@@ -148,7 +148,7 @@ export default function Cotizaciones() {
                                         onClick={() => navigate(`/editar-cotizacion/${cot.id}`)}
                                         onMouseOver={e => e.currentTarget.style.backgroundColor = '#F9FAFB'}
                                         onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                        <td style={{ padding: '12px 16px', fontWeight: 600, color: '#1E3A5F' }}>{cot.numeroCotizacion}</td>
+                                        <td style={{ padding: '12px 16px', fontWeight: 600, color: '#F2A900' }}>{cot.numeroCotizacion}</td>
                                         <td style={{ padding: '12px 16px' }}>{cot.cliente?.nombre || 'Sin cliente'}</td>
                                         <td style={{ padding: '12px 16px', color: '#6B7280' }}>{new Date(cot.createdAt).toLocaleDateString('es-CO')}</td>
                                         <td style={{ padding: '12px 16px', color: '#6B7280' }}>{cot.validaHasta ? new Date(cot.validaHasta + 'T12:00:00').toLocaleDateString('es-CO') : '-'}</td>

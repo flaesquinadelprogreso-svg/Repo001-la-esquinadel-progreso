@@ -43,7 +43,7 @@ function Toggle({ on, onClick }) {
             style={{
                 width: '44px', height: '24px', borderRadius: '12px',
                 display: 'flex', alignItems: 'center', cursor: 'pointer',
-                backgroundColor: on ? '#1E3A5F' : '#D1D5DB',
+                backgroundColor: on ? '#F2A900' : '#D1D5DB',
                 justifyContent: on ? 'flex-end' : 'flex-start',
                 padding: '2px', transition: 'all 200ms ease',
                 flexShrink: 0
@@ -274,10 +274,10 @@ export default function Usuarios() {
 
     const tabStyle = (active) => ({
         padding: '10px 24px', fontSize: '14px', fontWeight: active ? 600 : 500,
-        color: active ? '#1E3A5F' : '#6B7280', cursor: 'pointer',
-        borderBottom: active ? '2px solid #1E3A5F' : '2px solid transparent',
+        color: active ? '#F2A900' : '#6B7280', cursor: 'pointer',
+        borderBottom: active ? '2px solid #F2A900' : '2px solid transparent',
         backgroundColor: 'transparent', border: 'none', borderBottomWidth: '2px',
-        borderBottomStyle: 'solid', borderBottomColor: active ? '#1E3A5F' : 'transparent',
+        borderBottomStyle: 'solid', borderBottomColor: active ? '#F2A900' : 'transparent',
         transition: 'all 150ms'
     });
 
@@ -537,7 +537,7 @@ export default function Usuarios() {
                                                             backgroundColor: childOn ? '#EFF6FF' : '#F9FAFB',
                                                             transition: 'background 150ms'
                                                         }}>
-                                                            <p style={{ fontSize: '12px', fontWeight: 500, color: childOn ? '#1E3A5F' : '#9CA3AF' }}>↳ {child.label}</p>
+                                                            <p style={{ fontSize: '12px', fontWeight: 500, color: childOn ? '#F2A900' : '#9CA3AF' }}>↳ {child.label}</p>
                                                             <Toggle on={childOn} onClick={() => toggleUserPermission(child.key)} />
                                                         </div>
                                                     );
@@ -578,7 +578,7 @@ export default function Usuarios() {
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
                                 <label style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>Módulos permitidos</label>
                                 <button onClick={toggleAll}
-                                    style={{ fontSize: '12px', color: '#1E3A5F', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 500, textDecoration: 'underline' }}>
+                                    style={{ fontSize: '12px', color: '#F2A900', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 500, textDecoration: 'underline' }}>
                                     {roleForm.permisos.length === MODULES.length ? 'Desmarcar todos' : 'Marcar todos'}
                                 </button>
                             </div>
@@ -611,7 +611,7 @@ export default function Usuarios() {
                                                         transition: 'background 150ms'
                                                     }}>
                                                         <div>
-                                                            <p style={{ fontSize: '12px', fontWeight: 500, color: childOn ? '#1E3A5F' : '#9CA3AF' }}>↳ {child.label}</p>
+                                                            <p style={{ fontSize: '12px', fontWeight: 500, color: childOn ? '#F2A900' : '#9CA3AF' }}>↳ {child.label}</p>
                                                             <p style={{ fontSize: '10px', color: '#9CA3AF', marginTop: '1px' }}>{child.desc}</p>
                                                         </div>
                                                         <Toggle on={childOn} onClick={() => togglePermission(child.key)} />

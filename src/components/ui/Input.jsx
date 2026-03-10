@@ -25,7 +25,7 @@ export default function Input({
                         transition: 'all 150ms', boxSizing: 'border-box',
                         ...style
                     }}
-                    onFocus={e => { e.target.style.borderColor = '#3B82F6'; e.target.style.boxShadow = '0 0 0 2px rgba(59,130,246,0.2)'; }}
+                    onFocus={e => { e.target.style.borderColor = '#F2A900'; e.target.style.boxShadow = '0 0 0 2px rgba(242,169,0,0.2)'; }}
                     onBlur={e => { e.target.style.borderColor = error ? '#DC2626' : '#E2E5EA'; e.target.style.boxShadow = 'none'; }}
                     {...props}
                 />

@@ -83,8 +83,8 @@ export default function Roles() {
                         <p style={{ fontSize: '13px', color: '#6B7280' }}>Configura permisos para <strong>{showPerms.nombre || showPerms.name}</strong></p>
                         {permModules.map(mod => (
                             <div key={mod} style={{ border: '1px solid #E2E5EA', borderRadius: '8px', overflow: 'hidden' }}>
-                                <div style={{ padding: '12px 18px', backgroundColor: '#EBF0F7', borderBottom: '1px solid #E2E5EA' }}>
-                                    <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#1E3A5F' }}>{mod}</h4>
+                                <div style={{ padding: '12px 18px', backgroundColor: '#FFF8E7', borderBottom: '1px solid #E2E5EA' }}>
+                                    <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#F2A900' }}>{mod}</h4>
                                 </div>
                                 {permissions.filter(p => p.module === mod).map(perm => {
                                     const rp = rolePermissions.find(rp => rp.roleId === showPerms.id && rp.permissionId === perm.id);
@@ -101,7 +101,7 @@ export default function Roles() {
                                             <div style={{
                                                 width: '40px', height: '22px', borderRadius: '11px',
                                                 display: 'flex', alignItems: 'center', cursor: 'pointer',
-                                                backgroundColor: on ? '#1E3A5F' : '#E2E5EA',
+                                                backgroundColor: on ? '#F2A900' : '#E2E5EA',
                                                 justifyContent: on ? 'flex-end' : 'flex-start',
                                                 padding: '2px', transition: 'all 150ms'
                                             }}>

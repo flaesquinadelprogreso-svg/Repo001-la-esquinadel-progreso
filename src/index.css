@@ -4,12 +4,12 @@
 @source "../src/**/*.{js,jsx,ts,tsx}";
 
 @theme {
-  --color-navy: #1E3A5F;
-  --color-navy-light: #2C4F7C;
-  --color-navy-dark: #132B47;
-  --color-navy-50: #EBF0F7;
-  --color-navy-100: #D6E1EE;
-  --color-accent: #3B82F6;
+  --color-navy: #F2A900;
+  --color-navy-light: #FFBF00;
+  --color-navy-dark: #D4950A;
+  --color-navy-50: #FFF8E7;
+  --color-navy-100: #FFF0CC;
+  --color-accent: #F2A900;
   --color-bg: #F0F2F5;
   --color-card: #FFFFFF;
   --color-border: #E2E5EA;

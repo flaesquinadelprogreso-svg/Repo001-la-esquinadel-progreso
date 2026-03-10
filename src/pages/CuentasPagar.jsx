@@ -9,7 +9,7 @@ import '../styles/cuentas-mobile.css';
 
 const metodosPago = [
     { id: 'efectivo', label: 'Efectivo', icon: Wallet, color: '#16A34A' },
-    { id: 'transferencia', label: 'Transferencia', icon: Building, color: '#1E3A5F' }
+    { id: 'transferencia', label: 'Transferencia', icon: Building, color: '#F2A900' }
 ];
 
 export default function CuentasPagar() {
@@ -286,7 +286,7 @@ export default function CuentasPagar() {
                                 </div>
                                 <div style={{ minWidth: 0 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
-                                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#1E3A5F', backgroundColor: '#EBF0F7', padding: '2px 6px', borderRadius: '4px' }}>
+                                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#F2A900', backgroundColor: '#FFF8E7', padding: '2px 6px', borderRadius: '4px' }}>
                                             CXP-{cuenta.id.toString().padStart(4, '0')}
                                         </span>
                                         <span style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A2E', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -404,7 +404,7 @@ export default function CuentasPagar() {
                                 {/* Header compacto */}
                                 <div id="cuentas-modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '8px', borderBottom: '1px solid #E5E7EB' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#1E3A5F', backgroundColor: '#EBF0F7', padding: '3px 8px', borderRadius: '4px' }}>CXP-{cuentaActiva.id.toString().padStart(4, '0')}</span>
+                                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#F2A900', backgroundColor: '#FFF8E7', padding: '3px 8px', borderRadius: '4px' }}>CXP-{cuentaActiva.id.toString().padStart(4, '0')}</span>
                                         <span style={{ fontSize: '14px', fontWeight: 700, color: '#1A1A2E' }}>{cuentaActiva.proveedorNombre}</span>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -495,7 +495,7 @@ export default function CuentasPagar() {
                                                                 {isItemPagada ? (
                                                                     <span style={{ fontSize: '10px', color: '#166534', backgroundColor: '#DCFCE7', padding: '2px 6px', borderRadius: '4px', fontWeight: 800 }}>PAGADA</span>
                                                                 ) : (
-                                                                    <span style={{ fontSize: '10px', color: '#1E3A5F', backgroundColor: '#EBF0F7', padding: '2px 6px', borderRadius: '4px', fontWeight: 800 }}>CXP-{cuentaActiva.id.toString().padStart(4, '0')}</span>
+                                                                    <span style={{ fontSize: '10px', color: '#F2A900', backgroundColor: '#FFF8E7', padding: '2px 6px', borderRadius: '4px', fontWeight: 800 }}>CXP-{cuentaActiva.id.toString().padStart(4, '0')}</span>
                                                                 )}
                                                                 <span style={{ fontWeight: 500, color: isItemPagada ? '#166534' : '#111827' }}>{item.detail}</span>
                                                             </td>

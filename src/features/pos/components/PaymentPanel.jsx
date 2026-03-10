@@ -144,7 +144,7 @@ export default function PaymentPanel({
                             style={{
                                 padding: '6px 4px',
                                 borderRadius: '6px',
-                                border: paymentMethod === method.id ? '2px solid #1E3A5F' : '1px solid #E5E7EB',
+                                border: paymentMethod === method.id ? '2px solid #F2A900' : '1px solid #E5E7EB',
                                 backgroundColor: paymentMethod === method.id ? '#F0F7FF' : '#fff',
                                 cursor: 'pointer',
                                 display: 'flex',
@@ -156,8 +156,8 @@ export default function PaymentPanel({
                                 justifyContent: 'center'
                             }}
                         >
-                            <method.icon size={14} color={paymentMethod === method.id ? '#1E3A5F' : '#9CA3AF'} />
-                            <span style={{ fontSize: '10px', fontWeight: 600, color: paymentMethod === method.id ? '#1E3A5F' : '#6B7280' }}>
+                            <method.icon size={14} color={paymentMethod === method.id ? '#F2A900' : '#9CA3AF'} />
+                            <span style={{ fontSize: '10px', fontWeight: 600, color: paymentMethod === method.id ? '#F2A900' : '#6B7280' }}>
                                 {method.label}
                             </span>
                         </button>

@@ -277,7 +277,7 @@ export default function HistorialVentas() {
                                         alignItems: 'center',
                                         cursor: 'pointer',
                                         transition: 'background-color 0.2s',
-                                        borderLeft: expandedHistoryId === venta.id ? '4px solid #1E3A5F' : '4px solid transparent'
+                                        borderLeft: expandedHistoryId === venta.id ? '4px solid #F2A900' : '4px solid transparent'
                                     }}
                                 >
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

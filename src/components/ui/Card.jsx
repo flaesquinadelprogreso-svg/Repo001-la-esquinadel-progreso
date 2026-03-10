@@ -32,8 +32,8 @@ export function StatCard({ label, value, change, trend, icon: Icon }) {
                     {change && <span style={{ fontSize: '12px', fontWeight: 500, color: trend === 'up' ? '#16A34A' : '#DC2626' }}>{change}</span>}
                 </div>
                 {Icon && (
-                    <div style={{ width: '48px', height: '48px', borderRadius: '4px', backgroundColor: '#EBF0F7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Icon size={22} style={{ color: '#1E3A5F' }} />
+                    <div style={{ width: '48px', height: '48px', borderRadius: '4px', backgroundColor: '#FFF8E7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Icon size={22} style={{ color: '#F2A900' }} />
                     </div>
                 )}
             </div>

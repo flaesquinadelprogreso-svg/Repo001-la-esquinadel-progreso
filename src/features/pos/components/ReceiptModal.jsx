@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Modal from '../../../components/ui/Modal';
 import Button from '../../../components/ui/Button';
 import { formatPesos } from '../../../utils/currency';
-import logoSrc from '../../../Logo/Logo1.jpeg';
+import logoSrc from '../../../Logo/Logo1.jpg';
 import api from '../../../api/client';
 import { Send, CheckCircle, AlertTriangle, Phone } from 'lucide-react';
 
@@ -114,11 +114,11 @@ export default function ReceiptModal({ sale, onClose, onDownloadPDF }) {
                                 marginBottom: '8px'
                             }}
                         />
-                        <h2 style={{ fontSize: '14px', fontWeight: 800, margin: '0 0 2px 0', lineHeight: '1.3' }}>SERVITEC THE COMPANY SAS</h2>
-                        <p style={{ fontSize: '11px', margin: '0 0 1px 0', color: '#000', fontWeight: 600 }}>Nit 901.923.623-8</p>
-                        <p style={{ fontSize: '11px', margin: '0 0 1px 0', color: '#000', fontWeight: 600 }}>CLL 9 CR 15 LC 1 BRR CENTRO</p>
-                        <p style={{ fontSize: '11px', margin: '0 0 1px 0', color: '#000', fontWeight: 600 }}>El Copey - Tel. (605) 3243001873</p>
-                        <p style={{ fontSize: '11px', margin: '0 0 1px 0', color: '#000', fontWeight: 600 }}>EDIERAVILA21@GMAIL.COM</p>
+                        <h2 style={{ fontSize: '14px', fontWeight: 800, margin: '0 0 2px 0', lineHeight: '1.3' }}>FERRETERIA LA ESQUINA DEL PROGRESO</h2>
+                        <p style={{ fontSize: '11px', margin: '0 0 1px 0', color: '#000', fontWeight: 600 }}>NIT 19.591.012-2</p>
+                        <p style={{ fontSize: '11px', margin: '0 0 1px 0', color: '#000', fontWeight: 600 }}>CALLE 9A #10-37</p>
+                        <p style={{ fontSize: '11px', margin: '0 0 1px 0', color: '#000', fontWeight: 600 }}>Algarrobo - Tel. 3014147802</p>
+                        <p style={{ fontSize: '11px', margin: '0 0 1px 0', color: '#000', fontWeight: 600 }}>flaesquinadelprogreso@gmail.com</p>
                         <p style={{ fontSize: '14px', fontWeight: 800, margin: '8px 0 0 0', letterSpacing: '1px' }}>FACTURACIÓN</p>
                         <p style={{ fontSize: '12px', fontWeight: 700, margin: '4px 0 0 0' }}>No. {sale.receiptNumber}</p>
                         {sale.cliente?.nombre && (

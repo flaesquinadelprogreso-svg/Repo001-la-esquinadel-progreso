@@ -17,7 +17,7 @@ const getTotalStock = (product) => {
 // Location colors
 const ubicacionColor = (name) => {
     const colors = {
-        'Bodega Principal': '#3B82F6',
+        'Bodega Principal': '#F2A900',
         'Mostrador': '#10B981',
         'Vitrina': '#8B5CF6',
     };
@@ -596,7 +596,7 @@ export default function Inventario() {
 
                     {/* Value (Price) */}
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginBottom: '8px', marginTop: '8px' }}>
-                        <span style={{ fontSize: '15px', fontWeight: 700, color: '#1E3A5F' }}>
+                        <span style={{ fontSize: '15px', fontWeight: 700, color: '#F2A900' }}>
                             {formatPesos(product.precio)}
                         </span>
 

@@ -5,7 +5,7 @@ export const currentUser = {
     email: 'carlos@miempresa.com',
     role: 'Administrador',
     avatar: null,
-    business: 'REFRIELECTRIC',
+    business: 'FERRETERIA LA ESQUINA DEL PROGRESO',
 };
 
 export const notifications = [

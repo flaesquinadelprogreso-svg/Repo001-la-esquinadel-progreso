@@ -363,7 +363,7 @@ export default function NuevaCompra() {
                     <button onClick={() => navigate('/compras')} style={{ border: 'none', background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#F3F4F6', color: '#4B5563', transition: 'background 0.2s' }}>
                         <ArrowLeft size={18} />
                     </button>
-                    <h1 style={{ fontSize: '24px', fontWeight: 600, color: '#3B82F6' }}>{isEditing ? 'Editar orden de compra' : 'Nueva orden de compra'}</h1>
+                    <h1 style={{ fontSize: '24px', fontWeight: 600, color: '#F2A900' }}>{isEditing ? 'Editar orden de compra' : 'Nueva orden de compra'}</h1>
                 </div>
                 <div style={{ display: 'flex', gap: '8px' }}>
                     <Button variant="secondary" onClick={() => navigate('/compras')}>Cancelar</Button>
@@ -476,7 +476,7 @@ export default function NuevaCompra() {
                                             flex: 1,
                                             padding: '8px 6px',
                                             borderRadius: '6px',
-                                            border: metodoPago === m.value ? '2px solid #3B82F6' : '1px solid #D1D5DB',
+                                            border: metodoPago === m.value ? '2px solid #F2A900' : '1px solid #D1D5DB',
                                             backgroundColor: metodoPago === m.value ? '#EFF6FF' : '#fff',
                                             color: metodoPago === m.value ? '#1D4ED8' : '#4B5563',
                                             fontSize: '11px',
@@ -689,7 +689,7 @@ export default function NuevaCompra() {
                                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                         width: '26px', height: '26px', borderRadius: '4px', flexShrink: 0,
                                                         border: '1px solid #D1D5DB', backgroundColor: '#F9FAFB',
-                                                        cursor: 'pointer', fontSize: '14px', fontWeight: 700, color: '#1E3A5F'
+                                                        cursor: 'pointer', fontSize: '14px', fontWeight: 700, color: '#F2A900'
                                                     }}
                                                 >
                                                     <Plus size={14} />
@@ -779,7 +779,7 @@ export default function NuevaCompra() {
                         <textarea
                             value={observaciones}
                             onChange={e => setObservaciones(e.target.value)}
-                            style={{ width: '100%', height: '120px', padding: '12px', border: '1px solid #D1D5DB', borderRadius: '6px', resize: 'none', fontSize: '13px', outlineColor: '#3B82F6' }}
+                            style={{ width: '100%', height: '120px', padding: '12px', border: '1px solid #D1D5DB', borderRadius: '6px', resize: 'none', fontSize: '13px', outlineColor: '#F2A900' }}
                             placeholder="Escribe aquí las observaciones del documento..."
                         ></textarea>
                     </div>
@@ -799,7 +799,7 @@ export default function NuevaCompra() {
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 16px', marginTop: '8px', backgroundColor: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '6px' }}>
                             <span style={{ fontWeight: 700, fontSize: '14px', color: '#111827' }}>Total neto</span>
-                            <span style={{ fontWeight: 800, fontSize: '16px', color: '#1E3A5F' }}>{formatPesos(totales.neto)}</span>
+                            <span style={{ fontWeight: 800, fontSize: '16px', color: '#F2A900' }}>{formatPesos(totales.neto)}</span>
                         </div>
                     </div>
                 </div>

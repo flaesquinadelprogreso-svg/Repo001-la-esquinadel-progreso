@@ -78,7 +78,7 @@ export default function Topbar({ isMobile, onMenuToggle }) {
                     style={{
                         padding: '8px', borderRadius: '8px',
                         border: 'none', background: 'transparent',
-                        cursor: 'pointer', color: '#1E3A5F',
+                        cursor: 'pointer', color: '#F2A900',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         flexShrink: 0
                     }}
@@ -104,8 +104,8 @@ export default function Topbar({ isMobile, onMenuToggle }) {
                     onFocus={(e) => {
                         setSearchFocused(true);
                         e.target.style.backgroundColor = '#FFFFFF';
-                        e.target.style.borderColor = '#3B82F6';
-                        e.target.style.boxShadow = '0 0 0 2px rgba(59, 130, 246, 0.2)';
+                        e.target.style.borderColor = '#F2A900';
+                        e.target.style.boxShadow = '0 0 0 2px rgba(242, 169, 0, 0.2)';
                     }}
                     onBlur={(e) => {
                         setSearchFocused(false);
@@ -118,8 +118,8 @@ export default function Topbar({ isMobile, onMenuToggle }) {
 
             {/* Navbar Branding */}
             <div style={{ display: 'none', lg: 'block', marginRight: 'auto', marginLeft: '20px' }} className="topbar-branding">
-                <span style={{ fontSize: '18px', fontWeight: 800, color: '#1E3A5F', letterSpacing: '0.5px' }}>
-                    REFRIELECTRIC
+                <span style={{ fontSize: '18px', fontWeight: 800, color: '#F2A900', letterSpacing: '0.5px' }}>
+                    LA ESQUINA DEL PROGRESO
                 </span>
             </div>
 
@@ -128,12 +128,12 @@ export default function Topbar({ isMobile, onMenuToggle }) {
                 <button style={{
                     display: 'flex', alignItems: 'center', gap: '6px',
                     padding: '7px 14px', fontSize: '12px', fontWeight: 600,
-                    color: 'white', backgroundColor: '#1E3A5F',
+                    color: 'white', backgroundColor: '#F2A900',
                     borderRadius: '8px', border: 'none', cursor: 'pointer',
                     transition: 'background 150ms'
                 }}
-                    onMouseEnter={e => e.currentTarget.style.backgroundColor = '#2C4F7C'}
-                    onMouseLeave={e => e.currentTarget.style.backgroundColor = '#1E3A5F'}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FFBF00'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = '#F2A900'}
                 >
                     <Wallet size={14} /><span>Caja</span>
                 </button>
@@ -144,7 +144,7 @@ export default function Topbar({ isMobile, onMenuToggle }) {
                         border: 'none', background: 'transparent', cursor: 'pointer',
                         color: '#6B7280', transition: 'all 150ms'
                     }}
-                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#EBF0F7'}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FFF8E7'}
                         onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
                         <Bell size={18} />
@@ -159,8 +159,8 @@ export default function Topbar({ isMobile, onMenuToggle }) {
                 }>
                     {(close) => (
                         <div style={{ width: '300px' }}>
-                            <div style={{ padding: '12px 16px', borderBottom: '1px solid #E2E5EA', backgroundColor: '#EBF0F7' }}>
-                                <h4 style={{ fontSize: '12px', fontWeight: 600, color: '#1E3A5F', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Notificaciones</h4>
+                            <div style={{ padding: '12px 16px', borderBottom: '1px solid #E2E5EA', backgroundColor: '#FFF8E7' }}>
+                                <h4 style={{ fontSize: '12px', fontWeight: 600, color: '#F2A900', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Notificaciones</h4>
                             </div>
                             {notifications.length === 0 ? (
                                 <div style={{ padding: '20px', textAlign: 'center', color: '#9CA3AF', fontSize: '13px' }}>
@@ -169,7 +169,7 @@ export default function Topbar({ isMobile, onMenuToggle }) {
                             ) : (
                                 notifications.map(n => (
                                     <div key={n.id} onClick={close} style={{ padding: '12px 16px', cursor: 'pointer', borderBottom: '1px solid #F0F2F5', transition: 'background 100ms' }}
-                                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#EBF0F7'}
+                                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FFF8E7'}
                                         onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                                     >
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
@@ -191,12 +191,12 @@ export default function Topbar({ isMobile, onMenuToggle }) {
                         border: 'none', background: 'transparent', cursor: 'pointer',
                         transition: 'all 150ms'
                     }}
-                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#EBF0F7'}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FFF8E7'}
                         onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
                         <div style={{
                             width: '32px', height: '32px', borderRadius: '8px',
-                            backgroundColor: '#1E3A5F', display: 'flex',
+                            backgroundColor: '#F2A900', display: 'flex',
                             alignItems: 'center', justifyContent: 'center'
                         }}>
                             <span style={{ fontSize: '11px', fontWeight: 700, color: 'white' }}>

@@ -3,7 +3,7 @@ import {
     Wallet, Building, Plus, ArrowDownCircle, ArrowUpCircle,
     Clock, Search, AlertCircle, FileText, ChevronRight,
     TrendingUp, TrendingDown, Landmark, X, ArrowRightLeft,
-    CheckCircle, Trash2
+    CheckCircle, Trash2, DoorOpen, DoorClosed, Lock
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
@@ -19,7 +19,9 @@ export default function CajaBancos() {
     const [showAccountModal, setShowAccountModal] = useState(false);
     const [showMovementModal, setShowMovementModal] = useState(false);
     const [showTransferModal, setShowTransferModal] = useState(false);
-
+    const [cajaIniciada, setCajaIniciada] = useState(true);
+    const [saldoInicialInput, setSaldoInicialInput] = useState('');
+    const [iniciandoCaja, setIniciandoCaja] = useState(false);
 
     // Form states
     const [nuevaCuenta, setNuevaCuenta] = useState({ nombre: '', tipo: 'banco', saldoInicial: 0, bancoNombre: '', numeroCuenta: '' });
@@ -45,10 +47,18 @@ export default function CajaBancos() {
             if (startDate) movParams.append('startDate', startDate);
             if (endDate) movParams.append('endDate', endDate);
 
-            const cuentasRes = await api.get('/cuentas-financieras');
+            const [cuentasRes, movsRes, cierresRes] = await Promise.all([
+                api.get('/cuentas-financieras'),
+                api.get(`/movimientos-financieros?${movParams.toString()}`),
+                api.get('/cierres')
+            ]);
             const cuentasData = cuentasRes.data;
 
-            const movsRes = await api.get(`/movimientos-financieros?${movParams.toString()}`);
+            // Detectar si la caja nunca fue iniciada: caja principal con saldo 0, sin cierres ni movimientos
+            const cajaPrincipal = cuentasData.find(c => c.tipo === 'caja');
+            const sinCierres = cierresRes.data.length === 0;
+            const sinMovimientos = movsRes.data.length === 0;
+            setCajaIniciada(!(cajaPrincipal && cajaPrincipal.saldoActual === 0 && sinCierres && sinMovimientos));
 
             setCuentas(cuentasData);
             setMovimientos(movsRes.data);
@@ -155,10 +165,36 @@ export default function CajaBancos() {
     const totalDisponible = cuentas.reduce((sum, c) => sum + c.saldoActual, 0);
     const cajaPrincipalId = cuentas.find(c => c.tipo === 'caja')?.id;
 
+    const handleIniciarCaja = async () => {
+        setIniciandoCaja(true);
+        try {
+            const monto = parseInt(saldoInicialInput.replace(/\D/g, '')) || 0;
+            // Abrir cierre de caja con saldo inicial
+            await api.post('/cierres/abrir', { saldoInicial: monto, cuentaId: cajaPrincipalId });
+            // Si hay saldo inicial > 0, registrar movimiento de entrada
+            if (monto > 0) {
+                await api.post('/movimientos-financieros', {
+                    tipo: 'entrada',
+                    categoria: 'Saldo inicial',
+                    monto: monto,
+                    cuentaId: cajaPrincipalId,
+                    descripcion: 'Saldo inicial al abrir caja por primera vez',
+                    metodo: 'efectivo'
+                });
+            }
+            setSaldoInicialInput('');
+            fetchData();
+        } catch (error) {
+            alert(error.response?.data?.error || 'Error al iniciar la caja');
+        } finally {
+            setIniciandoCaja(false);
+        }
+    };
+
     if (loading) {
         return (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ width: '40px', height: '40px', border: '3px solid #E5E7EB', borderTop: '3px solid #1E3A5F', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+                <div style={{ width: '40px', height: '40px', border: '3px solid #E5E7EB', borderTop: '3px solid #F2A900', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
                 <p style={{ color: '#6B7280', fontSize: '14px', fontWeight: 500 }}>Actualizando saldos y cajas...</p>
                 <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
             </div>
@@ -166,6 +202,105 @@ export default function CajaBancos() {
     }
 
     return (
+        <div style={{ position: 'relative', minHeight: '100%' }}>
+        {/* Modal popup de inicialización de caja — no bloquea sidebar/topbar */}
+        {!cajaIniciada && (
+            <div style={{
+                position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.35)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                zIndex: 50, borderRadius: '12px'
+            }}>
+                <div style={{
+                    backgroundColor: '#fff',
+                    borderRadius: '14px',
+                    padding: '28px 32px',
+                    width: '400px',
+                    maxWidth: '90vw',
+                    boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
+                    animation: 'fadeInUp 0.25s ease-out'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                        <div style={{
+                            width: '42px', height: '42px', borderRadius: '10px',
+                            backgroundColor: '#FFF8E7', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            flexShrink: 0
+                        }}>
+                            <Wallet size={22} color="#F2A900" />
+                        </div>
+                        <div>
+                            <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A2E', margin: 0 }}>
+                                Inicializar Caja Principal
+                            </h3>
+                            <p style={{ fontSize: '12px', color: '#9CA3AF', margin: 0 }}>
+                                Ingrese el saldo inicial para comenzar
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style={{ marginBottom: '20px' }}>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#374151', marginBottom: '6px' }}>
+                            Saldo Inicial en Caja
+                        </label>
+                        <div style={{ position: 'relative' }}>
+                            <span style={{
+                                position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)',
+                                color: '#6B7280', fontWeight: 700, fontSize: '15px'
+                            }}>$</span>
+                            <input
+                                type="text"
+                                value={saldoInicialInput ? parseInt(saldoInicialInput).toLocaleString('es-CO') : ''}
+                                onChange={(e) => setSaldoInicialInput(e.target.value.replace(/\D/g, ''))}
+                                placeholder="0"
+                                autoFocus
+                                style={{
+                                    width: '100%', padding: '11px 12px 11px 28px',
+                                    border: '2px solid #E5E7EB', borderRadius: '8px',
+                                    fontSize: '18px', fontWeight: 700, outline: 'none',
+                                    textAlign: 'right', transition: 'border-color 0.2s'
+                                }}
+                                onFocus={(e) => e.target.style.borderColor = '#F2A900'}
+                                onBlur={(e) => e.target.style.borderColor = '#E5E7EB'}
+                            />
+                        </div>
+                        <p style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '4px', marginBottom: 0 }}>
+                            Puede ser $0 si inicia sin efectivo en caja
+                        </p>
+                    </div>
+
+                    <button
+                        onClick={handleIniciarCaja}
+                        disabled={iniciandoCaja}
+                        style={{
+                            width: '100%', padding: '11px',
+                            background: 'linear-gradient(135deg, #F2A900 0%, #D4950A 100%)',
+                            backgroundColor: '#F2A900',
+                            color: '#fff', fontSize: '14px', fontWeight: 700,
+                            border: 'none', borderRadius: '8px',
+                            cursor: iniciandoCaja ? 'not-allowed' : 'pointer',
+                            opacity: iniciandoCaja ? 0.7 : 1,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                            boxShadow: '0 4px 12px rgba(242,169,0,0.3)',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        {iniciandoCaja ? 'Abriendo caja...' : (
+                            <>
+                                <DoorOpen size={18} />
+                                Abrir Caja Principal
+                            </>
+                        )}
+                    </button>
+                </div>
+                <style>{`
+                    @keyframes fadeInUp {
+                        from { opacity: 0; transform: translateY(20px); }
+                        to { opacity: 1; transform: translateY(0); }
+                    }
+                `}</style>
+            </div>
+        )}
+
         <div id="caja-root" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {/* Header */}
             <div id="caja-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -174,7 +309,7 @@ export default function CajaBancos() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '8px' }}>
                         <button
                             onClick={() => setViewMode('general')}
-                            style={{ background: 'none', border: 'none', padding: 0, fontSize: '13px', fontWeight: viewMode === 'general' ? 600 : 400, color: viewMode === 'general' ? '#1E3A5F' : '#6B7280', cursor: 'pointer', borderBottom: viewMode === 'general' ? '2px solid #1E3A5F' : '2px solid transparent' }}
+                            style={{ background: 'none', border: 'none', padding: 0, fontSize: '13px', fontWeight: viewMode === 'general' ? 600 : 400, color: viewMode === 'general' ? '#F2A900' : '#6B7280', cursor: 'pointer', borderBottom: viewMode === 'general' ? '2px solid #F2A900' : '2px solid transparent' }}
                         >
                             Resumen General
                         </button>
@@ -197,7 +332,7 @@ export default function CajaBancos() {
                 <>
                     {/* Total Highlight */}
                     <div style={{
-                        backgroundColor: '#1E3A5F',
+                        backgroundColor: '#F2A900',
                         padding: '24px',
                         borderRadius: '12px',
                         color: '#fff',
@@ -250,7 +385,7 @@ export default function CajaBancos() {
                                             alignItems: 'center',
                                             justifyContent: 'center'
                                         }}>
-                                            {cuenta.tipo === 'caja' ? <Wallet size={16} color="#6B7280" /> : <Landmark size={16} color="#1E3A5F" />}
+                                            {cuenta.tipo === 'caja' ? <Wallet size={16} color="#6B7280" /> : <Landmark size={16} color="#F2A900" />}
                                         </div>
                                         <div>
                                             <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#1A1A2E' }}>{cuenta.nombre}{cuenta.tipo === 'banco' && cuenta.numeroCuenta ? ` ****${cuenta.numeroCuenta}` : ''}</h3>
@@ -289,7 +424,7 @@ export default function CajaBancos() {
                             alignItems: 'center',
                             justifyContent: 'center'
                         }}>
-                            {cuentas.find(c => c.id.toString() === selectedCuentaId)?.tipo === 'caja' ? <Wallet size={28} color="#6B7280" /> : <Landmark size={28} color="#1E3A5F" />}
+                            {cuentas.find(c => c.id.toString() === selectedCuentaId)?.tipo === 'caja' ? <Wallet size={28} color="#6B7280" /> : <Landmark size={28} color="#F2A900" />}
                         </div>
                         <div>
                             <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#1A1A2E' }}>{cuentas.find(c => c.id.toString() === selectedCuentaId)?.nombre}</h2>
@@ -305,7 +440,7 @@ export default function CajaBancos() {
                         </p>
                         <button
                             onClick={() => { setViewMode('general'); setSelectedCuentaId(''); }}
-                            style={{ marginTop: '8px', color: '#1E3A5F', fontSize: '13px', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                            style={{ marginTop: '8px', color: '#F2A900', fontSize: '13px', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
                         >
                             &larr; Volver a todas las cuentas
                         </button>
@@ -358,7 +493,7 @@ export default function CajaBancos() {
                                 variant="secondary"
                                 size="sm"
                                 onClick={handleExportExcel}
-                                style={(startDate || endDate) ? { backgroundColor: '#1E3A5F', color: '#fff', borderColor: '#1E3A5F' } : {}}
+                                style={(startDate || endDate) ? { backgroundColor: '#F2A900', color: '#fff', borderColor: '#F2A900' } : {}}
                             >
                                 <FileText size={14} style={{ marginRight: '6px' }} />{(startDate || endDate) ? 'Descargar Historial Filtrado' : 'Exportar Excel'}
                             </Button>
@@ -367,7 +502,7 @@ export default function CajaBancos() {
                     <div style={{ overflowX: 'auto', position: 'relative', minHeight: '200px' }}>
                         {loading && (
                             <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>
-                                <div style={{ color: '#1E3A5F', fontWeight: 600 }}>Cargando movimientos...</div>
+                                <div style={{ color: '#F2A900', fontWeight: 600 }}>Cargando movimientos...</div>
                             </div>
                         )}
                         <table style={{ width: '100%', borderCollapse: 'collapse', opacity: loading ? 0.5 : 1 }}>
@@ -633,5 +768,6 @@ export default function CajaBancos() {
             </Modal >
 
         </div >
+        </div>
     );
 }

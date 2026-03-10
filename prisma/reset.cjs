@@ -92,11 +92,11 @@ async function reset() {
     // Resetear configuración a valores genéricos
     await prisma.configuracion.updateMany({
         data: {
-            nombreEmpresa: 'Almacén Refrielectric The Company',
-            nit: '1083040891-1',
-            direccion: 'Calle 9 Carrera 15 Local 1',
-            telefono: '3234465603',
-            email: null,
+            nombreEmpresa: 'FERRETERIA LA ESQUINA DEL PROGRESO',
+            nit: '19.591.012-2',
+            direccion: 'CALLE 9A #10-37',
+            telefono: '3014147802',
+            email: 'flaesquinadelprogreso@gmail.com',
         }
     });
     console.log('  ✓ Configuración: reseteada a valores genéricos');

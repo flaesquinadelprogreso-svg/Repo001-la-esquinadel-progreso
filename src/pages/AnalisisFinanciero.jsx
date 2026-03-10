@@ -209,7 +209,7 @@ export default function AnalisisFinanciero() {
     if (!data) {
         return (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ width: '40px', height: '40px', border: '3px solid #E5E7EB', borderTop: '3px solid #1E3A5F', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+                <div style={{ width: '40px', height: '40px', border: '3px solid #E5E7EB', borderTop: '3px solid #F2A900', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
                 <p style={{ color: '#6B7280', fontSize: '14px', fontWeight: 500 }}>Sincronizando reportes financieros...</p>
                 <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
             </div>
@@ -347,7 +347,7 @@ export default function AnalisisFinanciero() {
                         >
                             <div style={{ position: 'absolute', right: '-15px', top: '10px', opacity: 0.05 }}><TrendingUp size={80} /></div>
                             <span style={{ fontSize: '13px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Margen Neto</span>
-                            <div style={{ fontSize: '24px', fontWeight: 700, color: '#3B82F6', marginTop: '8px' }}>
+                            <div style={{ fontSize: '24px', fontWeight: 700, color: '#F2A900', marginTop: '8px' }}>
                                 {isNaN(resumen.margenRentabilidad) ? '0.0' : Number(resumen.margenRentabilidad).toFixed(1)}%
                             </div>
                             <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '4px' }}>Rentabilidad</div>
@@ -409,7 +409,7 @@ export default function AnalisisFinanciero() {
                                     return topClients.map((c, idx) => (
                                         <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '8px', borderBottom: '1px solid #F3F4F6' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 600, color: '#3B82F6' }}>{idx + 1}</div>
+                                                <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 600, color: '#F2A900' }}>{idx + 1}</div>
                                                 <span style={{ fontSize: '13px', fontWeight: 500, color: '#374151' }}>{c.name}</span>
                                             </div>
                                             <div style={{ textAlign: 'right' }}>

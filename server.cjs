@@ -140,7 +140,7 @@ async function checkCXCNotifications() {
         if (!phone) return;
         const jid = `${phone}@s.whatsapp.net`;
 
-        const empresa = config?.nombreEmpresa || 'SERVITEC THE COMPANY SAS';
+        const empresa = config?.nombreEmpresa || 'FERRETERIA LA ESQUINA DEL PROGRESO';
         const formatCOP = (v) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(v);
 
         // Get date 3 days from now
@@ -2566,7 +2566,7 @@ app.post('/api/whatsapp/prueba', waLimiter, async (req, res) => {
         const jid = `${phone}@s.whatsapp.net`;
 
         const config = await prisma.configuracion.findFirst();
-        const empresa = config?.nombreEmpresa || 'Almacén Refrielectric The Company';
+        const empresa = config?.nombreEmpresa || 'FERRETERIA LA ESQUINA DEL PROGRESO';
 
         const msg = `*MENSAJE DE PRUEBA*\n\n` +
             `Este es un mensaje de prueba del sistema *${empresa}*.\n\n` +
@@ -2609,7 +2609,7 @@ app.post('/api/whatsapp/enviar-recibo', waLimiter, async (req, res) => {
 
         const jid = `${phone}@s.whatsapp.net`;
         const config = await prisma.configuracion.findFirst();
-        const empresa = config?.nombreEmpresa || 'Almacén Refrielectric The Company';
+        const empresa = config?.nombreEmpresa || 'FERRETERIA LA ESQUINA DEL PROGRESO';
         const fmt = (v) => '$' + Math.round(Number(v) || 0).toLocaleString('es-CO');
 
         // Sanitizar filename
@@ -3636,6 +3636,8 @@ app.post('/api/admin/panic-reset', async (req, res) => {
 
         await prisma.$transaction(async (tx) => {
             // Orden de eliminación respetando foreign keys (hijos primero)
+            await tx.itemCotizacion.deleteMany();
+            await tx.cotizacion.deleteMany();
             await tx.movimientoCajaDevolucion.deleteMany();
             await tx.movimientoCaja.deleteMany();
             await tx.pagoVenta.deleteMany();
@@ -3673,7 +3675,7 @@ app.post('/api/admin/panic-reset', async (req, res) => {
             for (const r of resoluciones) {
                 await tx.resolucion.update({ where: { id: r.id }, data: { actual: r.desde } });
             }
-        });
+        }, { maxWait: 30000, timeout: 120000 });
 
         res.json({ success: true, message: 'Sistema reseteado correctamente. Todos los datos transaccionales han sido eliminados.' });
     } catch (error) {

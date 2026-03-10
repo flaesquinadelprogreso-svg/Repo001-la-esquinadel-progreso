@@ -78,7 +78,7 @@ export default function Compras() {
                                     <td data-label="Fecha" style={{ padding: '14px 20px', fontSize: '13px', color: '#6B7280' }}>
                                         {new Date(p.createdAt).toLocaleDateString()}
                                     </td>
-                                    <td data-label="Total" style={{ padding: '14px 20px', fontSize: '13px', fontWeight: 600, color: '#1E3A5F' }}>
+                                    <td data-label="Total" style={{ padding: '14px 20px', fontSize: '13px', fontWeight: 600, color: '#F2A900' }}>
                                         {formatPesos(p.total)}
                                     </td>
                                     <td data-label="Estado" style={{ padding: '14px 20px' }}>

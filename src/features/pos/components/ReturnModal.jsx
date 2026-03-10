@@ -180,7 +180,7 @@ export default function ReturnModal({
                                     flex: 1,
                                     padding: '10px',
                                     borderRadius: '8px',
-                                    border: returnMethod === method.id ? '2px solid #1E3A5F' : '1px solid #E5E7EB',
+                                    border: returnMethod === method.id ? '2px solid #F2A900' : '1px solid #E5E7EB',
                                     backgroundColor: returnMethod === method.id ? '#F0F7FF' : '#fff',
                                     cursor: 'pointer',
                                     display: 'flex',
@@ -189,8 +189,8 @@ export default function ReturnModal({
                                     gap: '4px'
                                 }}
                             >
-                                <method.icon size={18} color={returnMethod === method.id ? '#1E3A5F' : '#6B7280'} />
-                                <span style={{ fontSize: '12px', fontWeight: 600, color: returnMethod === method.id ? '#1E3A5F' : '#6B7280' }}>
+                                <method.icon size={18} color={returnMethod === method.id ? '#F2A900' : '#6B7280'} />
+                                <span style={{ fontSize: '12px', fontWeight: 600, color: returnMethod === method.id ? '#F2A900' : '#6B7280' }}>
                                     {method.label}
                                 </span>
                             </button>

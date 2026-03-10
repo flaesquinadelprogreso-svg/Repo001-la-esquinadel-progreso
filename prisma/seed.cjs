@@ -317,11 +317,11 @@ async function main() {
         where: { id: 1 },
         update: {},
         create: {
-            nombreEmpresa: 'REFRIELECTRIC',
-            nit: '900123456-1',
-            direccion: 'Calle Principal #123',
-            telefono: '6012345678',
-            email: 'contacto@miempresa.com',
+            nombreEmpresa: 'FERRETERIA LA ESQUINA DEL PROGRESO',
+            nit: '19.591.012-2',
+            direccion: 'CALLE 9A #10-37',
+            telefono: '3014147802',
+            email: 'flaesquinadelprogreso@gmail.com',
             moneda: 'COP',
             ivaDefecto: 19
         }

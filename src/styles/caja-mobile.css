@@ -34,11 +34,11 @@
 
     /* ── Tarjeta Total Disponible ── */
     /* El div justo debajo del header cuando viewMode es 'general' */
-    #caja-root>div:nth-child(2)[style*="backgroundColor: '#1E3A5F'"] {
+    #caja-root>div:nth-child(2)[style*="backgroundColor: '#F2A900'"] {
         padding: 16px !important;
     }
 
-    #caja-root>div:nth-child(2)[style*="backgroundColor: '#1E3A5F'"] p:nth-child(2) {
+    #caja-root>div:nth-child(2)[style*="backgroundColor: '#F2A900'"] p:nth-child(2) {
         font-size: 26px !important;
     }
 

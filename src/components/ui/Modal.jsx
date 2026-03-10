@@ -31,7 +31,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md', f
                 <div style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     padding: '14px 20px', borderBottom: '1px solid #E2E5EA',
-                    backgroundColor: '#EBF0F7', borderRadius: '4px 4px 0 0'
+                    backgroundColor: '#FFF8E7', borderRadius: '4px 4px 0 0'
                 }}>
                     <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#1A1A2E' }}>{title}</h3>
                     <button onClick={onClose} style={{
@@ -39,7 +39,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md', f
                         background: 'transparent', cursor: 'pointer', color: '#9CA3AF',
                         display: 'flex', transition: 'all 150ms'
                     }}
-                        onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#D6E1EE'; e.currentTarget.style.color = '#1A1A2E'; }}
+                        onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#FFF0CC'; e.currentTarget.style.color = '#1A1A2E'; }}
                         onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#9CA3AF'; }}
                     >
                         <X size={18} />

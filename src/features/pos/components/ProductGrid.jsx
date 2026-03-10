@@ -88,7 +88,7 @@ export default function ProductGrid({ products, services, recentItems, isSearchi
                                     justifyContent: 'center',
                                     minHeight: 0
                                 }}
-                                onMouseEnter={e => { e.currentTarget.style.borderColor = isService ? '#F59E0B' : '#1E3A5F'; e.currentTarget.style.boxShadow = isService ? '0 2px 8px rgba(245,158,11,0.15)' : '0 2px 8px rgba(0,0,0,0.08)'; }}
+                                onMouseEnter={e => { e.currentTarget.style.borderColor = isService ? '#F59E0B' : '#F2A900'; e.currentTarget.style.boxShadow = isService ? '0 2px 8px rgba(245,158,11,0.15)' : '0 2px 8px rgba(0,0,0,0.08)'; }}
                                 onMouseLeave={e => { e.currentTarget.style.borderColor = isService ? '#FDE68A' : '#E5E7EB'; e.currentTarget.style.boxShadow = 'none'; }}
                             >
                                 <div style={{ flex: 1, minHeight: 0, backgroundColor: isService ? '#FEF3C7' : '#F8FAFC', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '4px' }}>

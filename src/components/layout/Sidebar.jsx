@@ -6,7 +6,7 @@ import {
     ChevronLeft, Store, CreditCard, Banknote, Landmark, ReceiptText, FileText
 } from 'lucide-react';
 import api from '../../api/client';
-import logo from '../../Logo/Logo1.jpeg';
+import logo from '../../Logo/Logo1.jpg';
 
 const navItems = [
     { path: '/analisis-financiero', label: 'Análisis Financiero', icon: BarChart3 },
@@ -113,9 +113,9 @@ export default function Sidebar({ collapsed, onToggle, isMobile, mobileOpen, onM
                 {!collapsed && (
                     <div style={{ overflow: 'hidden' }}>
                         <h1 style={{ fontSize: '14px', fontWeight: 700, color: '#1A1A2E', whiteSpace: 'nowrap' }}>
-                            REFRIELECTRIC
+                            LA ESQUINA
                         </h1>
-                        <p style={{ fontSize: '11px', color: '#9CA3AF', whiteSpace: 'nowrap', fontWeight: 500 }}>THE COMPANY</p>
+                        <p style={{ fontSize: '11px', color: '#9CA3AF', whiteSpace: 'nowrap', fontWeight: 500 }}>DEL PROGRESO</p>
                     </div>
                 )}
             </div>
@@ -137,13 +137,13 @@ export default function Sidebar({ collapsed, onToggle, isMobile, mobileOpen, onM
                                         justifyContent: collapsed ? 'center' : 'flex-start',
                                         borderRadius: '8px', textDecoration: 'none',
                                         fontSize: '13px', fontWeight: isActive ? 600 : 500,
-                                        backgroundColor: isActive ? '#1E3A5F' : 'transparent',
+                                        backgroundColor: isActive ? '#F2A900' : 'transparent',
                                         color: isActive ? '#FFFFFF' : '#6B7280',
                                         transition: 'all 150ms ease'
                                     }}
                                     onMouseEnter={e => {
                                         if (!isActive) {
-                                            e.currentTarget.style.backgroundColor = '#EBF0F7';
+                                            e.currentTarget.style.backgroundColor = '#FFF8E7';
                                             e.currentTarget.style.color = '#1A1A2E';
                                         }
                                     }}
@@ -168,12 +168,12 @@ export default function Sidebar({ collapsed, onToggle, isMobile, mobileOpen, onM
                 <div style={{
                     display: 'flex', alignItems: 'center', gap: '10px',
                     padding: '10px 12px', borderRadius: '8px',
-                    backgroundColor: '#EBF0F7',
+                    backgroundColor: '#FFF8E7',
                     justifyContent: collapsed ? 'center' : 'flex-start'
                 }}>
                     <div style={{
                         width: '32px', height: '32px', borderRadius: '8px',
-                        backgroundColor: '#1E3A5F', display: 'flex',
+                        backgroundColor: '#F2A900', display: 'flex',
                         alignItems: 'center', justifyContent: 'center', flexShrink: 0
                     }}>
                         <span style={{ fontSize: '11px', fontWeight: 700, color: 'white' }}>
@@ -202,7 +202,7 @@ export default function Sidebar({ collapsed, onToggle, isMobile, mobileOpen, onM
                         boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
                         transition: 'all 150ms ease'
                     }}
-                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#EBF0F7'; }}
+                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#FFF8E7'; }}
                     onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#FFFFFF'; }}
                 >
                     <ChevronLeft size={14} style={{ color: '#9CA3AF', transform: collapsed ? 'rotate(180deg)' : 'none', transition: 'transform 300ms ease' }} />

@@ -5,7 +5,7 @@ export default function Table({ columns, data, onRowClick }) {
         <div style={{ width: '100%', overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                 <thead>
-                    <tr style={{ backgroundColor: '#1E3A5F' }}>
+                    <tr style={{ backgroundColor: '#F2A900' }}>
                         {columns.map((col) => (
                             <th key={col.key} style={{
                                 padding: '12px 20px', textAlign: col.className?.includes('text-right') ? 'right' : col.className?.includes('text-center') ? 'center' : 'left',

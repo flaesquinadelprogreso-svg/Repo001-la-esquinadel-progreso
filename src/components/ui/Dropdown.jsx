@@ -34,7 +34,7 @@ export function DropdownItem({ children, icon: Icon, danger, onClick }) {
                 color: danger ? '#DC2626' : '#1A1A2E',
                 backgroundColor: 'transparent', border: 'none', fontFamily: 'inherit'
             }}
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = danger ? '#FEE2E2' : '#EBF0F7'}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = danger ? '#FEE2E2' : '#FFF8E7'}
             onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
         >
             {Icon && <Icon size={16} />}
