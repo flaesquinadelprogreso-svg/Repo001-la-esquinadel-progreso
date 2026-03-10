@@ -80,9 +80,9 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secreto-temporal-en-lo-que-railway-funciona-2026';
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secreto-temporal-2026';
 if (!process.env.JWT_SECRET) {
-    console.warn('\n⚠️ ATENCIÓN CRÍTICA: La variable JWT_SECRET no fue inyectada por Railway. Utilizando secreto de respaldo para permitir el arranque.\n');
+    console.warn('\n⚠️ ATENCIÓN: La variable JWT_SECRET no está configurada. Utilizando secreto de respaldo.\n');
 }
 
 // Middleware de autenticación global
