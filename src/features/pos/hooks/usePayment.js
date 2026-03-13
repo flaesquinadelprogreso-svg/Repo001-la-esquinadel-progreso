@@ -120,9 +120,9 @@ export function usePayment({ cart, total, subtotal, iva, ivaTasa, cuentas, selec
                         servicioId: null,
                         nombre: item.name,
                         codigo: item.code,
-                        cantidad: dist.qty,
+                        cantidad: parseFloat(dist.qty.toFixed(4)),
                         precioUnit: item.price,
-                        subtotal: item.price * dist.qty,
+                        subtotal: Math.round(item.price * dist.qty),
                         locationId: dist.locationId
                     });
                 });
@@ -132,9 +132,9 @@ export function usePayment({ cart, total, subtotal, iva, ivaTasa, cuentas, selec
                     servicioId: item.id,
                     nombre: item.name,
                     codigo: item.code,
-                    cantidad: item.qty,
+                    cantidad: parseFloat(item.qty.toFixed(4)),
                     precioUnit: item.price,
-                    subtotal: item.price * item.qty,
+                    subtotal: Math.round(item.price * item.qty),
                     esServicio: true
                 });
             }

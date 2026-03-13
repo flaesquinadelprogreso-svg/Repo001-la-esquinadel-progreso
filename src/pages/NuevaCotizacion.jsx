@@ -224,7 +224,7 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
                         nombre: i.descripcion || i.productoSearch,
                         codigo: catItem?.codigo || null,
                         descripcion: i.descripcion,
-                        cantidad: parseInt(i.cantidad) || 1,
+                        cantidad: parseFloat(i.cantidad) || 1,
                         precioUnit: Math.round(parseFloat(i.precioUnit) || 0),
                         descuento: Math.round(parseFloat(i.descuento) || 0),
                         subtotal: Math.round(parseFloat(i.valor) || 0)
@@ -467,7 +467,7 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
                                         style={{ width: '100%', padding: '6px 8px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }} />
                                 </td>
                                 <td style={{ padding: '4px' }}>
-                                    <input type="number" min="1" value={item.cantidad} onChange={e => handleItemChange(item.id, 'cantidad', e.target.value)}
+                                    <input type="text" inputMode="decimal" value={item.cantidad} onChange={e => { let v = e.target.value.replace(',', '.'); if (v === '' || /^\d*\.?\d*$/.test(v)) handleItemChange(item.id, 'cantidad', v); }} onBlur={e => { const val = parseFloat(e.target.value); handleItemChange(item.id, 'cantidad', val > 0 ? String(val) : '1'); }}
                                         style={{ width: '100%', padding: '6px 8px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '12px', textAlign: 'right', outline: 'none', boxSizing: 'border-box' }} />
                                 </td>
                                 <td style={{ padding: '4px' }}>

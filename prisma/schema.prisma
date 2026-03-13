@@ -63,19 +63,19 @@ model Ubicacion {
 }
 
 model Producto {
-  id          Int       @id @default(autoincrement())
-  codigo      String    @unique
-  nombre      String
-  descripcion String?
-  precio      Int       // Precio en centavos para evitar decimales
-  costo       Int       @default(0)
-  stockMinimo Int       @default(5)
-  precioMayor Int?      // Precio al por mayor opcional
-  categoria   String?
-  imagen      String?
-  activo      Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id            Int       @id @default(autoincrement())
+  codigo        String    @unique
+  nombre        String
+  descripcion   String?
+  precio        Int       // Precio en centavos para evitar decimales
+  costo         Int       @default(0)
+  stockMinimo   Int       @default(5)
+  precioMayor   Int?      // Precio al por mayor opcional
+  categoria     String?
+  imagen        String?
+  activo        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   
   // Relaciones
   stockUbicaciones StockUbicacion[]
@@ -89,7 +89,7 @@ model StockUbicacion {
   id          Int      @id @default(autoincrement())
   productoId  Int
   ubicacionId Int
-  stock       Int      @default(0)
+  stock       Float    @default(0)
   
   producto   Producto  @relation(fields: [productoId], references: [id], onDelete: Cascade)
   ubicacion  Ubicacion @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
@@ -151,8 +151,8 @@ model ItemVenta {
   servicioId   Int?
   nombre       String
   codigo       String
-  cantidad     Int
-  cantidadDevuelta Int @default(0) // Control de devoluciones para el item
+  cantidad     Float
+  cantidadDevuelta Float @default(0) // Control de devoluciones para el item
   precioUnit   Int
   subtotal     Int
   esServicio   Boolean  @default(false)
@@ -214,7 +214,7 @@ model ItemDevolucion {
   productoId     Int?
   nombre         String
   codigo         String
-  cantidad       Int      // Cantidad devuelta
+  cantidad       Float    // Cantidad devuelta
   precioUnit     Int      // Precio unitario original
   subtotal       Int      // Subtotal devuelto
   esServicio     Boolean  @default(false)
@@ -282,7 +282,7 @@ model ItemCompra {
   ubicacionId  Int?       // Bodega
   nombre       String
   codigo       String?
-  cantidad     Int
+  cantidad     Float
   precioUnit   Int
   descuento    Int        @default(0)
   baseAiu      Int        @default(0)
@@ -494,7 +494,7 @@ model ItemCotizacion {
   nombre        String
   codigo        String?
   descripcion   String?
-  cantidad      Int     @default(1)
+  cantidad      Float   @default(1)
   precioUnit    Int     @default(0)
   descuento     Int     @default(0)
   subtotal      Int     @default(0)

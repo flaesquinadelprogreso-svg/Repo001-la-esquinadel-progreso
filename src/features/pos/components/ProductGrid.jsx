@@ -7,6 +7,7 @@ const getTotalStock = (product) => {
     return product.stockUbicaciones?.reduce((sum, sl) => sum + sl.stock, 0) || 0;
 };
 
+
 export default function ProductGrid({ products, services, recentItems, isSearching, search, onSearchChange, loading, onProductClick, onServiceClick, onHistoryClick }) {
     // Cuando hay búsqueda: combinar productos y servicios filtrados. Sin búsqueda: usar recientes del backend
     let combined;

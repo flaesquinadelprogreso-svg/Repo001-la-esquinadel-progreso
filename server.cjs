@@ -888,8 +888,8 @@ app.post('/api/productos/:id/entrada', async (req, res) => {
         }
         await prisma.stockUbicacion.upsert({
             where: { productoId_ubicacionId: { productoId, ubicacionId: parseInt(ubicacionId) } },
-            update: { stock: { increment: parseInt(cantidad) } },
-            create: { productoId, ubicacionId: parseInt(ubicacionId), stock: parseInt(cantidad) }
+            update: { stock: { increment: parseFloat(cantidad) } },
+            create: { productoId, ubicacionId: parseInt(ubicacionId), stock: parseFloat(cantidad) }
         });
         res.json({ success: true });
     } catch (error) {
@@ -908,12 +908,12 @@ app.post('/api/productos/:id/disminuir', async (req, res) => {
         const stockRecord = await prisma.stockUbicacion.findUnique({
             where: { productoId_ubicacionId: { productoId, ubicacionId: parseInt(ubicacionId) } }
         });
-        if (!stockRecord || stockRecord.stock < parseInt(cantidad)) {
+        if (!stockRecord || stockRecord.stock < parseFloat(cantidad)) {
             return res.status(400).json({ error: 'Stock insuficiente en la ubicación seleccionada' });
         }
         await prisma.stockUbicacion.update({
             where: { id: stockRecord.id },
-            data: { stock: { decrement: parseInt(cantidad) } }
+            data: { stock: { decrement: parseFloat(cantidad) } }
         });
         res.json({ success: true });
     } catch (error) {
@@ -1030,8 +1030,8 @@ app.post('/api/ventas', async (req, res) => {
 
         // Validar cantidades
         for (const item of items) {
-            const qty = parseInt(item.cantidad);
-            if (!Number.isInteger(qty) || qty <= 0) {
+            const qty = parseFloat(item.cantidad);
+            if (isNaN(qty) || qty <= 0) {
                 return res.status(400).json({ error: `Cantidad inválida para ${item.nombre || 'item'}` });
             }
         }
@@ -1068,17 +1068,17 @@ app.post('/api/ventas', async (req, res) => {
                     const p = productsMap.get(item.productoId);
                     if (!p) throw new Error(`Producto ${item.productoId} no encontrado`);
                     // Respect price override from frontend if present
-                    precioUnit = item.precioUnit != null ? parseInt(item.precioUnit) : p.precio;
+                    precioUnit = item.precioUnit != null ? Math.round(parseFloat(item.precioUnit)) : p.precio;
                     costoUnit = p.costo || 0;
                 } else if (item.servicioId) {
                     const s = servicesMap.get(item.servicioId);
                     if (!s) throw new Error(`Servicio ${item.servicioId} no encontrado`);
                     // Respect price override from frontend if present
-                    precioUnit = item.precioUnit != null ? parseInt(item.precioUnit) : s.precio;
+                    precioUnit = item.precioUnit != null ? Math.round(parseFloat(item.precioUnit)) : s.precio;
                     costoUnit = 0;
                 }
-                const itemTotal = precioUnit * item.cantidad;
-                const itemCostoTotal = costoUnit * item.cantidad;
+                const itemTotal = Math.round(precioUnit * item.cantidad);
+                const itemCostoTotal = Math.round(costoUnit * item.cantidad);
                 const itemSubtotal = Math.round(itemTotal / (1 + (ivaTasa / 100)));
                 totalVentaCalculado += itemTotal;
                 subtotalCalculado += itemSubtotal;
@@ -2311,19 +2311,19 @@ app.put('/api/compras/:id', async (req, res) => {
                         productoId: item.productoId ? parseInt(item.productoId) : null,
                         nombre: item.nombre || item.descripcion || 'Sin nombre',
                         codigo: item.codigo || null,
-                        cantidad: parseInt(item.cantidad) || 1,
+                        cantidad: parseFloat(item.cantidad) || 1,
                         precioUnit: parseInt(item.precioUnit) || 0,
                         descuento: parseInt(item.descuento) || 0,
                         impCargo: parseInt(item.impCargo) || 0,
-                        subtotal: (parseInt(item.cantidad) || 1) * (parseInt(item.precioUnit) || 0),
+                        subtotal: Math.round((parseFloat(item.cantidad) || 1) * (parseInt(item.precioUnit) || 0)),
                         ubicacionId: item.ubicacionId ? parseInt(item.ubicacionId) : null
                     }
                 });
                 if (item.productoId && item.ubicacionId) {
                     await tx.stockUbicacion.upsert({
                         where: { productoId_ubicacionId: { productoId: parseInt(item.productoId), ubicacionId: parseInt(item.ubicacionId) } },
-                        update: { stock: { increment: parseInt(item.cantidad) } },
-                        create: { productoId: parseInt(item.productoId), ubicacionId: parseInt(item.ubicacionId), stock: parseInt(item.cantidad) }
+                        update: { stock: { increment: parseFloat(item.cantidad) } },
+                        create: { productoId: parseInt(item.productoId), ubicacionId: parseInt(item.ubicacionId), stock: parseFloat(item.cantidad) }
                     });
                 }
             }
@@ -3752,7 +3752,7 @@ app.post('/api/cotizaciones', async (req, res) => {
                             nombre: item.nombre || 'Sin nombre',
                             codigo: item.codigo || null,
                             descripcion: item.descripcion || null,
-                            cantidad: parseInt(item.cantidad) || 1,
+                            cantidad: parseFloat(item.cantidad) || 1,
                             precioUnit: parseInt(item.precioUnit) || 0,
                             descuento: parseInt(item.descuento) || 0,
                             subtotal: parseInt(item.subtotal) || 0
@@ -3801,7 +3801,7 @@ app.put('/api/cotizaciones/:id', async (req, res) => {
                             nombre: item.nombre || 'Sin nombre',
                             codigo: item.codigo || null,
                             descripcion: item.descripcion || null,
-                            cantidad: parseInt(item.cantidad) || 1,
+                            cantidad: parseFloat(item.cantidad) || 1,
                             precioUnit: parseInt(item.precioUnit) || 0,
                             descuento: parseInt(item.descuento) || 0,
                             subtotal: parseInt(item.subtotal) || 0

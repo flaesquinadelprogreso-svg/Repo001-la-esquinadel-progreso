@@ -20,6 +20,10 @@ export default function LocationPopup({ product, locationQuantities, setLocation
 
     if (!product) return null;
 
+    // Calcular total de cantidad y subtotal
+    const totalQty = Object.values(locationQuantities).reduce((sum, qty) => sum + (parseFloat(qty) || 0), 0);
+    const subtotalCalc = Math.round(precioActual * totalQty);
+
     return (
         <Modal isOpen={true} onClose={onClose} title="Seleccionar Ubicación">
             <div style={{ minWidth: '380px' }}>
@@ -95,22 +99,32 @@ export default function LocationPopup({ product, locationQuantities, setLocation
                                         </div>
                                         <div>
                                             <div style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>{s.ubicacion?.nombre}</div>
-                                            <div style={{ fontSize: '12px', color: '#6B7280' }}>Disponible: <span style={{ fontWeight: 600, color: '#374151' }}>{s.stock} unds</span></div>
+                                            <div style={{ fontSize: '12px', color: '#6B7280' }}>Disponible: <span style={{ fontWeight: 600, color: '#374151' }}>{s.stock % 1 === 0 ? s.stock : s.stock.toFixed(2)}</span></div>
                                         </div>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                         <input
-                                            type="number"
-                                            min="0"
-                                            max={s.stock}
+                                            type="text"
+                                            inputMode="decimal"
                                             placeholder="0"
-                                            value={locationQuantities[s.ubicacionId] || ''}
+                                            value={locationQuantities[s.ubicacionId] ?? ''}
                                             onChange={(e) => {
-                                                const val = Math.min(parseInt(e.target.value) || 0, s.stock);
-                                                setLocationQuantities(prev => ({ ...prev, [s.ubicacionId]: val || '' }));
+                                                let raw = e.target.value.replace(',', '.');
+                                                // Allow empty, digits, and one decimal point
+                                                if (raw !== '' && !/^\d*\.?\d*$/.test(raw)) return;
+                                                setLocationQuantities(prev => ({ ...prev, [s.ubicacionId]: raw }));
+                                            }}
+                                            onBlur={(e) => {
+                                                const raw = e.target.value;
+                                                if (raw === '' || raw === '.') {
+                                                    setLocationQuantities(prev => ({ ...prev, [s.ubicacionId]: '' }));
+                                                    return;
+                                                }
+                                                const val = Math.min(parseFloat(raw) || 0, s.stock);
+                                                setLocationQuantities(prev => ({ ...prev, [s.ubicacionId]: val > 0 ? String(val) : '' }));
                                             }}
                                             style={{
-                                                width: '70px',
+                                                width: '80px',
                                                 padding: '8px 12px',
                                                 border: '1px solid #D1D5DB',
                                                 borderRadius: '8px',
@@ -136,11 +150,32 @@ export default function LocationPopup({ product, locationQuantities, setLocation
                     </div>
                 </div>
 
+                {/* Subtotal preview - muestra el cálculo cuando hay cantidad */}
+                {totalQty > 0 && (
+                    <div style={{
+                        backgroundColor: '#F0FDF4',
+                        border: '1px solid #BBF7D0',
+                        borderRadius: '10px',
+                        padding: '12px 16px',
+                        marginBottom: '16px',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                    }}>
+                        <span style={{ fontSize: '13px', color: '#166534', fontWeight: 500 }}>
+                            {totalQty % 1 === 0 ? totalQty : totalQty.toFixed(2)} × {formatPesos(precioActual)}
+                        </span>
+                        <span style={{ fontSize: '16px', fontWeight: 700, color: '#166534' }}>
+                            = {formatPesos(subtotalCalc)}
+                        </span>
+                    </div>
+                )}
+
                 <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '24px', paddingTop: '16px', borderTop: '1px solid #E5E7EB' }}>
                     <Button variant="secondary" onClick={onClose}>Cancelar</Button>
                     <Button
                         onClick={() => onConfirm(product, locationQuantities, precioActual)}
-                        disabled={!Object.values(locationQuantities).some(qty => parseInt(qty) > 0)}
+                        disabled={!Object.values(locationQuantities).some(qty => parseFloat(qty) > 0)}
                     >
                         <Plus size={18} style={{ marginRight: '6px' }} />
                         Agregar al Carrito

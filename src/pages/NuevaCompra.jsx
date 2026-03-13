@@ -715,7 +715,7 @@ export default function NuevaCompra() {
                                         </select>
                                     </td>
                                     <td style={{ padding: '4px' }}>
-                                        <input type="number" min="1" value={item.cantidad} onChange={e => handleItemChange(item.id, 'cantidad', e.target.value)} style={{ width: '100%', padding: '6px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '12px', textAlign: 'right', outline: 'none' }} />
+                                        <input type="text" inputMode="decimal" value={item.cantidad} onChange={e => { let v = e.target.value.replace(',', '.'); if (v === '' || /^\d*\.?\d*$/.test(v)) handleItemChange(item.id, 'cantidad', v); }} onBlur={e => { const val = parseFloat(e.target.value); handleItemChange(item.id, 'cantidad', val > 0 ? String(val) : '1'); }} style={{ width: '100%', padding: '6px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '12px', textAlign: 'right', outline: 'none' }} />
                                     </td>
                                     <td style={{ padding: '4px' }}>
                                         <input

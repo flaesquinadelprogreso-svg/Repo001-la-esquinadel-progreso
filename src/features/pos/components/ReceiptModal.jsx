@@ -135,12 +135,12 @@ export default function ReceiptModal({ sale, onClose, onDownloadPDF }) {
 
                         {sale.items.map((item, idx) => (
                             <div key={idx} style={{ display: 'flex', marginBottom: '8px', fontSize: '11px', fontWeight: 600 }}>
-                                <div style={{ width: '35px', paddingTop: '2px' }}>{item.qty}</div>
+                                <div style={{ width: '35px', paddingTop: '2px' }}>{item.qty % 1 === 0 ? item.qty : item.qty.toFixed(2)}</div>
                                 <div style={{ flex: 1, paddingLeft: '8px', paddingRight: '4px', wordBreak: 'break-word' }}>
                                     {item.name}
                                 </div>
                                 <div style={{ width: '70px', textAlign: 'right', paddingTop: '2px' }}>
-                                    {formatPesos(item.price * item.qty)}
+                                    {formatPesos(Math.round(item.price * item.qty))}
                                 </div>
                             </div>
                         ))}

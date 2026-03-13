@@ -48,7 +48,7 @@ export default function POS() {
     const { cart, addToCart, addServiceToCart, updateQty, removeFromCart, togglePrecioMayor, clearCart: clearCartItems } = useCart();
 
     // Totals (computed here so usePayment can receive them)
-    const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    const total = cart.reduce((sum, item) => sum + Math.round(item.price * item.qty), 0);
     const subtotal = Math.round(total / (1 + (ivaTasa / 100)));
     const iva = total - subtotal;
 
