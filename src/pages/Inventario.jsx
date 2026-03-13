@@ -38,6 +38,7 @@ export default function Inventario() {
     // Pagination
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [totalProducts, setTotalProducts] = useState(0);
     const limit = 21; // 21 items por página
 
     // Modals
@@ -52,6 +53,7 @@ export default function Inventario() {
     // Importación Excel
     const fileImportRef = useRef(null);
     const [isImporting, setIsImporting] = useState(false);
+    const [importProgress, setImportProgress] = useState({ current: 0, total: 0 });
 
     // Edit product / service
     const [editProduct, setEditProduct] = useState(null);
@@ -93,9 +95,11 @@ export default function Inventario() {
                 if (prodRes.data.meta) {
                     setProducts(prodRes.data.data);
                     setTotalPages(prodRes.data.meta.totalPages || 1);
+                    setTotalProducts(prodRes.data.meta.total || 0);
                 } else {
                     setProducts(prodRes.data);
                     setTotalPages(1);
+                    setTotalProducts(Array.isArray(prodRes.data) ? prodRes.data.length : 0);
                 }
             }
             if (servRes?.data) setServices(servRes.data);
@@ -431,6 +435,17 @@ export default function Inventario() {
         }
     };
 
+    const handleDeleteAllProducts = async () => {
+        if (!confirm('¿Está seguro de que desea ELIMINAR todos los productos del inventario?\n\nEsta acción no se puede deshacer. El historial de ventas y compras se conservará.')) return;
+        try {
+            await api.delete('/productos');
+            alert('Inventario eliminado correctamente');
+            fetchData();
+        } catch (error) {
+            alert(error?.response?.data?.error || 'Error al eliminar inventario');
+        }
+    };
+
     const handleImportExcel = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -525,12 +540,26 @@ export default function Inventario() {
                 return;
             }
 
-            const response = await api.post('/inventario/importar', { productos: payloadProductos });
+            // Enviar en lotes de 50 para mostrar progreso
+            const BATCH_SIZE = 50;
+            const totalProductos = payloadProductos.length;
+            let totalInsertados = 0, totalActualizados = 0, totalErrores = 0;
+            setImportProgress({ current: 0, total: totalProductos });
 
-            if (response.data?.success) {
-                alert(`¡Éxito! Importación completada:\n- Creados nuevos: ${response.data.insertados}\n- Actualizados: ${response.data.actualizados}\n- Errores/Omitidos: ${response.data.errores}`);
-                fetchData();
+            for (let i = 0; i < totalProductos; i += BATCH_SIZE) {
+                const batch = payloadProductos.slice(i, i + BATCH_SIZE);
+                const response = await api.post('/inventario/importar', { productos: batch });
+                if (response.data?.success) {
+                    totalInsertados += response.data.insertados || 0;
+                    totalActualizados += response.data.actualizados || 0;
+                    totalErrores += response.data.errores || 0;
+                }
+                setImportProgress({ current: Math.min(i + batch.length, totalProductos), total: totalProductos });
             }
+
+            alert(`¡Éxito! Importación completada:\n- Creados nuevos: ${totalInsertados}\n- Actualizados: ${totalActualizados}\n- Errores/Omitidos: ${totalErrores}`);
+            setImportProgress({ current: 0, total: 0 });
+            fetchData();
 
         } catch (error) {
             console.error('Error importando Excel:', error);
@@ -720,7 +749,14 @@ export default function Inventario() {
             <div id="inventario-header-consolidado" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', flexShrink: 0 }}>
                 <div style={{ minWidth: '200px' }}>
                     <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#1A1A2E' }}>Inventario</h1>
-                    <p style={{ fontSize: '13px', color: '#6B7280', marginTop: '2px' }}>Gestión de productos</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '2px' }}>
+                        <span style={{ fontSize: '12px', backgroundColor: '#EEF2FF', color: '#4F46E5', padding: '2px 8px', borderRadius: '10px', fontWeight: 600 }}>
+                            {totalProducts} productos
+                        </span>
+                        <span style={{ fontSize: '12px', backgroundColor: '#FFFBEB', color: '#D97706', padding: '2px 8px', borderRadius: '10px', fontWeight: 600 }}>
+                            {services.length} servicios
+                        </span>
+                    </div>
                 </div>
 
                 <div id="inventario-search-bar" style={{ display: 'flex', gap: '12px', alignItems: 'center', flex: 1, minWidth: '300px', maxWidth: '500px' }}>
@@ -763,7 +799,9 @@ export default function Inventario() {
                     />
                     <Button onClick={() => fileImportRef.current?.click()} style={{ backgroundColor: '#10B981', color: 'white', border: 'none', padding: '8px 12px', fontSize: '13px' }} disabled={isImporting}>
                         <FileSpreadsheet size={16} style={{ marginRight: '4px' }} />
-                        {isImporting ? 'Importando...' : 'Importar'}
+                        {isImporting && importProgress.total > 0
+                            ? `${importProgress.current} / ${importProgress.total}`
+                            : isImporting ? 'Leyendo archivo...' : 'Importar'}
                     </Button>
                     <Button variant="secondary" onClick={() => setShowLocationModal(true)} style={{ padding: '8px 12px', fontSize: '13px' }}>
                         <MapPin size={16} style={{ marginRight: '4px' }} />Ubicación
@@ -772,6 +810,29 @@ export default function Inventario() {
                     <Button onClick={openNew} style={{ padding: '8px 12px', fontSize: '13px' }}><Plus size={16} style={{ marginRight: '4px' }} />Producto</Button>
                 </div>
             </div>
+
+            {/* Barra de progreso de importación */}
+            {isImporting && importProgress.total > 0 && (
+                <div style={{ marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 600, color: '#374151' }}>
+                            Importando productos...
+                        </span>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#10B981' }}>
+                            {importProgress.current} de {importProgress.total} ({Math.round((importProgress.current / importProgress.total) * 100)}%)
+                        </span>
+                    </div>
+                    <div style={{ width: '100%', height: '8px', backgroundColor: '#E5E7EB', borderRadius: '4px', overflow: 'hidden' }}>
+                        <div style={{
+                            width: `${(importProgress.current / importProgress.total) * 100}%`,
+                            height: '100%',
+                            backgroundColor: '#10B981',
+                            borderRadius: '4px',
+                            transition: 'width 0.3s ease'
+                        }} />
+                    </div>
+                </div>
+            )}
 
             {/* Área scrollable: contenido + paginación */}
             <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>

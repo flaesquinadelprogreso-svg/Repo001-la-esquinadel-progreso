@@ -848,6 +848,25 @@ app.delete('/api/productos/:id', async (req, res) => {
     }
 });
 
+// Eliminar TODOS los productos (inventario completo)
+app.delete('/api/productos', async (req, res) => {
+    try {
+        await prisma.$transaction(async (tx) => {
+            // Desvincula productos de items históricos (ventas, compras, devoluciones, cotizaciones)
+            await tx.itemVenta.updateMany({ where: { productoId: { not: null } }, data: { productoId: null } });
+            await tx.itemCompra.updateMany({ where: { productoId: { not: null } }, data: { productoId: null } });
+            await tx.itemDevolucion.updateMany({ where: { productoId: { not: null } }, data: { productoId: null } });
+            await tx.itemCotizacion.updateMany({ where: { productoId: { not: null } }, data: { productoId: null } });
+            // StockUbicacion se elimina en cascada
+            await tx.producto.deleteMany();
+        });
+        res.json({ success: true, message: 'Inventario eliminado completamente' });
+    } catch (error) {
+        logger.error('Error al eliminar inventario:', error);
+        res.status(500).json({ error: 'Error al eliminar inventario: ' + error.message });
+    }
+});
+
 app.post('/api/productos/:id/transferir', async (req, res) => {
     try {
         const { origenUbicacionId, destinoUbicacionId, cantidad } = req.body;
