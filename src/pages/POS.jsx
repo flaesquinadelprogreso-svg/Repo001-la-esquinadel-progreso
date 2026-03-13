@@ -45,7 +45,7 @@ export default function POS() {
     const { products, services, recentItems, isSearching, clients, addClient, cuentas, loading, isCajaOpen, fetchData } = usePOSData(search, setSelectedAccountId);
 
     // Cart hook
-    const { cart, addToCart, addServiceToCart, updateQty, removeFromCart, togglePrecioMayor, clearCart: clearCartItems } = useCart();
+    const { cart, addToCart, addServiceToCart, updateQty, setDirectQty, removeFromCart, togglePrecioMayor, clearCart: clearCartItems } = useCart();
 
     // Totals (computed here so usePayment can receive them)
     const total = cart.reduce((sum, item) => sum + Math.round(item.price * item.qty), 0);
@@ -132,6 +132,7 @@ export default function POS() {
                 cart={cart}
                 clearCart={clearCart}
                 updateQty={updateQty}
+                setDirectQty={setDirectQty}
                 removeFromCart={removeFromCart}
                 togglePrecioMayor={togglePrecioMayor}
             />

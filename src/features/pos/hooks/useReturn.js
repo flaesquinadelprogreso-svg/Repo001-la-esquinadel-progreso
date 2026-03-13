@@ -46,7 +46,7 @@ export function useReturn({ cuentas, fetchData }) {
             .filter(([_, qty]) => qty > 0)
             .map(([itemVentaId, cantidad]) => ({
                 itemVentaId: parseInt(itemVentaId),
-                cantidad: parseInt(cantidad)
+                cantidad: parseFloat(cantidad)
             }));
 
         if (itemsToReturn.length === 0) {

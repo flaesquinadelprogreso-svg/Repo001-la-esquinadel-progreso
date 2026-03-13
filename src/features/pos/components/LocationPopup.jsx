@@ -115,6 +115,7 @@ export default function LocationPopup({ product, locationQuantities, setLocation
                                                 setLocationQuantities(prev => ({ ...prev, [s.ubicacionId]: raw }));
                                             }}
                                             onBlur={(e) => {
+                                                e.target.style.borderColor = '#D1D5DB';
                                                 const raw = e.target.value;
                                                 if (raw === '' || raw === '.') {
                                                     setLocationQuantities(prev => ({ ...prev, [s.ubicacionId]: '' }));
@@ -135,7 +136,6 @@ export default function LocationPopup({ product, locationQuantities, setLocation
                                                 transition: 'border-color 0.2s'
                                             }}
                                             onFocus={e => e.target.style.borderColor = '#4F46E5'}
-                                            onBlur={e => e.target.style.borderColor = '#D1D5DB'}
                                         />
                                     </div>
                                 </div>

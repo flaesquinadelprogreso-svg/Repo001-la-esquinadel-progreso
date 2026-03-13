@@ -7,7 +7,7 @@ const formatQty = (qty) => {
     return qty % 1 === 0 ? qty.toString() : qty.toFixed(2);
 };
 
-export default function CartPanel({ cart, clearCart, updateQty, removeFromCart, togglePrecioMayor }) {
+export default function CartPanel({ cart, clearCart, updateQty, setDirectQty, removeFromCart, togglePrecioMayor }) {
     return (
         <div id="pos-cart" style={{ flex: 4, minWidth: 0, backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             {/* Cart Header */}
@@ -100,9 +100,25 @@ export default function CartPanel({ cart, clearCart, updateQty, removeFromCart, 
                                         >
                                             <Minus size={10} />
                                         </button>
-                                        <span style={{ fontSize: '12px', fontWeight: 700, minWidth: '30px', textAlign: 'center' }}>
-                                            {formatQty(item.qty)}
-                                        </span>
+                                        <input
+                                            type="text"
+                                            inputMode="decimal"
+                                            value={item._editingQty !== undefined ? item._editingQty : formatQty(item.qty)}
+                                            onChange={(e) => {
+                                                let v = e.target.value.replace(',', '.');
+                                                if (v === '' || /^\d*\.?\d*$/.test(v)) {
+                                                    setDirectQty(item.id, item.isService, v, true);
+                                                }
+                                            }}
+                                            onBlur={(e) => {
+                                                const val = parseFloat(e.target.value) || 0;
+                                                setDirectQty(item.id, item.isService, val > 0 ? val : 0.25, false);
+                                            }}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') e.target.blur();
+                                            }}
+                                            style={{ width: '40px', fontSize: '12px', fontWeight: 700, textAlign: 'center', border: 'none', background: 'transparent', outline: 'none', padding: '2px' }}
+                                        />
                                         <button
                                             onClick={() => updateQty(item.id, item.isService, 1)}
                                             style={{ width: '22px', height: '22px', borderRadius: '4px', border: 'none', background: '#F9FAFB', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}

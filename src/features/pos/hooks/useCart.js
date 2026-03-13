@@ -122,6 +122,31 @@ export function useCart() {
         }).filter(Boolean));
     };
 
+    // Set quantity directly (typed by user)
+    const setDirectQty = (id, isService, value, isEditing) => {
+        setCart(prev => prev.map(item => {
+            if (item.id === id && item.isService === isService) {
+                if (isEditing) {
+                    return { ...item, _editingQty: value };
+                }
+                const newQty = parseFloat(value) || 0;
+                if (newQty <= 0) return null;
+                const cleanItem = { ...item };
+                delete cleanItem._editingQty;
+                cleanItem.qty = parseFloat(newQty.toFixed(4));
+                if (cleanItem.isProduct && cleanItem.distributions?.length > 0) {
+                    // Adjust last distribution to match new total
+                    const otherQty = cleanItem.distributions.slice(0, -1).reduce((s, d) => s + d.qty, 0);
+                    const lastDist = { ...cleanItem.distributions[cleanItem.distributions.length - 1] };
+                    lastDist.qty = Math.max(0, parseFloat((newQty - otherQty).toFixed(4)));
+                    cleanItem.distributions = [...cleanItem.distributions.slice(0, -1), lastDist].filter(d => d.qty > 0.001);
+                }
+                return cleanItem;
+            }
+            return item;
+        }).filter(Boolean));
+    };
+
     // Remove from cart
     const removeFromCart = (id, isService) => {
         setCart(prev => prev.filter(item => !(item.id === id && item.isService === isService)));
@@ -143,5 +168,5 @@ export function useCart() {
         clearPersistedCart();
     };
 
-    return { cart, addToCart, addServiceToCart, updateQty, removeFromCart, togglePrecioMayor, clearCart };
+    return { cart, addToCart, addServiceToCart, updateQty, setDirectQty, removeFromCart, togglePrecioMayor, clearCart };
 }

@@ -480,13 +480,21 @@ export default function Inventario() {
 
             const payloadProductos = [];
 
-            // Helper to parse numbers like "19.250" or 19.250 safely
+            // Helper to parse money amounts like "19.250" or "19,250" → 19250 (enteros/centavos)
             const parseAmount = (val) => {
                 if (val === undefined || val === null || val === '') return 0;
                 if (typeof val === 'number') return Math.round(val);
-                // Si es string, remover puntos (separadores de miles) y comas si fuesen decimales, nos quedamos solo con los enteros
                 const cleanStr = String(val).replace(/\./g, '').split(',')[0];
                 return parseInt(cleanStr) || 0;
+            };
+
+            // Helper to parse quantities that can be decimal: "212,5" → 212.5, "3.5" → 3.5
+            const parseQty = (val) => {
+                if (val === undefined || val === null || val === '') return 0;
+                if (typeof val === 'number') return val;
+                // Reemplazar coma decimal por punto
+                const cleanStr = String(val).replace(',', '.');
+                return parseFloat(cleanStr) || 0;
             };
 
             for (let i = 1; i < jsonData.length; i++) {
@@ -498,8 +506,8 @@ export default function Inventario() {
                     nombre: String(row[idxNombre]),
                     precio: parseAmount(row[idxPrecio]),
                     costo: idxCosto !== -1 ? parseAmount(row[idxCosto]) : 0,
-                    stock: idxStock !== -1 ? parseAmount(row[idxStock]) : 0,
-                    stockMinimo: idxStockMinimo !== -1 ? parseAmount(row[idxStockMinimo]) : 0,
+                    stock: idxStock !== -1 ? parseQty(row[idxStock]) : 0,
+                    stockMinimo: idxStockMinimo !== -1 ? parseQty(row[idxStockMinimo]) : 0,
                     categoria: idxCategoria !== -1 ? String(row[idxCategoria]) : 'Sin Categoría'
                 };
                 payloadProductos.push(productoObj);
@@ -511,7 +519,7 @@ export default function Inventario() {
                 return;
             }
 
-            if (!confirm(`Se encontraron ${payloadProductos.length} productos listos para importar a la sede principal.\n\nPrecios y Stock serán interpretados como números enteros (ej. "19.250" -> $19,250).\n¿Desea proceder?`)) {
+            if (!confirm(`Se encontraron ${payloadProductos.length} productos listos para importar a la sede principal.\n\nPrecios serán interpretados como enteros (ej. "19.250" → $19,250).\nCantidades aceptan decimales (ej. "212,5" → 212.5 unidades).\n¿Desea proceder?`)) {
                 fileImportRef.current.value = null; // reset
                 setIsImporting(false);
                 return;

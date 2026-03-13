@@ -775,8 +775,8 @@ app.post('/api/inventario/importar', async (req, res) => {
                 // Normalizar valores (centavos)
                 const precio = parseInt(p.precio) || 0;
                 const costo = p.costo ? parseInt(p.costo) : 0;
-                const stock = parseInt(p.stock) || 0;
-                const stockMinimo = p.stockMinimo !== undefined ? parseInt(p.stockMinimo) : 5;
+                const stock = parseFloat(p.stock) || 0;
+                const stockMinimo = p.stockMinimo !== undefined ? parseFloat(p.stockMinimo) : 5;
 
                 // Transacción individual por producto para que un error no falle todo el lote
                 await prisma.$transaction(async (tx) => {
@@ -3266,19 +3266,19 @@ app.post('/api/compras', async (req, res) => {
                         productoId: item.productoId ? parseInt(item.productoId) : null,
                         nombre: item.nombre || item.descripcion || 'Sin nombre',
                         codigo: item.codigo || null,
-                        cantidad: parseInt(item.cantidad) || 1,
+                        cantidad: parseFloat(item.cantidad) || 1,
                         precioUnit: parseInt(item.precioUnit) || 0,
                         descuento: parseInt(item.descuento) || 0,
                         impCargo: parseInt(item.impCargo) || 0,
-                        subtotal: (parseInt(item.cantidad) || 1) * (parseInt(item.precioUnit) || 0),
+                        subtotal: Math.round((parseFloat(item.cantidad) || 1) * (parseInt(item.precioUnit) || 0)),
                         ubicacionId: item.ubicacionId ? parseInt(item.ubicacionId) : null
                     }
                 });
                 if (item.productoId && item.ubicacionId) {
                     await tx.stockUbicacion.upsert({
                         where: { productoId_ubicacionId: { productoId: parseInt(item.productoId), ubicacionId: parseInt(item.ubicacionId) } },
-                        update: { stock: { increment: parseInt(item.cantidad) } },
-                        create: { productoId: parseInt(item.productoId), ubicacionId: parseInt(item.ubicacionId), stock: parseInt(item.cantidad) }
+                        update: { stock: { increment: parseFloat(item.cantidad) || 1 } },
+                        create: { productoId: parseInt(item.productoId), ubicacionId: parseInt(item.ubicacionId), stock: parseFloat(item.cantidad) || 1 }
                     });
                 }
             }
