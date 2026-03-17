@@ -66,8 +66,9 @@ export default function CartPanel({ cart, clearCart, updateQty, setDirectQty, re
                                             overflow: 'hidden',
                                             textOverflow: 'ellipsis',
                                             display: '-webkit-box',
-                                            WebkitLineClamp: 2,
-                                            WebkitBoxOrient: 'vertical'
+                                            WebkitLineClamp: 3,
+                                            WebkitBoxOrient: 'vertical',
+                                            wordBreak: 'break-word'
                                         }}>
                                             {item.name}
                                         </div>
