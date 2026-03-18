@@ -21,6 +21,12 @@ export function usePayment({ cart, total, subtotal, iva, ivaTasa, cuentas, selec
     const [showClientDropdown, setShowClientDropdown] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
 
+    // Anticipo state
+    const [anticipoClients, setAnticipoClients] = useState([]);
+    const [anticipoClientId, setAnticipoClientId] = useState(null);
+    const [anticipoSearch, setAnticipoSearch] = useState('');
+    const [showAnticipoDropdown, setShowAnticipoDropdown] = useState(false);
+
     // Sync selectedAccountId when paymentMethod changes
     useEffect(() => {
         if (!cuentas.length) return;
@@ -42,6 +48,15 @@ export function usePayment({ cart, total, subtotal, iva, ivaTasa, cuentas, selec
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [paymentMethod, cuentas]);
 
+    // Fetch anticipo clients when method is anticipo
+    useEffect(() => {
+        if (paymentMethod === 'anticipo') {
+            api.get('/anticipos/disponibles').then(res => {
+                setAnticipoClients(res.data);
+            }).catch(err => console.error('Error fetching anticipos:', err));
+        }
+    }, [paymentMethod]);
+
     // Reset payment state (called when cart is cleared after a sale)
     const resetPayment = (currentCuentas) => {
         clearPaymentMethod();
@@ -50,6 +65,9 @@ export function usePayment({ cart, total, subtotal, iva, ivaTasa, cuentas, selec
         setPaymentErrors({});
         clearCreditClient();
         clearCreditDueDate();
+        setAnticipoClientId(null);
+        setAnticipoSearch('');
+        setShowAnticipoDropdown(false);
         const defaultCaja = currentCuentas.find(c => c.tipo === 'caja');
         if (defaultCaja) setSelectedAccountId(defaultCaja.id);
     };
@@ -67,10 +85,27 @@ export function usePayment({ cart, total, subtotal, iva, ivaTasa, cuentas, selec
         if (isCredit || hasCreditInMultiple) {
             if (!creditClient) {
                 alert('Debe seleccionar un cliente para la venta a crédito');
+                setIsProcessing(false);
                 return;
             }
             if (!creditDueDate) {
                 alert('Debe seleccionar una fecha de vencimiento');
+                setIsProcessing(false);
+                return;
+            }
+        }
+
+        // Validate anticipo payment
+        if (paymentMethod === 'anticipo') {
+            if (!anticipoClientId) {
+                alert('Debe seleccionar un cliente con anticipo');
+                setIsProcessing(false);
+                return;
+            }
+            const selectedAnticipo = anticipoClients.find(c => c.clienteId === anticipoClientId);
+            if (!selectedAnticipo || selectedAnticipo.saldo < total) {
+                alert('Saldo de anticipo insuficiente para esta venta');
+                setIsProcessing(false);
                 return;
             }
         }
@@ -141,7 +176,7 @@ export function usePayment({ cart, total, subtotal, iva, ivaTasa, cuentas, selec
         });
 
         const saleData = {
-            clienteId: (paymentMethod === 'credito' || hasCreditInMultiple) ? parseInt(creditClient) : (creditClient ? parseInt(creditClient) : null),
+            clienteId: paymentMethod === 'anticipo' ? anticipoClientId : ((paymentMethod === 'credito' || hasCreditInMultiple) ? parseInt(creditClient) : (creditClient ? parseInt(creditClient) : null)),
             items: flattenedItems,
             subtotal: subtotal,
             iva: iva,
@@ -205,5 +240,12 @@ export function usePayment({ cart, total, subtotal, iva, ivaTasa, cuentas, selec
         resetPayment,
         confirmSale,
         isProcessing,
+        anticipoClients,
+        anticipoClientId,
+        setAnticipoClientId,
+        anticipoSearch,
+        setAnticipoSearch,
+        showAnticipoDropdown,
+        setShowAnticipoDropdown,
     };
 }

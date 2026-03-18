@@ -185,6 +185,13 @@ export default function POS() {
                     clients={clients}
                     onClientCreated={addClient}
                     onConfirmClick={() => {}}
+                    anticipoClients={payment.anticipoClients}
+                    anticipoClientId={payment.anticipoClientId}
+                    setAnticipoClientId={payment.setAnticipoClientId}
+                    anticipoSearch={payment.anticipoSearch}
+                    setAnticipoSearch={payment.setAnticipoSearch}
+                    showAnticipoDropdown={payment.showAnticipoDropdown}
+                    setShowAnticipoDropdown={payment.setShowAnticipoDropdown}
                     showConfirm={showConfirm}
                     setShowConfirm={setShowConfirm}
                     confirmSale={payment.confirmSale}

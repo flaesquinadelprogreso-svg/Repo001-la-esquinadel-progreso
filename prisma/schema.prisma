@@ -30,6 +30,7 @@ model Cliente {
   ventas           Venta[]
   devoluciones     Devolucion[]
   cotizaciones     Cotizacion[]
+  anticipos        Anticipo[]
 }
 
 model Proveedor {
@@ -142,6 +143,7 @@ model Venta {
   pagos             PagoVenta[]
   movimientosCaja   MovimientoCaja[]
   devoluciones      Devolucion[]
+  anticipos         Anticipo[]
 }
 
 model ItemVenta {
@@ -358,6 +360,23 @@ model AbonoPago {
   cuenta           CuentaPorPagar @relation(fields: [cuentaPorPagarId], references: [id], onDelete: Cascade)
   usuario          Usuario?  @relation("AbonoPagoUsuario", fields: [usuarioId], references: [id])
   movimientoCaja   MovimientoCaja?
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ANTICIPOS
+// ═══════════════════════════════════════════════════════════════
+
+model Anticipo {
+  id          Int       @id @default(autoincrement())
+  clienteId   Int
+  tipo        String    // deposito, consumo
+  monto       Int
+  descripcion String?
+  ventaId     Int?      // Si es consumo, referencia a la venta
+  fecha       DateTime  @default(now())
+
+  cliente     Cliente   @relation(fields: [clienteId], references: [id])
+  venta       Venta?    @relation(fields: [ventaId], references: [id])
 }
 
 // ═══════════════════════════════════════════════════════════════

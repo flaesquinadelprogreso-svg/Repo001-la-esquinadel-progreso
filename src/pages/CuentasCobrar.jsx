@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, ChevronRight, FileText, CheckCircle, Clock, AlertTriangle, Wallet, Building, CreditCard, MessageCircle, Trash2, Bell } from 'lucide-react';
+import { Search, Plus, ChevronRight, FileText, CheckCircle, AlertTriangle, Wallet, Building, Trash2, Bell, DollarSign, ArrowDownCircle, ArrowUpCircle, User } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import { formatPesos } from '../utils/currency';
@@ -15,6 +15,7 @@ const metodosPago = [
 export default function CuentasCobrar() {
     const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
     const isAdmin = currentUser.role === 'admin';
+    const [activeTab, setActiveTab] = useState('cuentas');
     const [cuentas, setCuentas] = useState([]);
     const [clientes, setClientes] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -37,14 +38,28 @@ export default function CuentasCobrar() {
         fechaVencimiento: ''
     });
 
+    // === ANTICIPOS STATE ===
+    const [anticipos, setAnticipos] = useState([]);
+    const [showAnticipoModal, setShowAnticipoModal] = useState(false);
+    const [showAnticipoDetalle, setShowAnticipoDetalle] = useState(null);
+    const [anticipoDetalle, setAnticipoDetalle] = useState(null);
+    const [searchAnticipo, setSearchAnticipo] = useState('');
+    const [nuevoAnticipo, setNuevoAnticipo] = useState({
+        clienteId: '',
+        descripcion: '',
+        monto: '',
+        metodo: 'efectivo'
+    });
+
     // Fetch data from API
     const fetchData = async () => {
         try {
             setLoading(true);
-            const [cuentasRes, clientesRes, finRes] = await Promise.all([
+            const [cuentasRes, clientesRes, finRes, anticiposRes] = await Promise.all([
                 api.get('/cuentas-cobrar'),
                 api.get('/clientes'),
-                api.get('/cuentas-financieras')
+                api.get('/cuentas-financieras'),
+                api.get('/anticipos')
             ]);
 
             const cuentasData = cuentasRes.data;
@@ -54,6 +69,7 @@ export default function CuentasCobrar() {
             setCuentas(cuentasData);
             setClientes(clientesData);
             setCuentasFinancieras(finData);
+            setAnticipos(anticiposRes.data);
 
             // Default select first caja
             const defaultCaja = finData.find(c => c.tipo === 'caja');
@@ -199,12 +215,59 @@ export default function CuentasCobrar() {
         }
     };
 
+    // === ANTICIPOS HANDLERS ===
+    const handleCrearAnticipo = async () => {
+        if (!nuevoAnticipo.clienteId || !nuevoAnticipo.monto || parseInt(nuevoAnticipo.monto) <= 0) {
+            alert('Por favor complete el cliente y monto');
+            return;
+        }
+        try {
+            await api.post('/anticipos', {
+                clienteId: parseInt(nuevoAnticipo.clienteId),
+                monto: parseInt(nuevoAnticipo.monto),
+                descripcion: nuevoAnticipo.descripcion || 'Anticipo',
+                cuentaId: selectedAccountId ? parseInt(selectedAccountId) : null,
+                metodo: nuevoAnticipo.metodo
+            });
+            fetchData();
+            setShowAnticipoModal(false);
+            setNuevoAnticipo({ clienteId: '', descripcion: '', monto: '', metodo: 'efectivo' });
+            alert('Anticipo registrado exitosamente');
+        } catch (error) {
+            console.error('Error creating anticipo:', error);
+            alert(error.response?.data?.error || 'Error al crear anticipo');
+        }
+    };
+
+    const handleVerDetalleAnticipo = async (clienteId) => {
+        try {
+            const res = await api.get(`/anticipos/cliente/${clienteId}`);
+            setAnticipoDetalle(res.data);
+            setShowAnticipoDetalle(clienteId);
+        } catch (error) {
+            console.error('Error fetching anticipo detail:', error);
+            alert('Error al cargar detalle');
+        }
+    };
+
+    const filteredAnticipos = anticipos.filter(a =>
+        a.clienteNombre.toLowerCase().includes(searchAnticipo.toLowerCase()) ||
+        a.clienteDocumento?.includes(searchAnticipo)
+    );
+
+    const resumenAnticipos = {
+        totalDepositos: anticipos.reduce((s, a) => s + a.depositos, 0),
+        totalConsumido: anticipos.reduce((s, a) => s + a.consumido, 0),
+        totalSaldo: anticipos.reduce((s, a) => s + a.saldo, 0),
+        clientesConSaldo: anticipos.filter(a => a.saldo > 0).length
+    };
+
     return (
         <div id="cuentas-root" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div id="cuentas-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
                     <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#1A1A2E' }}>Cuentas por Cobrar</h1>
-                    <p style={{ fontSize: '13px', color: '#6B7280', marginTop: '4px' }}>Gestión de cuentas por cobrar de clientes</p>
+                    <p style={{ fontSize: '13px', color: '#6B7280', marginTop: '4px' }}>Gestión de cuentas por cobrar y anticipos de clientes</p>
                 </div>
                 <div style={{ display: 'flex', gap: '12px' }}>
                     <Button
@@ -223,134 +286,267 @@ export default function CuentasCobrar() {
                     >
                         Alerta de Cobros
                     </Button>
+                    <Button onClick={() => setShowAnticipoModal(true)}>
+                        <Plus size={16} style={{ marginRight: '6px' }} />Nuevo Anticipo
+                    </Button>
                     <Button onClick={() => setShowModal(true)}><Plus size={16} style={{ marginRight: '6px' }} />Nueva Cuenta</Button>
                 </div>
             </div>
 
-            {/* Resumen */}
-            <div id="cuentas-resumen" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
-                <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #E5E7EB' }}>
-                    <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '4px' }}>Total por Cobrar</div>
-                    <div style={{ fontSize: '24px', fontWeight: 700, color: '#1A1A2E' }}>{formatPesos(resumen.total)}</div>
-                </div>
-                <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #E5E7EB' }}>
-                    <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '4px' }}>Abonado</div>
-                    <div style={{ fontSize: '24px', fontWeight: 700, color: '#16A34A' }}>{formatPesos(resumen.abonado)}</div>
-                </div>
-                <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #E5E7EB' }}>
-                    <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '4px' }}>Pendiente</div>
-                    <div style={{ fontSize: '24px', fontWeight: 700, color: '#D97706' }}>{formatPesos(resumen.pendiente)}</div>
-                </div>
-                <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #E5E7EB' }}>
-                    <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '4px' }}>Vencidas</div>
-                    <div style={{ fontSize: '24px', fontWeight: 700, color: '#DC2626' }}>{resumen.vencidas}</div>
-                </div>
-            </div>
-
-            {/* Filtros */}
-            <div id="cuentas-filters" style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-                <div style={{ position: 'relative', flex: 1, maxWidth: '400px' }}>
-                    <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }} />
-                    <input
-                        type="text"
-                        placeholder="Buscar cliente..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        style={{ width: '100%', padding: '10px 12px 10px 40px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '14px', outline: 'none' }}
-                    />
-                </div>
-                <select
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                    style={{ padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '14px', backgroundColor: '#fff' }}
+            {/* Tabs */}
+            <div style={{ display: 'flex', gap: '0', borderBottom: '2px solid #E5E7EB' }}>
+                <button
+                    onClick={() => setActiveTab('cuentas')}
+                    style={{
+                        padding: '10px 24px',
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        border: 'none',
+                        borderBottom: activeTab === 'cuentas' ? '2px solid #1A1A2E' : '2px solid transparent',
+                        backgroundColor: 'transparent',
+                        color: activeTab === 'cuentas' ? '#1A1A2E' : '#6B7280',
+                        cursor: 'pointer',
+                        marginBottom: '-2px',
+                        transition: 'all 0.2s'
+                    }}
                 >
-                    <option value="todas">Todas</option>
-                    <option value="pendientes">Pendientes</option>
-                    <option value="vencidas">Vencidas</option>
-                    <option value="pagadas">Pagadas</option>
-                </select>
+                    <FileText size={16} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+                    Cuentas por Cobrar
+                </button>
+                <button
+                    onClick={() => setActiveTab('anticipos')}
+                    style={{
+                        padding: '10px 24px',
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        border: 'none',
+                        borderBottom: activeTab === 'anticipos' ? '2px solid #1A1A2E' : '2px solid transparent',
+                        backgroundColor: 'transparent',
+                        color: activeTab === 'anticipos' ? '#1A1A2E' : '#6B7280',
+                        cursor: 'pointer',
+                        marginBottom: '-2px',
+                        transition: 'all 0.2s'
+                    }}
+                >
+                    <DollarSign size={16} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+                    Anticipos
+                </button>
             </div>
 
-            {/* Lista de Cuentas Individuales */}
-            {loading ? (
-                <div style={{ padding: '60px', textAlign: 'center', color: '#6B7280' }}>
-                    Cargando cuentas...
-                </div>
-            ) : (
-                <div id="cuentas-lista" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {filteredCuentas.map((cuenta, idx) => (
-                        <div
-                            key={idx}
-                            onClick={() => setShowDetalleModal(cuenta)}
-                            style={{
-                                backgroundColor: cuenta.saldoPendiente <= 0 ? '#F0FDF4' : '#fff',
-                                borderRadius: '12px',
-                                border: '1px solid',
-                                borderColor: cuenta.saldoPendiente <= 0 ? '#BBF7D0' : '#E5E7EB',
-                                padding: '16px 20px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                cursor: 'pointer',
-                                transition: 'box-shadow 0.2s',
-                                opacity: cuenta.saldoPendiente <= 0 ? 0.8 : 1
-                            }}
+            {/* ============ TAB: CUENTAS POR COBRAR ============ */}
+            {activeTab === 'cuentas' && (
+                <>
+                    {/* Resumen */}
+                    <div id="cuentas-resumen" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+                        <div style={{ backgroundColor: '#fff', padding: '14px 16px', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+                            <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '2px' }}>Total por Cobrar</div>
+                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A2E' }}>{formatPesos(resumen.total)}</div>
+                        </div>
+                        <div style={{ backgroundColor: '#fff', padding: '14px 16px', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+                            <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '2px' }}>Abonado</div>
+                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A2E' }}>{formatPesos(resumen.abonado)}</div>
+                        </div>
+                        <div style={{ backgroundColor: '#fff', padding: '14px 16px', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+                            <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '2px' }}>Pendiente</div>
+                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A2E' }}>{formatPesos(resumen.pendiente)}</div>
+                        </div>
+                        <div style={{ backgroundColor: '#fff', padding: '14px 16px', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+                            <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '2px' }}>Vencidas</div>
+                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A2E' }}>{resumen.vencidas}</div>
+                        </div>
+                    </div>
+
+                    {/* Filtros */}
+                    <div id="cuentas-filters" style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                        <div style={{ position: 'relative', flex: 1, maxWidth: '400px' }}>
+                            <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }} />
+                            <input
+                                type="text"
+                                placeholder="Buscar cliente..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                style={{ width: '100%', padding: '10px 12px 10px 40px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '14px', outline: 'none' }}
+                            />
+                        </div>
+                        <select
+                            value={filterStatus}
+                            onChange={(e) => setFilterStatus(e.target.value)}
+                            style={{ padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '14px', backgroundColor: '#fff' }}
                         >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
-                                <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: cuenta.saldoPendiente <= 0 ? '#DCFCE7' : (cuenta.tieneVencidas ? '#FEE2E2' : '#F3F4F6'), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                    {cuenta.saldoPendiente <= 0
-                                        ? <CheckCircle size={24} color="#16A34A" />
-                                        : (cuenta.tieneVencidas ? <AlertTriangle size={24} color="#DC2626" /> : <FileText size={24} color="#6B7280" />)
-                                    }
-                                </div>
-                                <div style={{ minWidth: 0 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
-                                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#F2A900', backgroundColor: '#FFF8E7', padding: '2px 6px', borderRadius: '4px' }}>
+                            <option value="todas">Todas</option>
+                            <option value="pendientes">Pendientes</option>
+                            <option value="vencidas">Vencidas</option>
+                            <option value="pagadas">Pagadas</option>
+                        </select>
+                    </div>
+
+                    {/* Lista de Cuentas Individuales */}
+                    {loading ? (
+                        <div style={{ padding: '60px', textAlign: 'center', color: '#6B7280' }}>
+                            Cargando cuentas...
+                        </div>
+                    ) : (
+                        <div id="cuentas-lista" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            {filteredCuentas.map((cuenta, idx) => (
+                                <div
+                                    key={idx}
+                                    onClick={() => setShowDetalleModal(cuenta)}
+                                    style={{
+                                        backgroundColor: cuenta.saldoPendiente <= 0 ? '#FAFFF9' : '#fff',
+                                        borderRadius: '8px',
+                                        border: '1px solid #E5E7EB',
+                                        padding: '10px 14px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        cursor: 'pointer',
+                                        transition: 'background 0.15s',
+                                        opacity: cuenta.saldoPendiente <= 0 ? 0.7 : 1
+                                    }}
+                                    onMouseEnter={e => e.currentTarget.style.backgroundColor = '#F9FAFB'}
+                                    onMouseLeave={e => e.currentTarget.style.backgroundColor = cuenta.saldoPendiente <= 0 ? '#FAFFF9' : '#fff'}
+                                >
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
+                                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#F2A900', backgroundColor: '#FFF8E7', padding: '2px 6px', borderRadius: '4px', flexShrink: 0 }}>
                                             CXC-{cuenta.id.toString().padStart(4, '0')}
                                         </span>
-                                        <span style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A2E', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                        <span style={{ fontSize: '13px', fontWeight: 600, color: '#1A1A2E', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                             {cuenta.clienteNombre}
                                         </span>
                                         {cuenta.saldoPendiente <= 0 && (
-                                            <span style={{ fontSize: '10px', color: '#166534', backgroundColor: '#DCFCE7', padding: '2px 4px', borderRadius: '4px', fontWeight: 700 }}>
+                                            <span style={{ fontSize: '9px', color: '#166534', backgroundColor: '#DCFCE7', padding: '1px 4px', borderRadius: '3px', fontWeight: 700, flexShrink: 0 }}>
                                                 PAGADA
                                             </span>
                                         )}
+                                        <span style={{ fontSize: '11px', color: cuenta.tieneVencidas && cuenta.saldoPendiente > 0 ? '#DC2626' : '#9CA3AF', flexShrink: 0 }}>
+                                            {cuenta.fechaVencimiento ? new Date(cuenta.fechaVencimiento).toLocaleDateString() : ''}
+                                        </span>
                                     </div>
-                                    <div style={{ fontSize: '12px', color: '#6B7280', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '350px' }}>
-                                        {(() => {
-                                            const firstLine = (cuenta.descripcion || '').split('|')[0].trim();
-                                            const parts = firstLine.replace(/^PAGADA\s*/i, '').split(' - ');
-                                            const recibo = parts[0]?.trim() || '';
-                                            const totalLines = (cuenta.descripcion || '').split('|').length;
-                                            return recibo.length > 25 ? recibo.substring(0, 25) + '...' + (totalLines > 1 ? ` (+${totalLines - 1})` : '') : recibo + (totalLines > 1 ? ` (+${totalLines - 1} más)` : '');
-                                        })()}
-                                    </div>
-                                    <div style={{ fontSize: '12px', color: cuenta.tieneVencidas && cuenta.saldoPendiente > 0 ? '#DC2626' : '#9CA3AF', marginTop: '4px' }}>
-                                        Vence: {cuenta.fechaVencimiento ? new Date(cuenta.fechaVencimiento).toLocaleDateString() : 'N/A'}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                                        <span style={{ fontSize: '14px', fontWeight: 700, color: '#1A1A2E' }}>
+                                            {formatPesos(cuenta.saldoPendiente)}
+                                        </span>
+                                        <ChevronRight size={16} color="#D1D5DB" />
                                     </div>
                                 </div>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flexShrink: 0, marginLeft: '16px' }}>
-                                <div style={{ textAlign: 'right' }}>
-                                    <div style={{ fontSize: '12px', color: '#6B7280' }}>
-                                        Balance {cuenta.saldoPendiente <= 0 ? '' : 'Pendiente'}
-                                    </div>
-                                    <div style={{ fontSize: '18px', fontWeight: 700, color: cuenta.saldoPendiente > 0 ? '#D97706' : '#16A34A' }}>
-                                        {formatPesos(cuenta.saldoPendiente)}
-                                    </div>
-                                </div>
-                                <ChevronRight size={20} color="#9CA3AF" />
-                            </div>
-                        </div>
-                    ))}
+                            ))}
 
-                    {filteredCuentas.length === 0 && (
-                        <div style={{ padding: '60px', textAlign: 'center', color: '#6B7280' }}>
-                            No se encontraron cuentas
+                            {filteredCuentas.length === 0 && (
+                                <div style={{ padding: '60px', textAlign: 'center', color: '#6B7280' }}>
+                                    No se encontraron cuentas
+                                </div>
+                            )}
                         </div>
                     )}
-                </div>
+                </>
+            )}
+
+            {/* ============ TAB: ANTICIPOS ============ */}
+            {activeTab === 'anticipos' && (
+                <>
+                    {/* Resumen Anticipos */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+                        <div style={{ backgroundColor: '#fff', padding: '14px 16px', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+                            <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '2px' }}>Total Depositado</div>
+                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A2E' }}>{formatPesos(resumenAnticipos.totalDepositos)}</div>
+                        </div>
+                        <div style={{ backgroundColor: '#fff', padding: '14px 16px', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+                            <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '2px' }}>Consumido</div>
+                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A2E' }}>{formatPesos(resumenAnticipos.totalConsumido)}</div>
+                        </div>
+                        <div style={{ backgroundColor: '#fff', padding: '14px 16px', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+                            <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '2px' }}>Saldo Disponible</div>
+                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A2E' }}>{formatPesos(resumenAnticipos.totalSaldo)}</div>
+                        </div>
+                        <div style={{ backgroundColor: '#fff', padding: '14px 16px', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+                            <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '2px' }}>Clientes con Saldo</div>
+                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A2E' }}>{resumenAnticipos.clientesConSaldo}</div>
+                        </div>
+                    </div>
+
+                    {/* Buscar anticipo */}
+                    <div style={{ position: 'relative', maxWidth: '400px' }}>
+                        <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }} />
+                        <input
+                            type="text"
+                            placeholder="Buscar cliente..."
+                            value={searchAnticipo}
+                            onChange={(e) => setSearchAnticipo(e.target.value)}
+                            style={{ width: '100%', padding: '10px 12px 10px 40px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '14px', outline: 'none' }}
+                        />
+                    </div>
+
+                    {/* Cards de anticipos por cliente */}
+                    {loading ? (
+                        <div style={{ padding: '60px', textAlign: 'center', color: '#6B7280' }}>Cargando anticipos...</div>
+                    ) : (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
+                            {filteredAnticipos.map((ant) => (
+                                <div
+                                    key={ant.clienteId}
+                                    onClick={() => handleVerDetalleAnticipo(ant.clienteId)}
+                                    style={{
+                                        backgroundColor: '#fff',
+                                        borderRadius: '10px',
+                                        border: '1px solid #E5E7EB',
+                                        padding: '14px 16px',
+                                        cursor: 'pointer',
+                                        transition: 'box-shadow 0.2s, transform 0.1s',
+                                    }}
+                                    onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none'; }}
+                                >
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                                        <div style={{
+                                            width: '34px', height: '34px', borderRadius: '50%',
+                                            backgroundColor: '#F3F4F6',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                                        }}>
+                                            <User size={16} color={ant.saldo > 0 ? '#1A1A2E' : '#9CA3AF'} />
+                                        </div>
+                                        <div style={{ minWidth: 0 }}>
+                                            <div style={{ fontSize: '14px', fontWeight: 600, color: '#1A1A2E', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                {ant.clienteNombre}
+                                            </div>
+                                            <div style={{ fontSize: '11px', color: '#9CA3AF' }}>{ant.clienteDocumento}</div>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '12px' }}>
+                                        <div>
+                                            <span style={{ color: '#9CA3AF' }}>Depositado </span>
+                                            <span style={{ fontWeight: 600, color: '#1A1A2E' }}>{formatPesos(ant.depositos)}</span>
+                                        </div>
+                                        <div>
+                                            <span style={{ color: '#9CA3AF' }}>Consumido </span>
+                                            <span style={{ fontWeight: 600, color: '#1A1A2E' }}>{formatPesos(ant.consumido)}</span>
+                                        </div>
+                                    </div>
+
+                                    <div style={{
+                                        padding: '8px',
+                                        backgroundColor: '#F9FAFB',
+                                        borderRadius: '6px',
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center'
+                                    }}>
+                                        <span style={{ fontSize: '11px', color: '#9CA3AF' }}>Saldo</span>
+                                        <span style={{ fontSize: '16px', fontWeight: 700, color: ant.saldo > 0 ? '#16A34A' : '#9CA3AF' }}>
+                                            {formatPesos(ant.saldo)}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+
+                            {filteredAnticipos.length === 0 && (
+                                <div style={{ gridColumn: '1 / -1', padding: '60px', textAlign: 'center', color: '#6B7280' }}>
+                                    No hay anticipos registrados
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </>
             )}
 
             {/* Modal Nueva Cuenta */}
@@ -404,6 +600,189 @@ export default function CuentasCobrar() {
                     </div>
                 </div>
             </Modal>
+
+            {/* Modal Nuevo Anticipo */}
+            <Modal isOpen={showAnticipoModal} onClose={() => setShowAnticipoModal(false)} title="Nuevo Anticipo">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minWidth: '400px' }}>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Cliente *</label>
+                        <select
+                            value={nuevoAnticipo.clienteId}
+                            onChange={(e) => setNuevoAnticipo(prev => ({ ...prev, clienteId: e.target.value }))}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                        >
+                            <option value="">Seleccionar cliente...</option>
+                            {clientes.map(c => (
+                                <option key={c.id} value={c.id}>{c.nombre}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Descripción</label>
+                        <input
+                            type="text"
+                            value={nuevoAnticipo.descripcion}
+                            onChange={(e) => setNuevoAnticipo(prev => ({ ...prev, descripcion: e.target.value }))}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                            placeholder="Concepto del anticipo"
+                        />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Monto *</label>
+                        <input
+                            type="text"
+                            inputMode="numeric"
+                            value={nuevoAnticipo.monto ? formatPesos(nuevoAnticipo.monto) : ''}
+                            onChange={(e) => {
+                                const raw = e.target.value.replace(/\D/g, '');
+                                setNuevoAnticipo(prev => ({ ...prev, monto: raw }));
+                            }}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                            placeholder="$0"
+                        />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Método de pago</label>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            {metodosPago.map(m => (
+                                <button
+                                    key={m.id}
+                                    onClick={() => setNuevoAnticipo(prev => ({ ...prev, metodo: m.id }))}
+                                    style={{
+                                        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                                        padding: '10px', borderRadius: '6px', border: '1px solid',
+                                        borderColor: nuevoAnticipo.metodo === m.id ? '#1A1A2E' : '#D1D5DB',
+                                        backgroundColor: nuevoAnticipo.metodo === m.id ? '#F9FAFB' : '#fff',
+                                        color: nuevoAnticipo.metodo === m.id ? '#1A1A2E' : '#4B5563',
+                                        cursor: 'pointer', fontWeight: 600, fontSize: '13px'
+                                    }}
+                                >
+                                    <m.icon size={16} />
+                                    {m.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>
+                            {nuevoAnticipo.metodo === 'efectivo' ? 'Caja' : 'Cuenta Bancaria'}
+                        </label>
+                        <select
+                            value={selectedAccountId}
+                            onChange={(e) => setSelectedAccountId(e.target.value)}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                        >
+                            <option value="">Seleccionar...</option>
+                            {cuentasFinancieras.filter(c => nuevoAnticipo.metodo === 'efectivo' ? c.tipo === 'caja' : c.tipo === 'banco').map(c => (
+                                <option key={c.id} value={c.id}>{c.nombre}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
+                        <Button variant="secondary" onClick={() => setShowAnticipoModal(false)}>Cancelar</Button>
+                        <Button onClick={handleCrearAnticipo} style={{ backgroundColor: '#1A1A2E' }}>Registrar Anticipo</Button>
+                    </div>
+                </div>
+            </Modal>
+
+            {/* Modal Detalle Anticipo */}
+            {showAnticipoDetalle && anticipoDetalle && (
+                <Modal isOpen={true} onClose={() => { setShowAnticipoDetalle(null); setAnticipoDetalle(null); }} title="Historial de Anticipo" size="lg">
+                    <div style={{ padding: '4px' }}>
+                        <div style={{ backgroundColor: '#fff', padding: '16px 20px', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            {/* Header */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '8px', borderBottom: '1px solid #E5E7EB' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <User size={18} color="#1A1A2E" />
+                                    </div>
+                                    <span style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A2E' }}>
+                                        {anticipos.find(a => a.clienteId === showAnticipoDetalle)?.clienteNombre || 'Cliente'}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Summary */}
+                            <div style={{ display: 'flex', gap: '16px', padding: '8px 12px', backgroundColor: '#F9FAFB', borderRadius: '6px', fontSize: '13px' }}>
+                                <div style={{ flex: 1 }}>
+                                    <span style={{ color: '#6B7280', fontSize: '11px' }}>Depositado</span>
+                                    <div style={{ fontWeight: 700, color: '#1A1A2E' }}>{formatPesos(anticipoDetalle.depositos)}</div>
+                                </div>
+                                <div style={{ flex: 1, borderLeft: '1px solid #E5E7EB', paddingLeft: '16px' }}>
+                                    <span style={{ color: '#6B7280', fontSize: '11px' }}>Consumido</span>
+                                    <div style={{ fontWeight: 700, color: '#D97706' }}>{formatPesos(anticipoDetalle.consumido)}</div>
+                                </div>
+                                <div style={{ flex: 1, borderLeft: '1px solid #E5E7EB', paddingLeft: '16px' }}>
+                                    <span style={{ color: '#6B7280', fontSize: '11px' }}>Saldo</span>
+                                    <div style={{ fontWeight: 700, color: '#16A34A' }}>{formatPesos(anticipoDetalle.saldo)}</div>
+                                </div>
+                            </div>
+
+                            {/* Historial de movimientos */}
+                            <div>
+                                <div style={{ fontSize: '11px', fontWeight: 700, color: '#6B7280', marginBottom: '6px', textTransform: 'uppercase' }}>Historial de movimientos</div>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                                    <thead>
+                                        <tr style={{ borderBottom: '1px solid #E5E7EB', textAlign: 'left' }}>
+                                            <th style={{ padding: '8px 0', fontWeight: 600, color: '#6B7280' }}>Tipo</th>
+                                            <th style={{ padding: '8px 0', fontWeight: 600, color: '#6B7280' }}>Descripción</th>
+                                            <th style={{ padding: '8px 0', fontWeight: 600, color: '#6B7280' }}>Fecha</th>
+                                            <th style={{ padding: '8px 0', fontWeight: 600, color: '#6B7280', textAlign: 'right' }}>Monto</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {anticipoDetalle.movimientos.map((mov, idx) => (
+                                            <tr key={idx} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                                                <td style={{ padding: '10px 0' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                        {mov.tipo === 'deposito' ? (
+                                                            <ArrowDownCircle size={16} color="#16A34A" />
+                                                        ) : (
+                                                            <ArrowUpCircle size={16} color="#D97706" />
+                                                        )}
+                                                        <span style={{
+                                                            fontSize: '10px', fontWeight: 700,
+                                                            color: mov.tipo === 'deposito' ? '#166534' : '#92400E',
+                                                            backgroundColor: mov.tipo === 'deposito' ? '#DCFCE7' : '#FEF3C7',
+                                                            padding: '2px 6px', borderRadius: '4px'
+                                                        }}>
+                                                            {mov.tipo === 'deposito' ? 'DEPÓSITO' : 'CONSUMO'}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td style={{ padding: '10px 0', color: '#374151' }}>
+                                                    {mov.descripcion || '-'}
+                                                    {mov.venta && (
+                                                        <span style={{ fontSize: '11px', color: '#6B7280', marginLeft: '6px' }}>
+                                                            ({mov.venta.numeroRecibo})
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td style={{ padding: '10px 0', color: '#6B7280' }}>
+                                                    {new Date(mov.fecha).toLocaleDateString()}
+                                                </td>
+                                                <td style={{
+                                                    padding: '10px 0', textAlign: 'right', fontWeight: 700,
+                                                    color: mov.tipo === 'deposito' ? '#16A34A' : '#D97706'
+                                                }}>
+                                                    {mov.tipo === 'deposito' ? '+' : '-'}{formatPesos(mov.monto)}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        {anticipoDetalle.movimientos.length === 0 && (
+                                            <tr>
+                                                <td colSpan={4} style={{ padding: '20px', textAlign: 'center', color: '#6B7280' }}>
+                                                    Sin movimientos
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </Modal>
+            )}
 
             {/* Modal Detalle Cuenta */}
             {showDetalleModal && (() => {

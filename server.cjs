@@ -1056,7 +1056,7 @@ app.post('/api/ventas', async (req, res) => {
         }
 
         // Validar que al menos una caja esté abierta para poder vender
-        if (metodoPago !== 'credito') {
+        if (metodoPago !== 'credito' && metodoPago !== 'anticipo') {
             const cajaAbierta = await prisma.cierreCaja.findFirst({ where: { estado: 'abierta' } });
             if (!cajaAbierta) return res.status(400).json({ error: 'Debe tener al menos una caja abierta para registrar ventas.' });
         }
@@ -1225,6 +1225,47 @@ app.post('/api/ventas', async (req, res) => {
                                 fechaVencimiento: fechaVencimiento || new Date().toISOString().split('T')[0],
                                 numeroRecibo: numeroRecibo,
                                 estado: 'pendiente'
+                            }
+                        });
+                    }
+                } else if (p.metodo === 'anticipo') {
+                    // Pago con anticipo: validar saldo y crear movimiento de consumo
+                    if (!clienteId) throw new Error('Cliente requerido para pago con anticipo');
+                    const antMovs = await tx.anticipo.findMany({ where: { clienteId } });
+                    const saldoAnticipo = antMovs.reduce((s, m) => s + (m.tipo === 'deposito' ? m.monto : -m.monto), 0);
+                    if (saldoAnticipo < p.monto) throw new Error(`Saldo de anticipo insuficiente. Disponible: ${formatPesos(saldoAnticipo)}`);
+
+                    await tx.anticipo.create({
+                        data: {
+                            clienteId,
+                            tipo: 'consumo',
+                            monto: p.monto,
+                            descripcion: `Compra ${numeroRecibo}`,
+                            ventaId: venta.id
+                        }
+                    });
+                    await tx.pagoVenta.create({
+                        data: { ventaId: venta.id, monto: p.monto, metodo: 'anticipo' }
+                    });
+
+                    // Movimiento informativo $0 para trazabilidad del contador
+                    const clienteNombre = venta.cliente?.nombre || 'Cliente';
+                    const cajaDefault = await tx.cuentaFinanciera.findFirst({ where: { tipo: 'caja' } });
+                    if (cajaDefault) {
+                        await tx.movimientoCaja.create({
+                            data: {
+                                tipo: 'entrada',
+                                categoria: 'Consumo Anticipo',
+                                monto: 0,
+                                metodo: 'anticipo',
+                                referencia: numeroRecibo,
+                                descripcion: `Pago con anticipo - ${clienteNombre} - Valor real: ${formatPesos(p.monto)}`,
+                                fecha: new Date(),
+                                hora: `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`,
+                                saldoDespues: cajaDefault.saldoActual,
+                                cuentaId: cajaDefault.id,
+                                ventaId: venta.id,
+                                usuarioId: req.user?.id || null
                             }
                         });
                     }
@@ -2990,6 +3031,164 @@ app.delete('/api/cuentas-cobrar/:id', async (req, res) => {
     } catch (error) {
         logger.error('Error al eliminar cuenta por cobrar:', error);
         res.status(400).json({ error: error.message || 'Error al eliminar cuenta' });
+    }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// ANTICIPOS
+// ═══════════════════════════════════════════════════════════════
+
+// Obtener anticipos agrupados por cliente (saldo = depositos - consumos)
+app.get('/api/anticipos', async (req, res) => {
+    try {
+        const anticipos = await prisma.anticipo.findMany({
+            include: { cliente: true, venta: true },
+            orderBy: { fecha: 'desc' }
+        });
+
+        // Agrupar por cliente
+        const porCliente = {};
+        for (const a of anticipos) {
+            if (!porCliente[a.clienteId]) {
+                porCliente[a.clienteId] = {
+                    clienteId: a.clienteId,
+                    clienteNombre: a.cliente?.nombre || 'Sin nombre',
+                    clienteDocumento: a.cliente?.documento || '',
+                    depositos: 0,
+                    consumido: 0,
+                    saldo: 0,
+                    movimientos: []
+                };
+            }
+            const grupo = porCliente[a.clienteId];
+            if (a.tipo === 'deposito') {
+                grupo.depositos += a.monto;
+            } else {
+                grupo.consumido += a.monto;
+            }
+            grupo.movimientos.push(a);
+        }
+
+        // Calcular saldo
+        for (const key of Object.keys(porCliente)) {
+            porCliente[key].saldo = porCliente[key].depositos - porCliente[key].consumido;
+        }
+
+        res.json(Object.values(porCliente));
+    } catch (error) {
+        logger.error('Error al obtener anticipos:', error);
+        res.status(500).json({ error: 'Error al obtener anticipos' });
+    }
+});
+
+// Obtener historial de anticipo de un cliente específico
+app.get('/api/anticipos/cliente/:id', async (req, res) => {
+    try {
+        const clienteId = parseInt(req.params.id);
+        const movimientos = await prisma.anticipo.findMany({
+            where: { clienteId },
+            include: { venta: { select: { id: true, numeroRecibo: true, total: true, createdAt: true } } },
+            orderBy: { fecha: 'desc' }
+        });
+
+        const depositos = movimientos.filter(m => m.tipo === 'deposito').reduce((s, m) => s + m.monto, 0);
+        const consumido = movimientos.filter(m => m.tipo === 'consumo').reduce((s, m) => s + m.monto, 0);
+
+        res.json({ clienteId, depositos, consumido, saldo: depositos - consumido, movimientos });
+    } catch (error) {
+        logger.error('Error al obtener anticipos del cliente:', error);
+        res.status(500).json({ error: 'Error al obtener anticipos del cliente' });
+    }
+});
+
+// Crear nuevo anticipo (depósito)
+app.post('/api/anticipos', async (req, res) => {
+    try {
+        const { clienteId, monto, descripcion, cuentaId, metodo } = req.body;
+        if (!clienteId || !monto || monto <= 0) return res.status(400).json({ error: 'Cliente y monto válido son requeridos' });
+
+        const resultado = await prisma.$transaction(async (tx) => {
+            const anticipo = await tx.anticipo.create({
+                data: {
+                    clienteId: parseInt(clienteId),
+                    tipo: 'deposito',
+                    monto: parseInt(monto),
+                    descripcion: descripcion || 'Anticipo'
+                },
+                include: { cliente: true }
+            });
+
+            // Registrar movimiento de caja si se indica cuenta financiera
+            if (cuentaId) {
+                const now = new Date();
+                const hora = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                await crearMovimiento(tx, {
+                    tipo: 'entrada',
+                    categoria: 'Anticipo cliente',
+                    monto: parseInt(monto),
+                    metodo: metodo || 'efectivo',
+                    referencia: `ANT-${anticipo.id}`,
+                    descripcion: `Anticipo de ${anticipo.cliente.nombre}`,
+                    cuentaId: parseInt(cuentaId),
+                    usuarioId: req.user?.id || null
+                });
+            }
+
+            return anticipo;
+        });
+
+        res.json(resultado);
+    } catch (error) {
+        logger.error('Error al crear anticipo:', error);
+        res.status(500).json({ error: 'Error al crear anticipo' });
+    }
+});
+
+// Eliminar anticipo (solo admin, solo depósitos sin consumos posteriores)
+app.delete('/api/anticipos/:id', async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ error: 'Solo administradores' });
+        const id = parseInt(req.params.id);
+        const anticipo = await prisma.anticipo.findUnique({ where: { id } });
+        if (!anticipo) return res.status(404).json({ error: 'Anticipo no encontrado' });
+        if (anticipo.tipo !== 'deposito') return res.status(400).json({ error: 'Solo se pueden eliminar depósitos' });
+        await prisma.anticipo.delete({ where: { id } });
+        res.json({ success: true });
+    } catch (error) {
+        logger.error('Error al eliminar anticipo:', error);
+        res.status(400).json({ error: error.message || 'Error al eliminar anticipo' });
+    }
+});
+
+// Obtener clientes con saldo de anticipo disponible (para POS)
+app.get('/api/anticipos/disponibles', async (req, res) => {
+    try {
+        const anticipos = await prisma.anticipo.findMany({
+            include: { cliente: true }
+        });
+
+        const porCliente = {};
+        for (const a of anticipos) {
+            if (!porCliente[a.clienteId]) {
+                porCliente[a.clienteId] = {
+                    clienteId: a.clienteId,
+                    clienteNombre: a.cliente?.nombre || 'Sin nombre',
+                    saldo: 0
+                };
+            }
+            if (a.tipo === 'deposito') {
+                porCliente[a.clienteId].saldo += a.monto;
+            } else {
+                porCliente[a.clienteId].saldo -= a.monto;
+            }
+        }
+
+        // Solo devolver clientes con saldo > 0
+        const disponibles = Object.values(porCliente).filter(c => c.saldo > 0);
+        res.json(disponibles);
+    } catch (error) {
+        logger.error('Error al obtener anticipos disponibles:', error);
+        res.status(500).json({ error: 'Error al obtener anticipos disponibles' });
     }
 });
 

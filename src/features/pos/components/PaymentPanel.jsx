@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import api from '../../../api/client';
-import { CreditCard, Banknote, User, Landmark, Trash2, Plus, AlertCircle, History } from 'lucide-react';
+import { CreditCard, Banknote, User, Landmark, Trash2, Plus, AlertCircle, History, DollarSign } from 'lucide-react';
 import Button from '../../../components/ui/Button';
 import Modal from '../../../components/ui/Modal';
 import {
@@ -49,6 +49,14 @@ export default function PaymentPanel({
     isCajaOpen,
     clients,
     onClientCreated,
+    // Anticipo
+    anticipoClients,
+    anticipoClientId,
+    setAnticipoClientId,
+    anticipoSearch,
+    setAnticipoSearch,
+    showAnticipoDropdown,
+    setShowAnticipoDropdown,
     // Actions
     onConfirmClick,
     // Confirm modal
@@ -82,8 +90,13 @@ export default function PaymentPanel({
         { id: 'efectivo', label: 'Efectivo', icon: Banknote },
         { id: 'banco', label: 'Banco', icon: Landmark },
         { id: 'credito', label: 'Crédito', icon: User },
+        { id: 'anticipo', label: 'Anticipo', icon: DollarSign },
         { id: 'multiple', label: 'Múltiple', icon: CreditCard },
     ];
+
+    const filteredAnticipoClients = (anticipoClients || []).filter(c =>
+        c.clienteNombre?.toLowerCase().includes((anticipoSearch || '').toLowerCase())
+    );
 
     const filteredClients = clients.filter(c =>
         c.nombre?.toLowerCase().includes(clientSearch.toLowerCase()) ||
@@ -136,7 +149,7 @@ export default function PaymentPanel({
                 </div>
 
                 {/* Payment Methods */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
                     {methods.map(method => (
                         <button
                             key={method.id}
@@ -288,6 +301,80 @@ export default function PaymentPanel({
                                 </div>
                             </div>
                         </div>
+                    </div>
+                )}
+
+                {/* Anticipo Fields */}
+                {paymentMethod === 'anticipo' && (
+                    <div style={{ marginBottom: '12px' }}>
+                        <div style={{ marginBottom: '8px' }}>
+                            <label style={{ display: 'block', fontSize: '13px', marginBottom: '4px', fontWeight: 600 }}>Cliente con anticipo</label>
+                            <div style={{ position: 'relative' }}>
+                                <input
+                                    type="text"
+                                    placeholder="Buscar cliente..."
+                                    value={anticipoSearch}
+                                    onChange={(e) => {
+                                        setAnticipoSearch(e.target.value);
+                                        setShowAnticipoDropdown(e.target.value.length >= 2);
+                                    }}
+                                    style={{ width: '100%', padding: '10px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                                />
+                                {showAnticipoDropdown && anticipoSearch.length >= 2 && filteredAnticipoClients.length > 0 && (
+                                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #E5E7EB', borderRadius: '6px', maxHeight: '200px', overflow: 'auto', zIndex: 10, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+                                        {filteredAnticipoClients.map(client => (
+                                            <div
+                                                key={client.clienteId}
+                                                onClick={() => {
+                                                    setAnticipoClientId(client.clienteId);
+                                                    setAnticipoSearch(client.clienteNombre);
+                                                    setShowAnticipoDropdown(false);
+                                                    setCreditClient(client.clienteId);
+                                                    setClientSearch(client.clienteNombre);
+                                                }}
+                                                style={{ padding: '8px 12px', cursor: 'pointer', borderBottom: '1px solid #F3F4F6' }}
+                                                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#F5F3FF'}
+                                                onMouseLeave={e => e.currentTarget.style.backgroundColor = '#fff'}
+                                            >
+                                                <div style={{ fontSize: '13px', fontWeight: 500 }}>{client.clienteNombre}</div>
+                                                <div style={{ fontSize: '12px', color: '#7C3AED', fontWeight: 600 }}>
+                                                    Saldo: {formatPesos(client.saldo)}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        {anticipoClientId && (() => {
+                            const selected = (anticipoClients || []).find(c => c.clienteId === anticipoClientId);
+                            if (!selected) return null;
+                            return (
+                                <div style={{
+                                    padding: '10px', backgroundColor: '#F5F3FF', borderRadius: '6px',
+                                    border: '1px solid #C4B5FD', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                                }}>
+                                    <div>
+                                        <div style={{ fontSize: '13px', fontWeight: 600, color: '#7C3AED' }}>{selected.clienteNombre}</div>
+                                        <div style={{ fontSize: '11px', color: '#6B7280' }}>Saldo disponible</div>
+                                    </div>
+                                    <div style={{ fontSize: '18px', fontWeight: 700, color: '#7C3AED' }}>
+                                        {formatPesos(selected.saldo)}
+                                    </div>
+                                </div>
+                            );
+                        })()}
+                        {anticipoClientId && (() => {
+                            const selected = (anticipoClients || []).find(c => c.clienteId === anticipoClientId);
+                            if (!selected || total > selected.saldo) {
+                                return (
+                                    <div style={{ marginTop: '8px', padding: '8px', backgroundColor: '#FEF2F2', borderRadius: '6px', fontSize: '12px', color: '#DC2626', fontWeight: 600, textAlign: 'center' }}>
+                                        {!selected ? 'Seleccione un cliente' : `Saldo insuficiente. Necesita ${formatPesos(total)} pero tiene ${formatPesos(selected.saldo)}`}
+                                    </div>
+                                );
+                            }
+                            return null;
+                        })()}
                     </div>
                 )}
 
@@ -650,10 +737,10 @@ export default function PaymentPanel({
                 {/* Confirm Button */}
                 <Button
                     onClick={() => setShowConfirm(true)}
-                    disabled={cart.length === 0 || !isCajaOpen}
+                    disabled={cart.length === 0 || (!isCajaOpen && paymentMethod !== 'anticipo' && paymentMethod !== 'credito')}
                     style={{ width: '100%', padding: '14px', fontSize: '16px' }}
                 >
-                    {isCajaOpen ? 'Confirmar Venta' : 'Caja Cerrada (Abre en Caja y Bancos)'}
+                    {(isCajaOpen || paymentMethod === 'anticipo' || paymentMethod === 'credito') ? 'Confirmar Venta' : 'Caja Cerrada (Abre en Caja y Bancos)'}
                 </Button>
             </div>
 
