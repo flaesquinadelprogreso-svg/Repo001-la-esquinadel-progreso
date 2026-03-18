@@ -1,5 +1,5 @@
-import React from 'react';
-import { Search, Hammer, Package, History } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, Hammer, Package, History, ChevronRight, X } from 'lucide-react';
 import { formatPesos } from '../../../utils/currency';
 
 // Helper to get total stock from stockUbicaciones
@@ -9,20 +9,25 @@ const getTotalStock = (product) => {
 
 
 export default function ProductGrid({ products, services, recentItems, isSearching, search, onSearchChange, loading, onProductClick, onServiceClick, onHistoryClick }) {
+    const [showAllModal, setShowAllModal] = useState(false);
+
     // Cuando hay búsqueda: combinar productos y servicios filtrados. Sin búsqueda: usar recientes del backend
-    let combined;
+    let allCombined;
     if (isSearching && search.trim()) {
         const filteredServices = services.filter(s =>
             s.nombre?.toLowerCase().includes(search.toLowerCase()) ||
             s.codigo?.toLowerCase().includes(search.toLowerCase())
         );
-        combined = [
+        allCombined = [
             ...products.map(p => ({ ...p, _type: 'product' })),
             ...filteredServices.map(s => ({ ...s, _type: 'service' }))
-        ].slice(0, 12);
+        ];
     } else {
-        combined = (recentItems || []).slice(0, 12);
+        allCombined = (recentItems || []).slice(0, 12);
     }
+
+    const combined = allCombined.slice(0, 12);
+    const hasMore = allCombined.length > 12;
 
     return (
         <div id="pos-catalog" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
@@ -113,6 +118,94 @@ export default function ProductGrid({ products, services, recentItems, isSearchi
                             </div>
                         );
                     })}
+                </div>
+            )}
+
+            {/* Botón Ver más */}
+            {hasMore && isSearching && (
+                <button
+                    onClick={() => setShowAllModal(true)}
+                    style={{
+                        marginTop: '6px',
+                        padding: '6px',
+                        backgroundColor: '#FFF8E1',
+                        border: '1px solid #F2A900',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        color: '#92400E',
+                        width: '100%'
+                    }}
+                >
+                    Ver más ({allCombined.length} resultados) <ChevronRight size={14} />
+                </button>
+            )}
+
+            {/* Modal todos los productos */}
+            {showAllModal && (
+                <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    onClick={() => setShowAllModal(false)}>
+                    <div style={{ backgroundColor: '#fff', borderRadius: '12px', width: '90%', maxWidth: '500px', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}
+                        onClick={e => e.stopPropagation()}>
+                        {/* Header */}
+                        <div style={{ padding: '16px', borderBottom: '1px solid #E5E7EB', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '15px', fontWeight: 700, color: '#1A1A2E' }}>
+                                Resultados para "{search}" ({allCombined.length})
+                            </span>
+                            <button onClick={() => setShowAllModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280' }}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        {/* Lista */}
+                        <div style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
+                            {allCombined.map(item => {
+                                const isService = item._type === 'service';
+                                const totalStock = isService ? null : getTotalStock(item);
+                                return (
+                                    <div
+                                        key={isService ? `modal-service-${item.id}` : `modal-${item.id}`}
+                                        onClick={() => {
+                                            isService ? onServiceClick(item) : onProductClick(item);
+                                            setShowAllModal(false);
+                                        }}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '10px',
+                                            padding: '10px',
+                                            borderRadius: '8px',
+                                            cursor: 'pointer',
+                                            borderBottom: '1px solid #F3F4F6',
+                                            opacity: !isService && totalStock <= 0 ? 0.5 : 1
+                                        }}
+                                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FFF8E1'}
+                                        onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                                    >
+                                        <div style={{ width: '36px', height: '36px', borderRadius: '6px', backgroundColor: isService ? '#FEF3C7' : '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                            {isService ? <Hammer size={16} color="#D97706" /> :
+                                                item.imagen ? <img src={item.imagen} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '6px' }} /> :
+                                                    <Package size={16} color="#94A3B8" />}
+                                        </div>
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                            <div style={{ fontSize: '13px', fontWeight: 600, color: '#1A1A2E' }}>{item.nombre}</div>
+                                            <div style={{ fontSize: '11px', color: '#6B7280' }}>{item.codigo || ''}</div>
+                                        </div>
+                                        <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                                            <div style={{ fontSize: '13px', fontWeight: 700, color: '#059669' }}>{formatPesos(item.precio)}</div>
+                                            <span style={{ fontSize: '10px', backgroundColor: isService ? '#FDE68A' : (totalStock <= 5 ? '#FEE2E2' : '#E2E8F0'), padding: '1px 6px', borderRadius: '3px', color: isService ? '#92400E' : (totalStock <= 5 ? '#DC2626' : '#475569'), fontWeight: 500 }}>
+                                                {isService ? 'Servicio' : `Stock: ${totalStock}`}
+                                            </span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
