@@ -250,6 +250,16 @@ export default function CuentasCobrar() {
         }
     };
 
+    const handleEliminarAnticipo = async (clienteId, clienteNombre) => {
+        if (!window.confirm(`¿Eliminar todos los anticipos de ${clienteNombre}? Esta acción no se puede deshacer.`)) return;
+        try {
+            await api.delete(`/anticipos/cliente/${clienteId}`);
+            setAnticipos(prev => prev.filter(a => a.clienteId !== clienteId));
+        } catch (error) {
+            alert('Error al eliminar anticipos');
+        }
+    };
+
     const filteredAnticipos = anticipos.filter(a =>
         a.clienteNombre.toLowerCase().includes(searchAnticipo.toLowerCase()) ||
         a.clienteDocumento?.includes(searchAnticipo)
@@ -504,12 +514,26 @@ export default function CuentasCobrar() {
                                         }}>
                                             <User size={16} color={ant.saldo > 0 ? '#1A1A2E' : '#9CA3AF'} />
                                         </div>
-                                        <div style={{ minWidth: 0 }}>
+                                        <div style={{ flex: 1, minWidth: 0 }}>
                                             <div style={{ fontSize: '14px', fontWeight: 600, color: '#1A1A2E', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                 {ant.clienteNombre}
                                             </div>
                                             <div style={{ fontSize: '11px', color: '#9CA3AF' }}>{ant.clienteDocumento}</div>
                                         </div>
+                                        {isAdmin && (
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleEliminarAnticipo(ant.clienteId, ant.clienteNombre); }}
+                                                title="Eliminar anticipos"
+                                                style={{
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    width: '28px', height: '28px', borderRadius: '6px',
+                                                    border: '1px solid #FCA5A5', backgroundColor: '#FEF2F2',
+                                                    cursor: 'pointer', flexShrink: 0
+                                                }}
+                                            >
+                                                <Trash2 size={14} color="#DC2626" />
+                                            </button>
+                                        )}
                                     </div>
 
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '12px' }}>

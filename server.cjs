@@ -11,6 +11,7 @@ const bcrypt = require('bcrypt');
 const { PrismaClient } = require('@prisma/client');
 
 const app = express();
+app.set('trust proxy', 1);
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 8080;
 
@@ -3157,6 +3158,38 @@ app.delete('/api/anticipos/:id', async (req, res) => {
     } catch (error) {
         logger.error('Error al eliminar anticipo:', error);
         res.status(400).json({ error: error.message || 'Error al eliminar anticipo' });
+    }
+});
+
+// Eliminar todos los anticipos de un cliente (solo admin)
+app.delete('/api/anticipos/cliente/:clienteId', async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.status(403).json({ error: 'Solo administradores' });
+        const clienteId = parseInt(req.params.clienteId);
+
+        // Buscar anticipos del cliente para obtener referencias
+        const anticipos = await prisma.anticipo.findMany({ where: { clienteId } });
+        const referencias = anticipos.filter(a => a.tipo === 'deposito').map(a => `ANT-${a.id}`);
+
+        await prisma.$transaction(async (tx) => {
+            // Eliminar movimientos de caja por referencia ANT-X
+            if (referencias.length > 0) {
+                await tx.movimientoCaja.deleteMany({
+                    where: { referencia: { in: referencias } }
+                });
+            }
+            // Eliminar movimientos de consumo anticipo vinculados a ventas del cliente
+            await tx.movimientoCaja.deleteMany({
+                where: { categoria: 'Consumo Anticipo', descripcion: { contains: anticipos[0]?.cliente?.nombre || '' } }
+            });
+            // Eliminar todos los anticipos
+            await tx.anticipo.deleteMany({ where: { clienteId } });
+        });
+
+        res.json({ success: true, eliminados: anticipos.length });
+    } catch (error) {
+        logger.error('Error al eliminar anticipos del cliente:', error);
+        res.status(500).json({ error: 'Error al eliminar anticipos' });
     }
 });
 
