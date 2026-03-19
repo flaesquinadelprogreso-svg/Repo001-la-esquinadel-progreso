@@ -273,84 +273,78 @@ export default function AnalisisFinanciero() {
             {activeTab === 'resumen' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                     {/* KPI Cards section - Nuevo formato con Ventas Brutas, Devoluciones y Netas */}
-                    <div id="analisis-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+                    <div id="analisis-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '10px' }}>
 
                         {/* Ventas Brutas */}
                         <div
                             onClick={() => setActiveTab('ventas')}
-                            style={{ backgroundColor: '#FFFFFF', padding: '20px', borderRadius: '12px', border: '1px solid #E2E5EA', position: 'relative', overflow: 'hidden', cursor: 'pointer', transition: 'all 0.2s' }}
-                            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'; }}
+                            style={{ backgroundColor: '#FFFFFF', padding: '12px 14px', borderRadius: '10px', border: '1px solid #E2E5EA', position: 'relative', overflow: 'hidden', cursor: 'pointer', transition: 'all 0.2s' }}
+                            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)'; }}
                             onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}
                         >
-                            <div style={{ position: 'absolute', right: '-15px', top: '10px', opacity: 0.05 }}><TrendingUp size={80} /></div>
-                            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Ventas Brutas</span>
-                            <div style={{ fontSize: '24px', fontWeight: 700, color: '#1A1A2E', marginTop: '8px' }}>
+                            <span style={{ fontSize: '11px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Ventas Brutas</span>
+                            <div style={{ fontSize: '17px', fontWeight: 700, color: '#1A1A2E', marginTop: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                 {formatMoney(resumen.ventasBrutas ?? resumen.totalVendido)}
                             </div>
-                            <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '4px' }}>{ventasPositivas?.length || ventas.length} ventas</div>
+                            <div style={{ fontSize: '11px', color: '#6B7280', marginTop: '2px' }}>{ventasPositivas?.length || ventas.length} ventas</div>
                         </div>
 
                         {/* Capital Inmovilizado */}
                         <div
-                            style={{ backgroundColor: '#FFFFFF', padding: '20px', borderRadius: '12px', border: '1px solid #E2E5EA', position: 'relative', overflow: 'hidden' }}
+                            style={{ backgroundColor: '#FFFFFF', padding: '12px 14px', borderRadius: '10px', border: '1px solid #E2E5EA', position: 'relative', overflow: 'hidden' }}
                         >
-                            <div style={{ position: 'absolute', right: '-15px', top: '10px', opacity: 0.05 }}><Package size={80} /></div>
-                            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Valorización de inventario</span>
-                            <div style={{ fontSize: '24px', fontWeight: 700, color: '#8B5CF6', marginTop: '8px' }}>
+                            <span style={{ fontSize: '11px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Valorización inventario</span>
+                            <div style={{ fontSize: '17px', fontWeight: 700, color: '#8B5CF6', marginTop: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                 {formatMoney(resumen.capitalInmovilizado || 0)}
                             </div>
-                            <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '4px' }}>Costo de stock actual</div>
+                            <div style={{ fontSize: '11px', color: '#6B7280', marginTop: '2px' }}>Costo de stock actual</div>
                         </div>
 
                         {/* Devoluciones */}
                         <div
-                            style={{ backgroundColor: '#FFFFFF', padding: '20px', borderRadius: '12px', border: '1px solid #E2E5EA', position: 'relative', overflow: 'hidden' }}
+                            style={{ backgroundColor: '#FFFFFF', padding: '12px 14px', borderRadius: '10px', border: '1px solid #E2E5EA', position: 'relative', overflow: 'hidden' }}
                         >
-                            <div style={{ position: 'absolute', right: '-15px', top: '10px', opacity: 0.05 }}><ArrowDownRight size={80} /></div>
-                            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Devoluciones</span>
-                            <div style={{ fontSize: '24px', fontWeight: 700, color: '#EF4444', marginTop: '8px' }}>
+                            <span style={{ fontSize: '11px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Devoluciones</span>
+                            <div style={{ fontSize: '17px', fontWeight: 700, color: '#EF4444', marginTop: '4px' }}>
                                 -{formatMoney(resumen.totalDevoluciones || 0)}
                             </div>
-                            <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '4px' }}>{devoluciones?.length || 0} devoluciones</div>
+                            <div style={{ fontSize: '11px', color: '#6B7280', marginTop: '2px' }}>{devoluciones?.length || 0} devoluciones</div>
                         </div>
 
                         {/* Ventas Netas */}
                         <div
                             onClick={() => setActiveTab('ventas')}
-                            style={{ backgroundColor: '#FFFFFF', padding: '20px', borderRadius: '12px', border: '1px solid #E2E5EA', position: 'relative', overflow: 'hidden', cursor: 'pointer', transition: 'all 0.2s' }}
-                            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'; }}
+                            style={{ backgroundColor: '#FFFFFF', padding: '12px 14px', borderRadius: '10px', border: '1px solid #E2E5EA', position: 'relative', overflow: 'hidden', cursor: 'pointer', transition: 'all 0.2s' }}
+                            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)'; }}
                             onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}
                         >
-                            <div style={{ position: 'absolute', right: '-15px', top: '10px', opacity: 0.05 }}><DollarSign size={80} /></div>
-                            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Ventas Netas</span>
-                            <div style={{ fontSize: '24px', fontWeight: 700, color: '#10B981', marginTop: '8px' }}>
+                            <span style={{ fontSize: '11px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Ventas Netas</span>
+                            <div style={{ fontSize: '17px', fontWeight: 700, color: '#10B981', marginTop: '4px' }}>
                                 {formatMoney(resumen.ventasNetas ?? resumen.totalVendido)}
                             </div>
-                            <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '4px' }}>Después de devoluciones</div>
+                            <div style={{ fontSize: '11px', color: '#6B7280', marginTop: '2px' }}>Después de devoluciones</div>
                         </div>
 
                         {/* Utilidad Neta */}
                         <div
-                            style={{ backgroundColor: '#FFFFFF', padding: '20px', borderRadius: '12px', border: '1px solid #E2E5EA', position: 'relative', overflow: 'hidden' }}
+                            style={{ backgroundColor: '#FFFFFF', padding: '12px 14px', borderRadius: '10px', border: '1px solid #E2E5EA', position: 'relative', overflow: 'hidden' }}
                         >
-                            <div style={{ position: 'absolute', right: '-15px', top: '10px', opacity: 0.05 }}><DollarSign size={80} /></div>
-                            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Utilidad Neta</span>
-                            <div style={{ fontSize: '24px', fontWeight: 700, color: (resumen.utilidadNeta ?? resumen.totalGanancia) >= 0 ? '#10B981' : '#EF4444', marginTop: '8px' }}>
+                            <span style={{ fontSize: '11px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Utilidad Neta</span>
+                            <div style={{ fontSize: '17px', fontWeight: 700, color: (resumen.utilidadNeta ?? resumen.totalGanancia) >= 0 ? '#10B981' : '#EF4444', marginTop: '4px' }}>
                                 {formatMoney(resumen.utilidadNeta ?? resumen.totalGanancia)}
                             </div>
-                            <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '4px' }}>Ganancia real</div>
+                            <div style={{ fontSize: '11px', color: '#6B7280', marginTop: '2px' }}>Ganancia real</div>
                         </div>
 
                         {/* Margen */}
                         <div
-                            style={{ backgroundColor: '#FFFFFF', padding: '20px', borderRadius: '12px', border: '1px solid #E2E5EA', position: 'relative', overflow: 'hidden' }}
+                            style={{ backgroundColor: '#FFFFFF', padding: '12px 14px', borderRadius: '10px', border: '1px solid #E2E5EA', position: 'relative', overflow: 'hidden' }}
                         >
-                            <div style={{ position: 'absolute', right: '-15px', top: '10px', opacity: 0.05 }}><TrendingUp size={80} /></div>
-                            <span style={{ fontSize: '13px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Margen Neto</span>
-                            <div style={{ fontSize: '24px', fontWeight: 700, color: '#F2A900', marginTop: '8px' }}>
+                            <span style={{ fontSize: '11px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Margen Neto</span>
+                            <div style={{ fontSize: '17px', fontWeight: 700, color: '#F2A900', marginTop: '4px' }}>
                                 {isNaN(resumen.margenRentabilidad) ? '0.0' : Number(resumen.margenRentabilidad).toFixed(1)}%
                             </div>
-                            <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '4px' }}>Rentabilidad</div>
+                            <div style={{ fontSize: '11px', color: '#6B7280', marginTop: '2px' }}>Rentabilidad</div>
                         </div>
                     </div>
 
