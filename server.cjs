@@ -1965,6 +1965,19 @@ inicializarCuentas();
 app.get('/api/cuentas-financieras', async (req, res) => {
     try {
         const cuentas = await prisma.cuentaFinanciera.findMany({ where: { activo: true }, orderBy: { nombre: 'asc' } });
+        // Calcular saldo real desde movimientos para cada cuenta
+        for (const cuenta of cuentas) {
+            const entradas = await prisma.movimientoCaja.aggregate({ _sum: { monto: true }, where: { cuentaId: cuenta.id, tipo: 'entrada' } });
+            const salidas = await prisma.movimientoCaja.aggregate({ _sum: { monto: true }, where: { cuentaId: cuenta.id, tipo: 'salida' } });
+            // Incluir devoluciones (siempre son salidas)
+            const devoluciones = await prisma.movimientoCajaDevolucion.aggregate({ _sum: { monto: true }, where: { cuentaId: cuenta.id, tipo: 'salida' } });
+            const saldoReal = (entradas._sum.monto || 0) - (salidas._sum.monto || 0) - (devoluciones._sum.monto || 0);
+            // Sincronizar si hay diferencia
+            if (saldoReal !== cuenta.saldoActual) {
+                await prisma.cuentaFinanciera.update({ where: { id: cuenta.id }, data: { saldoActual: saldoReal } });
+                cuenta.saldoActual = saldoReal;
+            }
+        }
         res.json(cuentas);
     } catch (error) {
         res.status(500).json({ error: 'Error al obtener cuentas' });
