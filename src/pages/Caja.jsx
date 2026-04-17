@@ -567,18 +567,18 @@ export default function CajaBancos() {
                                             {mov.saldoDespues != null ? formatPesos(mov.saldoDespues) : '-'}
                                         </td>
                                         <td style={{ padding: '14px 10px', textAlign: 'center' }}>
-                                            {mov.tipo === 'salida' && mov.categoria === 'Otros gastos' && (
+                                            {mov.tipo === 'salida' && !['Venta POS', 'Cobro de cartera', 'Compra', 'Devolución', 'Saldo inicial', 'Traslado', 'Anticipo cliente', 'Consumo Anticipo', 'Pago a proveedor', 'Reversión de gasto'].includes(mov.categoria) && (
                                                 <button
                                                     onClick={() => { setShowReversarModal(mov); setReversarMonto(formatPesos(mov.monto)); }}
                                                     title="Reversar gasto"
                                                     style={{
-                                                        display: 'inline-flex', alignItems: 'center', gap: '4px',
-                                                        padding: '4px 10px', borderRadius: '6px',
+                                                        display: 'inline-flex', alignItems: 'center', gap: '3px',
+                                                        padding: '4px 8px', borderRadius: '6px',
                                                         border: '1px solid #FCA5A5', backgroundColor: '#FEF2F2',
                                                         cursor: 'pointer', fontSize: '11px', color: '#DC2626', fontWeight: 600
                                                     }}
                                                 >
-                                                    <RotateCcw size={12} /> Reversar
+                                                    <RotateCcw size={11} />R
                                                 </button>
                                             )}
                                         </td>
