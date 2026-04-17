@@ -3,7 +3,7 @@ import {
     Wallet, Building, Plus, ArrowDownCircle, ArrowUpCircle,
     Clock, Search, AlertCircle, FileText, ChevronRight,
     TrendingUp, TrendingDown, Landmark, X, ArrowRightLeft,
-    CheckCircle, Trash2, DoorOpen, DoorClosed, Lock
+    CheckCircle, Trash2, DoorOpen, DoorClosed, Lock, RotateCcw
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
@@ -28,6 +28,8 @@ export default function CajaBancos() {
     const [nuevoMov, setNuevoMov] = useState({ tipo: 'salida', categoria: '', monto: '', cuentaId: '', descripcion: '', metodo: 'efectivo' });
     const [nuevoTraslado, setNuevoTraslado] = useState({ origenId: '', destinoId: '', monto: '', descripcion: '' });
     const [isMovProcessing, setIsMovProcessing] = useState(false);
+    const [showReversarModal, setShowReversarModal] = useState(null);
+    const [reversarMonto, setReversarMonto] = useState('');
 
     // Navigation states
     const [viewMode, setViewMode] = useState('general'); // 'general', 'account'
@@ -159,6 +161,26 @@ export default function CajaBancos() {
             fetchData();
         } catch (error) {
             alert(error.response?.data?.error || 'Error al eliminar la cuenta');
+        }
+    };
+
+    const handleReversarGasto = async () => {
+        const mov = showReversarModal;
+        const monto = parseInt(reversarMonto.replace(/\D/g, '')) || 0;
+        if (monto <= 0 || monto > mov.monto) {
+            return alert(`El monto debe ser entre $1 y ${formatPesos(mov.monto)}`);
+        }
+        if (!confirm(`¿Reversar ${formatPesos(monto)} del gasto "${mov.descripcion || mov.categoria}"?`)) return;
+        try {
+            await api.post('/movimientos-financieros/reversar', {
+                movimientoId: mov.id,
+                monto
+            });
+            setShowReversarModal(null);
+            setReversarMonto('');
+            fetchData();
+        } catch (error) {
+            alert(error.response?.data?.error || 'Error al reversar gasto');
         }
     };
 
@@ -515,6 +537,7 @@ export default function CajaBancos() {
                                     <th style={{ padding: '12px 20px', textAlign: 'left', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Usuario</th>
                                     <th style={{ padding: '12px 20px', textAlign: 'right', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Monto</th>
                                     <th style={{ padding: '12px 20px', textAlign: 'right', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Saldo</th>
+                                    <th style={{ padding: '12px 10px', textAlign: 'center', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -543,11 +566,27 @@ export default function CajaBancos() {
                                         <td style={{ padding: '14px 20px', textAlign: 'right', fontSize: '14px', fontWeight: 600, color: '#1A1A2E' }}>
                                             {mov.saldoDespues != null ? formatPesos(mov.saldoDespues) : '-'}
                                         </td>
+                                        <td style={{ padding: '14px 10px', textAlign: 'center' }}>
+                                            {mov.tipo === 'salida' && mov.categoria === 'Otros gastos' && (
+                                                <button
+                                                    onClick={() => { setShowReversarModal(mov); setReversarMonto(formatPesos(mov.monto)); }}
+                                                    title="Reversar gasto"
+                                                    style={{
+                                                        display: 'inline-flex', alignItems: 'center', gap: '4px',
+                                                        padding: '4px 10px', borderRadius: '6px',
+                                                        border: '1px solid #FCA5A5', backgroundColor: '#FEF2F2',
+                                                        cursor: 'pointer', fontSize: '11px', color: '#DC2626', fontWeight: 600
+                                                    }}
+                                                >
+                                                    <RotateCcw size={12} /> Reversar
+                                                </button>
+                                            )}
+                                        </td>
                                     </tr>
                                 ))}
                                 {!loading && movimientos.length === 0 && (
                                     <tr>
-                                        <td colSpan="7" style={{ padding: '40px', textAlign: 'center', color: '#6B7280' }}>
+                                        <td colSpan="8" style={{ padding: '40px', textAlign: 'center', color: '#6B7280' }}>
                                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
                                                 <AlertCircle size={40} opacity={0.3} />
                                                 <div>No se encontraron movimientos para los filtros seleccionados</div>
@@ -766,6 +805,36 @@ export default function CajaBancos() {
                     </div>
                 </div>
             </Modal >
+
+            {/* Modal Reversar Gasto */}
+            <Modal isOpen={!!showReversarModal} onClose={() => { setShowReversarModal(null); setReversarMonto(''); }} title="Reversar Gasto">
+                {showReversarModal && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minWidth: '380px' }}>
+                        <div style={{ padding: '12px', backgroundColor: '#F9FAFB', borderRadius: '8px', fontSize: '13px' }}>
+                            <div><strong>Categoría:</strong> {showReversarModal.categoria}</div>
+                            <div><strong>Descripción:</strong> {showReversarModal.descripcion || '-'}</div>
+                            <div><strong>Monto original:</strong> {formatPesos(showReversarModal.monto)}</div>
+                            <div><strong>Fecha:</strong> {new Date(showReversarModal.fecha).toLocaleDateString()}</div>
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Monto a reversar *</label>
+                            <input
+                                type="text"
+                                value={reversarMonto}
+                                onChange={(e) => setReversarMonto(handleCurrencyChange(e.target.value))}
+                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                            />
+                            <div style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '4px' }}>
+                                Máximo: {formatPesos(showReversarModal.monto)} (total) — puede reversar parcial
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                            <Button variant="secondary" onClick={() => { setShowReversarModal(null); setReversarMonto(''); }}>Cancelar</Button>
+                            <Button onClick={handleReversarGasto}>Reversar</Button>
+                        </div>
+                    </div>
+                )}
+            </Modal>
 
         </div >
         </div>

@@ -2118,6 +2118,43 @@ app.post('/api/movimientos-financieros/traslado', async (req, res) => {
     }
 });
 
+// Reversar gasto (parcial o total)
+app.post('/api/movimientos-financieros/reversar', async (req, res) => {
+    try {
+        const { movimientoId, monto } = req.body;
+        const amount = parseInt(monto);
+        if (!movimientoId || isNaN(amount) || amount <= 0) {
+            return res.status(400).json({ error: 'Movimiento y monto válido requeridos' });
+        }
+
+        const movOriginal = await prisma.movimientoCaja.findUnique({
+            where: { id: parseInt(movimientoId) },
+            include: { cuenta: true }
+        });
+        if (!movOriginal) return res.status(404).json({ error: 'Movimiento no encontrado' });
+        if (movOriginal.tipo !== 'salida') return res.status(400).json({ error: 'Solo se pueden reversar gastos (salidas)' });
+        if (amount > movOriginal.monto) return res.status(400).json({ error: 'El monto no puede superar el gasto original' });
+
+        await prisma.$transaction(async (tx) => {
+            await crearMovimiento(tx, {
+                tipo: 'entrada',
+                categoria: 'Reversión de gasto',
+                monto: amount,
+                metodo: movOriginal.metodo || 'efectivo',
+                cuentaId: movOriginal.cuentaId,
+                descripcion: `Reversión ${amount === movOriginal.monto ? 'total' : 'parcial'}: ${movOriginal.descripcion || movOriginal.categoria} (ID: ${movOriginal.id})`,
+                referencia: `REV-${movOriginal.id}`,
+                usuarioId: req.user?.id || null
+            });
+        });
+
+        res.json({ success: true });
+    } catch (error) {
+        logger.error('Error al reversar gasto:', error);
+        res.status(500).json({ error: error.message || 'Error al reversar gasto' });
+    }
+});
+
 // ═════════════════════════════════
 // CIERRE DE CAJA DIARIO
 // ═════════════════════════════════
