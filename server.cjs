@@ -2062,7 +2062,7 @@ app.get('/api/movimientos-financieros', async (req, res) => {
         }
 
         const pageNum = Math.max(1, parseInt(page) || 1);
-        const pageSize = Math.min(100, Math.max(1, parseInt(limit) || 45));
+        const pageSize = Math.min(100, Math.max(1, parseInt(limit) || 35));
         const skip = (pageNum - 1) * pageSize;
 
         const [movimientos, total] = await Promise.all([

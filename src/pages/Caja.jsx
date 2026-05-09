@@ -44,7 +44,7 @@ export default function CajaBancos() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalMovimientos, setTotalMovimientos] = useState(0);
-    const PAGE_SIZE = 45;
+    const PAGE_SIZE = 35;
 
     const fetchData = async (page = currentPage) => {
         try {
