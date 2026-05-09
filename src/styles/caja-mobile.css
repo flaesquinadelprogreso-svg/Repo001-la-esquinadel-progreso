@@ -152,4 +152,16 @@
         justify-content: center !important;
         margin-left: 0 !important;
     }
+
+    /* ── Paginación ── */
+    #caja-history > div:last-child[style*="borderTop"] {
+        flex-direction: column !important;
+        gap: 10px !important;
+        padding: 10px 12px !important;
+    }
+
+    #caja-history > div:last-child[style*="borderTop"] > div {
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+    }
 }

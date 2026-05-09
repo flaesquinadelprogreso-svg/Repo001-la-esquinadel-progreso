@@ -2031,7 +2031,7 @@ app.delete('/api/cuentas-financieras/:id', async (req, res) => {
 
 app.get('/api/movimientos-financieros', async (req, res) => {
     try {
-        const { cuentaId, startDate, endDate } = req.query;
+        const { cuentaId, startDate, endDate, page, limit, all } = req.query;
         let whereClause = {};
 
         if (cuentaId) {
@@ -2052,13 +2052,36 @@ app.get('/api/movimientos-financieros', async (req, res) => {
             }
         }
 
-        const movimientos = await prisma.movimientoCaja.findMany({
-            where: whereClause,
-            include: { cuenta: true, usuario: { select: { username: true } } },
-            orderBy: { fecha: 'desc' },
-            take: 200
+        if (all === 'true') {
+            const movimientos = await prisma.movimientoCaja.findMany({
+                where: whereClause,
+                include: { cuenta: true, usuario: { select: { username: true } } },
+                orderBy: { fecha: 'desc' }
+            });
+            return res.json(movimientos);
+        }
+
+        const pageNum = Math.max(1, parseInt(page) || 1);
+        const pageSize = Math.min(100, Math.max(1, parseInt(limit) || 45));
+        const skip = (pageNum - 1) * pageSize;
+
+        const [movimientos, total] = await Promise.all([
+            prisma.movimientoCaja.findMany({
+                where: whereClause,
+                include: { cuenta: true, usuario: { select: { username: true } } },
+                orderBy: { fecha: 'desc' },
+                skip,
+                take: pageSize
+            }),
+            prisma.movimientoCaja.count({ where: whereClause })
+        ]);
+
+        res.json({
+            data: movimientos,
+            total,
+            page: pageNum,
+            totalPages: Math.ceil(total / pageSize)
         });
-        res.json(movimientos);
     } catch (error) {
         logger.error(error);
         res.status(500).json({ error: 'Error al obtener movimientos' });

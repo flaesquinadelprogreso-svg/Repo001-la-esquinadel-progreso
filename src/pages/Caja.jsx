@@ -3,7 +3,8 @@ import {
     Wallet, Building, Plus, ArrowDownCircle, ArrowUpCircle,
     Clock, Search, AlertCircle, FileText, ChevronRight,
     TrendingUp, TrendingDown, Landmark, X, ArrowRightLeft,
-    CheckCircle, Trash2, DoorOpen, DoorClosed, Lock, RotateCcw
+    CheckCircle, Trash2, DoorOpen, DoorClosed, Lock, RotateCcw,
+    ChevronLeft
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
@@ -39,15 +40,22 @@ export default function CajaBancos() {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
 
-    const fetchData = async () => {
+    // Pagination states
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalMovimientos, setTotalMovimientos] = useState(0);
+    const PAGE_SIZE = 45;
+
+    const fetchData = async (page = currentPage) => {
         try {
             setLoading(true);
 
-            // Build query params for movements
             const movParams = new URLSearchParams();
             if (selectedCuentaId) movParams.append('cuentaId', selectedCuentaId);
             if (startDate) movParams.append('startDate', startDate);
             if (endDate) movParams.append('endDate', endDate);
+            movParams.append('page', page);
+            movParams.append('limit', PAGE_SIZE);
 
             const [cuentasRes, movsRes, cierresRes] = await Promise.all([
                 api.get('/cuentas-financieras'),
@@ -55,15 +63,18 @@ export default function CajaBancos() {
                 api.get('/cierres')
             ]);
             const cuentasData = cuentasRes.data;
+            const movsData = movsRes.data;
 
-            // Detectar si la caja nunca fue iniciada: caja principal con saldo 0, sin cierres ni movimientos
             const cajaPrincipal = cuentasData.find(c => c.tipo === 'caja');
             const sinCierres = cierresRes.data.length === 0;
-            const sinMovimientos = movsRes.data.length === 0;
+            const sinMovimientos = movsData.total === 0;
             setCajaIniciada(!(cajaPrincipal && cajaPrincipal.saldoActual === 0 && sinCierres && sinMovimientos));
 
             setCuentas(cuentasData);
-            setMovimientos(movsRes.data);
+            setMovimientos(movsData.data);
+            setTotalPages(movsData.totalPages);
+            setTotalMovimientos(movsData.total);
+            setCurrentPage(movsData.page);
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
@@ -72,39 +83,53 @@ export default function CajaBancos() {
     };
 
     useEffect(() => {
-        fetchData();
+        setCurrentPage(1);
+        fetchData(1);
     }, [selectedCuentaId, startDate, endDate]);
 
-    const handleExportExcel = () => {
-        if (movimientos.length === 0) return alert('No hay datos para exportar');
+    const handleExportExcel = async () => {
+        try {
+            const movParams = new URLSearchParams();
+            if (selectedCuentaId) movParams.append('cuentaId', selectedCuentaId);
+            if (startDate) movParams.append('startDate', startDate);
+            if (endDate) movParams.append('endDate', endDate);
+            movParams.append('all', 'true');
 
-        // CSV Creation (Excel compatible)
-        const headers = ["Fecha", "Hora", "Cuenta", "Tipo", "Categoría", "Descripción", "Usuario", "Monto", "Saldo"];
-        const rows = movimientos.map(m => [
-            new Date(m.fecha).toLocaleDateString(),
-            m.hora,
-            m.cuenta?.nombre || 'N/A',
-            m.tipo.toUpperCase(),
-            m.categoria,
-            m.descripcion || '',
-            m.usuario?.username || '-',
-            m.tipo === 'salida' ? -m.monto : m.monto,
-            m.saldoDespues != null ? m.saldoDespues : ''
-        ]);
+            const res = await api.get(`/movimientos-financieros?${movParams.toString()}`);
+            const allMovimientos = res.data;
 
-        const csvContent = [
-            headers.join(";"),
-            ...rows.map(r => r.join(";"))
-        ].join("\n");
+            if (allMovimientos.length === 0) return alert('No hay datos para exportar');
 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", `movimientos_${new Date().toISOString().split('T')[0]}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+            const headers = ["Fecha", "Hora", "Cuenta", "Tipo", "Categoría", "Descripción", "Usuario", "Monto", "Saldo"];
+            const rows = allMovimientos.map(m => [
+                new Date(m.fecha).toLocaleDateString(),
+                m.hora,
+                m.cuenta?.nombre || 'N/A',
+                m.tipo.toUpperCase(),
+                m.categoria,
+                m.descripcion || '',
+                m.usuario?.username || '-',
+                m.tipo === 'salida' ? -m.monto : m.monto,
+                m.saldoDespues != null ? m.saldoDespues : ''
+            ]);
+
+            const csvContent = [
+                headers.join(";"),
+                ...rows.map(r => r.join(";"))
+            ].join("\n");
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `movimientos_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error('Error exporting:', error);
+            alert('Error al exportar los datos');
+        }
     };
 
     const handleCreateAccount = async () => {
@@ -597,6 +622,104 @@ export default function CajaBancos() {
                             </tbody>
                         </table>
                     </div>
+
+                    {totalPages > 1 && (
+                        <div style={{
+                            padding: '12px 20px',
+                            borderTop: '1px solid #E5E7EB',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            backgroundColor: '#F9FAFB'
+                        }}>
+                            <span style={{ fontSize: '13px', color: '#6B7280' }}>
+                                {totalMovimientos} movimientos &middot; Página {currentPage} de {totalPages}
+                            </span>
+                            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                                <button
+                                    onClick={() => fetchData(1)}
+                                    disabled={currentPage === 1}
+                                    style={{
+                                        padding: '6px 10px', borderRadius: '6px', border: '1px solid #E5E7EB',
+                                        backgroundColor: currentPage === 1 ? '#F3F4F6' : '#fff',
+                                        color: currentPage === 1 ? '#D1D5DB' : '#374151',
+                                        cursor: currentPage === 1 ? 'default' : 'pointer',
+                                        fontSize: '12px', fontWeight: 600
+                                    }}
+                                >
+                                    Primera
+                                </button>
+                                <button
+                                    onClick={() => fetchData(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                    style={{
+                                        padding: '6px 10px', borderRadius: '6px', border: '1px solid #E5E7EB',
+                                        backgroundColor: currentPage === 1 ? '#F3F4F6' : '#fff',
+                                        color: currentPage === 1 ? '#D1D5DB' : '#374151',
+                                        cursor: currentPage === 1 ? 'default' : 'pointer',
+                                        display: 'flex', alignItems: 'center'
+                                    }}
+                                >
+                                    <ChevronLeft size={16} />
+                                </button>
+
+                                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                                    .filter(p => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 2)
+                                    .reduce((acc, p, idx, arr) => {
+                                        if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...');
+                                        acc.push(p);
+                                        return acc;
+                                    }, [])
+                                    .map((p, idx) =>
+                                        p === '...' ? (
+                                            <span key={`dots-${idx}`} style={{ padding: '0 4px', color: '#9CA3AF', fontSize: '12px' }}>...</span>
+                                        ) : (
+                                            <button
+                                                key={p}
+                                                onClick={() => fetchData(p)}
+                                                style={{
+                                                    padding: '6px 12px', borderRadius: '6px',
+                                                    border: p === currentPage ? '1px solid #F2A900' : '1px solid #E5E7EB',
+                                                    backgroundColor: p === currentPage ? '#FFF8E1' : '#fff',
+                                                    color: p === currentPage ? '#F2A900' : '#374151',
+                                                    fontWeight: p === currentPage ? 700 : 500,
+                                                    cursor: 'pointer', fontSize: '13px'
+                                                }}
+                                            >
+                                                {p}
+                                            </button>
+                                        )
+                                    )}
+
+                                <button
+                                    onClick={() => fetchData(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                    style={{
+                                        padding: '6px 10px', borderRadius: '6px', border: '1px solid #E5E7EB',
+                                        backgroundColor: currentPage === totalPages ? '#F3F4F6' : '#fff',
+                                        color: currentPage === totalPages ? '#D1D5DB' : '#374151',
+                                        cursor: currentPage === totalPages ? 'default' : 'pointer',
+                                        display: 'flex', alignItems: 'center'
+                                    }}
+                                >
+                                    <ChevronRight size={16} />
+                                </button>
+                                <button
+                                    onClick={() => fetchData(totalPages)}
+                                    disabled={currentPage === totalPages}
+                                    style={{
+                                        padding: '6px 10px', borderRadius: '6px', border: '1px solid #E5E7EB',
+                                        backgroundColor: currentPage === totalPages ? '#F3F4F6' : '#fff',
+                                        color: currentPage === totalPages ? '#D1D5DB' : '#374151',
+                                        cursor: currentPage === totalPages ? 'default' : 'pointer',
+                                        fontSize: '12px', fontWeight: 600
+                                    }}
+                                >
+                                    Última
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 
