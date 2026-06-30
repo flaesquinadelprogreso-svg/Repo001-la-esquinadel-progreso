@@ -30,6 +30,7 @@ export default function CuentasCobrar() {
     const [cuentasFinancieras, setCuentasFinancieras] = useState([]);
     const [selectedAccountId, setSelectedAccountId] = useState('');
     const [isCajaOpen, setIsCajaOpen] = useState(true);
+    const [isSubmittingPago, setIsSubmittingPago] = useState(false);
 
     const [nuevaCuenta, setNuevaCuenta] = useState({
         clienteId: '',
@@ -172,6 +173,9 @@ export default function CuentasCobrar() {
             return;
         }
 
+        if (isSubmittingPago) return;
+        setIsSubmittingPago(true);
+
         try {
             await api.post(`/clientes/${cuentaActiva.clienteId}/abono-fifo`, {
                 monto: parseInt(pagoMonto),
@@ -187,6 +191,8 @@ export default function CuentasCobrar() {
         } catch (error) {
             console.error('Error registering payment:', error);
             alert(error.response?.data?.error || 'Error al registrar pago');
+        } finally {
+            setIsSubmittingPago(false);
         }
     };
 
@@ -981,9 +987,9 @@ export default function CuentasCobrar() {
                                             <Button
                                                 onClick={handleRegistrarPago}
                                                 style={{ padding: '5px 16px', height: '30px', fontSize: '12px', fontWeight: 700, backgroundColor: '#1A365D' }}
-                                                disabled={!selectedAccountId || !pagoMonto || (!isCajaOpen && metodoSeleccionado === 'efectivo')}
+                                                disabled={!selectedAccountId || !pagoMonto || (!isCajaOpen && metodoSeleccionado === 'efectivo') || isSubmittingPago}
                                             >
-                                                {isCajaOpen || metodoSeleccionado !== 'efectivo' ? 'Aplicar' : 'Caja Cerrada'}
+                                                {isSubmittingPago ? 'Procesando...' : (isCajaOpen || metodoSeleccionado !== 'efectivo' ? 'Aplicar' : 'Caja Cerrada')}
                                             </Button>
                                         </div>
                                     </div>
