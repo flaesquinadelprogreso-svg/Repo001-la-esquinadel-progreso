@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, Wallet, User, LogOut, Settings, ChevronDown, Menu } from 'lucide-react';
+import { Bell, Wallet, User, LogOut, Settings, ChevronDown, Menu } from 'lucide-react';
 import Dropdown, { DropdownItem } from '../ui/Dropdown';
 import Badge from '../ui/Badge';
 import api from '../../api/client';
 import { clearPersistedModule } from '../../hooks/usePersistedState';
 
 export default function Topbar({ isMobile, onMenuToggle }) {
-    const [searchFocused, setSearchFocused] = useState(false);
     const [currentUser, setCurrentUser] = useState(
         JSON.parse(localStorage.getItem('currentUser')) || { name: 'Cargando...', role: '...' }
     );
@@ -86,35 +85,6 @@ export default function Topbar({ isMobile, onMenuToggle }) {
                     <Menu size={22} />
                 </button>
             )}
-
-            {/* Search */}
-            <div style={{ position: 'relative', width: '100%', maxWidth: isMobile ? '100%' : (searchFocused ? '480px' : '380px'), transition: 'max-width 200ms ease', display: isMobile ? 'none' : 'block' }}>
-                <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }} />
-                <input
-                    type="text"
-                    placeholder="Buscar productos, clientes, ventas..."
-                    style={{
-                        width: '100%', paddingLeft: '40px', paddingRight: '16px',
-                        paddingTop: '9px', paddingBottom: '9px',
-                        fontSize: '13px', backgroundColor: '#F0F2F5',
-                        border: '1px solid #E2E5EA', borderRadius: '8px',
-                        outline: 'none', fontFamily: 'inherit',
-                        transition: 'all 200ms ease'
-                    }}
-                    onFocus={(e) => {
-                        setSearchFocused(true);
-                        e.target.style.backgroundColor = '#FFFFFF';
-                        e.target.style.borderColor = '#F2A900';
-                        e.target.style.boxShadow = '0 0 0 2px rgba(242, 169, 0, 0.2)';
-                    }}
-                    onBlur={(e) => {
-                        setSearchFocused(false);
-                        e.target.style.backgroundColor = '#F0F2F5';
-                        e.target.style.borderColor = '#E2E5EA';
-                        e.target.style.boxShadow = 'none';
-                    }}
-                />
-            </div>
 
             {/* Navbar Branding */}
             <div style={{ display: 'none', lg: 'block', marginRight: 'auto', marginLeft: '20px' }} className="topbar-branding">
