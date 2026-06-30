@@ -3520,6 +3520,9 @@ app.post('/api/proveedores/:id/abono-fifo', async (req, res) => {
             const cuentasConSaldo = todasLasCuentas.filter(cta => (cta.monto - (cta.abonado || 0)) > 0);
 
             let abonoRestante = amount;
+            // El movimiento de caja solo puede enlazarse a un AbonoPago (relación 1:1),
+            // por eso se enlaza al último abono generado cuando el pago cubre varias facturas.
+            let ultimoAbonoId = null;
 
             for (const cta of cuentasConSaldo) {
                 if (abonoRestante <= 0) break;
@@ -3528,7 +3531,7 @@ app.post('/api/proveedores/:id/abono-fifo', async (req, res) => {
 
                 const montoAbonarAca = Math.min(saldo, abonoRestante);
 
-                await tx.abonoPago.create({
+                const nuevoAbono = await tx.abonoPago.create({
                     data: {
                         cuentaPorPagarId: cta.id,
                         monto: montoAbonarAca,
@@ -3538,6 +3541,7 @@ app.post('/api/proveedores/:id/abono-fifo', async (req, res) => {
                         usuarioId: req.user?.id || null
                     }
                 });
+                ultimoAbonoId = nuevoAbono.id;
 
                 const nuevoAbonado = (cta.abonado || 0) + montoAbonarAca;
                 await tx.cuentaPorPagar.update({
@@ -3554,7 +3558,8 @@ app.post('/api/proveedores/:id/abono-fifo', async (req, res) => {
             await crearMovimiento(tx, {
                 tipo: 'salida', categoria: 'Pago a proveedor', monto: amount, metodo: metodo,
                 referencia: `Abono Proveedor ${proveedorId}`, cuentaId: accId,
-                usuarioId: req.user?.id || null
+                usuarioId: req.user?.id || null,
+                abonoPagoId: ultimoAbonoId
             });
 
             return { success: true };
@@ -3564,6 +3569,43 @@ app.post('/api/proveedores/:id/abono-fifo', async (req, res) => {
     } catch (error) {
         logger.error('Error en abono FIFO proveedor:', error);
         res.status(500).json({ error: error.message || 'Error al procesar el abono' });
+    }
+});
+
+// Revertir (eliminar) un abono individual a proveedor: restaura el saldo pendiente
+// de la cuenta por pagar y, si el abono tiene caja asociada, devuelve el dinero a esa cuenta.
+app.post('/api/abonos-pago/:id/revertir', async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const abono = await prisma.abonoPago.findUnique({
+            where: { id },
+            include: { cuenta: true, movimientoCaja: true }
+        });
+        if (!abono) return res.status(404).json({ error: 'Abono no encontrado' });
+
+        await prisma.$transaction(async (tx) => {
+            const nuevoAbonado = Math.max((abono.cuenta.abonado || 0) - abono.monto, 0);
+            await tx.cuentaPorPagar.update({
+                where: { id: abono.cuentaPorPagarId },
+                data: { abonado: nuevoAbonado, estado: 'pendiente' }
+            });
+
+            if (abono.movimientoCaja) {
+                await crearMovimiento(tx, {
+                    tipo: 'entrada', categoria: 'Reversión de abono a proveedor', monto: abono.monto,
+                    metodo: abono.movimientoCaja.metodo, cuentaId: abono.movimientoCaja.cuentaId,
+                    descripcion: `Reversión de abono #${abono.id} (${formatPesos(abono.monto)})`,
+                    referencia: `REV-ABP-${abono.id}`, usuarioId: req.user?.id || null
+                });
+            }
+
+            await tx.abonoPago.delete({ where: { id } });
+        });
+
+        res.json({ success: true });
+    } catch (error) {
+        logger.error('Error al revertir abono a proveedor:', error);
+        res.status(500).json({ error: error.message || 'Error al revertir el abono' });
     }
 });
 

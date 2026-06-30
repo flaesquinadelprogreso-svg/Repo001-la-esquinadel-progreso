@@ -198,6 +198,18 @@ export default function CuentasPagar() {
         }
     };
 
+    const handleRevertirAbono = async (abonoId) => {
+        if (!window.confirm('¿Revertir este abono? El monto volverá al saldo pendiente del proveedor y, si aplica, al efectivo/banco de la cuenta usada.')) return;
+        try {
+            await api.post(`/abonos-pago/${abonoId}/revertir`);
+            await fetchData();
+            alert('Abono revertido exitosamente');
+        } catch (error) {
+            console.error('Error reverting abono:', error);
+            alert(error.response?.data?.error || 'Error al revertir el abono');
+        }
+    };
+
     return (
         <div id="cuentas-root" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div id="cuentas-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -512,6 +524,35 @@ export default function CuentasPagar() {
                                         </tbody>
                                     </table>
                                 </div>
+
+                                {/* Historial de abonos */}
+                                {cuentaActiva.abonos && cuentaActiva.abonos.length > 0 && (
+                                    <div>
+                                        <div style={{ fontSize: '11px', fontWeight: 700, color: '#6B7280', marginBottom: '6px', textTransform: 'uppercase' }}>Historial de abonos</div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                            {[...cuentaActiva.abonos].sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).map(abono => (
+                                                <div key={abono.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', backgroundColor: '#F9FAFB', borderRadius: '4px', fontSize: '12px' }}>
+                                                    <span style={{ color: '#6B7280' }}>{new Date(abono.fecha).toLocaleDateString()} · {abono.metodo}</span>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                        <span style={{ fontWeight: 700, color: '#16A34A' }}>{formatPesos(abono.monto)}</span>
+                                                        <button
+                                                            onClick={() => handleRevertirAbono(abono.id)}
+                                                            title="Revertir abono"
+                                                            style={{
+                                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                width: '22px', height: '22px', borderRadius: '4px',
+                                                                border: '1px solid #FCA5A5', backgroundColor: '#FEF2F2',
+                                                                cursor: 'pointer'
+                                                            }}
+                                                        >
+                                                            <Trash2 size={12} color="#DC2626" />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Payment Interface compacto */}
                                 {cuentaActiva.saldoPendiente > 0 ? (
