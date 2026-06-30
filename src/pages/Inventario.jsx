@@ -14,6 +14,12 @@ const getTotalStock = (product) => {
     return product.stockUbicaciones?.reduce((sum, s) => sum + s.stock, 0) || 0;
 };
 
+// Formatear cantidad: si es entero muestra sin decimales, si tiene decimales muestra máximo .XX
+const formatQty = (qty) => {
+    const n = Number(qty) || 0;
+    return n % 1 === 0 ? n.toString() : n.toFixed(2);
+};
+
 // Location colors
 const ubicacionColor = (name) => {
     const colors = {
@@ -334,7 +340,7 @@ export default function Inventario() {
             const response = await api.post(`/productos/${productId}/transferir`, {
                 origenUbicacionId: parseInt(originId),
                 destinoUbicacionId: parseInt(destId),
-                cantidad: parseInt(quantity)
+                cantidad: parseFloat(quantity)
             });
 
             if (response.data) {
@@ -361,7 +367,7 @@ export default function Inventario() {
         try {
             const response = await api.post(`/productos/${productId}/entrada`, {
                 ubicacionId: parseInt(locationId),
-                cantidad: parseInt(quantity)
+                cantidad: parseFloat(quantity)
             });
 
             if (response.data) {
@@ -384,7 +390,7 @@ export default function Inventario() {
         try {
             const response = await api.post(`/productos/${editProduct.id}/disminuir`, {
                 ubicacionId: parseInt(editProduct.decreaseLocation),
-                cantidad: parseInt(editProduct.decreaseQty)
+                cantidad: parseFloat(editProduct.decreaseQty)
             });
 
             if (response.data) {
@@ -407,7 +413,7 @@ export default function Inventario() {
         try {
             const response = await api.post(`/productos/${editProduct.id}/entrada`, {
                 ubicacionId: parseInt(editProduct.increaseLocation),
-                cantidad: parseInt(editProduct.increaseQty)
+                cantidad: parseFloat(editProduct.increaseQty)
             });
 
             if (response.data) {
@@ -656,7 +662,7 @@ export default function Inventario() {
                             >
                                 <PackagePlus size={12} color={isLow ? '#EF4444' : '#6B7280'} />
                                 <span style={{ fontSize: '12px', fontWeight: 700, color: isLow ? '#EF4444' : '#1A1A2E' }}>
-                                    {totalStock}
+                                    {formatQty(totalStock)}
                                 </span>
                             </button>
                         )}
@@ -885,7 +891,7 @@ export default function Inventario() {
                                                     style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', backgroundColor: getTotalStock(item) <= 5 ? '#FEF2F2' : '#F3F4F6', padding: '4px 8px', borderRadius: '4px', border: 'none', cursor: 'pointer' }}
                                                 >
                                                     <PackagePlus size={12} color={getTotalStock(item) <= 5 ? '#EF4444' : '#6B7280'} />
-                                                    <span style={{ fontSize: '13px', fontWeight: 600, color: getTotalStock(item) <= 5 ? '#EF4444' : '#1A1A2E' }}>{getTotalStock(item)}</span>
+                                                    <span style={{ fontSize: '13px', fontWeight: 600, color: getTotalStock(item) <= 5 ? '#EF4444' : '#1A1A2E' }}>{formatQty(getTotalStock(item))}</span>
                                                 </button>
                                             ) : '-'}
                                         </td>
@@ -942,7 +948,7 @@ export default function Inventario() {
                                         <div style={{ width: '8px', height: '8px', borderRadius: '1px', backgroundColor: ubicacionColor(s.ubicacion?.nombre) }} />
                                         <span style={{ fontSize: '13px', color: '#4B5563', fontWeight: 500 }}>{s.ubicacion?.nombre}</span>
                                     </div>
-                                    <span style={{ fontSize: '14px', fontWeight: 700, color: '#1A1A2E' }}>{s.stock}</span>
+                                    <span style={{ fontSize: '14px', fontWeight: 700, color: '#1A1A2E' }}>{formatQty(s.stock)}</span>
                                 </div>
                             ))}
                             {(!showStockPopup.stockUbicaciones || showStockPopup.stockUbicaciones.filter(s => s.stock > 0).length === 0) && (
@@ -968,7 +974,7 @@ export default function Inventario() {
                 <Modal isOpen={true} onClose={() => setShowTransferModal(null)} title={`Trasladar: ${showTransferModal.product?.nombre}`}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minWidth: '350px' }}>
                         <div style={{ padding: '10px', backgroundColor: '#F0F9FF', border: '1px solid #BAE6FD', borderRadius: '4px', textAlign: 'center' }}>
-                            <span style={{ fontSize: '12px', fontWeight: 600, color: '#0369A1' }}>Stock Total: {getTotalStock(showTransferModal.product)}</span>
+                            <span style={{ fontSize: '12px', fontWeight: 600, color: '#0369A1' }}>Stock Total: {formatQty(getTotalStock(showTransferModal.product))}</span>
                         </div>
                         <div>
                             <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Ubicación Origen</label>
@@ -983,7 +989,7 @@ export default function Inventario() {
                                     const currentStock = stockRecord?.stock || 0;
                                     return (
                                         <option key={u.id} value={u.id} disabled={currentStock <= 0}>
-                                            {u.nombre} ({currentStock} disponibles)
+                                            {u.nombre} ({formatQty(currentStock)} disponibles)
                                         </option>
                                     );
                                 })}
@@ -1002,7 +1008,7 @@ export default function Inventario() {
                                     const currentStock = stockRecord?.stock || 0;
                                     return (
                                         <option key={u.id} value={u.id}>
-                                            {u.nombre} (Tiene {currentStock})
+                                            {u.nombre} (Tiene {formatQty(currentStock)})
                                         </option>
                                     );
                                 })}
@@ -1012,9 +1018,10 @@ export default function Inventario() {
                             <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Cantidad</label>
                             <input
                                 type="number"
-                                min="1"
+                                min="0.01"
+                                step="0.01"
                                 value={showTransferModal.quantity || ''}
-                                onChange={(e) => setShowTransferModal(prev => ({ ...prev, quantity: parseInt(e.target.value) || 0 }))}
+                                onChange={(e) => setShowTransferModal(prev => ({ ...prev, quantity: e.target.value }))}
                                 style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
                             />
                         </div>
@@ -1047,9 +1054,10 @@ export default function Inventario() {
                             <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Cantidad</label>
                             <input
                                 type="number"
-                                min="1"
+                                min="0.01"
+                                step="0.01"
                                 value={showEntryModal.quantity || ''}
-                                onChange={(e) => setShowEntryModal(prev => ({ ...prev, quantity: parseInt(e.target.value) || 0 }))}
+                                onChange={(e) => setShowEntryModal(prev => ({ ...prev, quantity: e.target.value }))}
                                 style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
                             />
                         </div>
@@ -1328,7 +1336,7 @@ export default function Inventario() {
                                                 <option value="">Seleccionar...</option>
                                                 {ubicaciones.map((u) => {
                                                     const stockActual = editProduct.stockLocations?.find(s => s.ubicacionId === u.id)?.stock || 0;
-                                                    return <option key={u.id} value={u.id}>{u.nombre} ({stockActual})</option>;
+                                                    return <option key={u.id} value={u.id}>{u.nombre} ({formatQty(stockActual)})</option>;
                                                 })}
                                             </select>
                                         </div>
@@ -1336,7 +1344,8 @@ export default function Inventario() {
                                             <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Cantidad</label>
                                             <input
                                                 type="number"
-                                                min="1"
+                                                min="0.01"
+                                                step="0.01"
                                                 value={editProduct.increaseQty || ''}
                                                 onChange={(e) => setEditProduct(prev => ({ ...prev, increaseQty: e.target.value }))}
                                                 style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
@@ -1361,7 +1370,7 @@ export default function Inventario() {
                                             >
                                                 <option value="">Seleccionar...</option>
                                                 {editProduct.stockLocations?.map((s, idx) => (
-                                                    <option key={idx} value={s.ubicacionId}>{s.ubicacion} ({s.stock})</option>
+                                                    <option key={idx} value={s.ubicacionId}>{s.ubicacion} ({formatQty(s.stock)})</option>
                                                 ))}
                                             </select>
                                         </div>
@@ -1369,7 +1378,8 @@ export default function Inventario() {
                                             <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Cantidad</label>
                                             <input
                                                 type="number"
-                                                min="1"
+                                                min="0.01"
+                                                step="0.01"
                                                 value={editProduct.decreaseQty || ''}
                                                 onChange={(e) => setEditProduct(prev => ({ ...prev, decreaseQty: e.target.value }))}
                                                 style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
