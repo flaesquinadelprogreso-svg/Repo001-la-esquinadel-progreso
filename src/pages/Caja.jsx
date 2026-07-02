@@ -217,7 +217,7 @@ export default function CajaBancos() {
                 return alert('Este movimiento no tiene un abono de proveedor asociado');
             }
             if (!confirm(`¿Revertir el pago a proveedor "${mov.descripcion || mov.categoria}" por ${formatPesos(mov.monto)}?`)) return;
-            await api.post(`/api/abonos-pago/${mov.abonoPagoId}/revertir`);
+            await api.post(`/abonos-pago/${mov.abonoPagoId}/revertir`);
             fetchData();
         } catch (error) {
             alert(error.response?.data?.error || 'Error al revertir abono a proveedor');
@@ -230,7 +230,7 @@ export default function CajaBancos() {
                 return alert('Este movimiento no tiene un abono de cobro asociado');
             }
             if (!confirm(`¿Revertir el cobro de cartera "${mov.descripcion || mov.categoria}" por ${formatPesos(mov.monto)}?`)) return;
-            await api.post(`/api/abonos-cobro/${mov.abonoCobroId}/revertir`);
+            await api.post(`/abonos-cobro/${mov.abonoCobroId}/revertir`);
             fetchData();
         } catch (error) {
             alert(error.response?.data?.error || 'Error al revertir abono de cobro');
