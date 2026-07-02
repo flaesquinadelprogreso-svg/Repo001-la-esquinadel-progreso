@@ -1403,14 +1403,19 @@ app.post('/api/devoluciones-venta', async (req, res) => {
 
                 // 5. Restaurar stock si es devolución física
                 if (esDevolucionFisica && originalItem.productoId && !originalItem.esServicio && originalItem.locationId) {
-                    await tx.stockUbicacion.update({
+                    await tx.stockUbicacion.upsert({
                         where: {
                             productoId_ubicacionId: {
                                 productoId: originalItem.productoId,
                                 ubicacionId: originalItem.locationId
                             }
                         },
-                        data: { stock: { increment: reqItem.cantidad } }
+                        update: { stock: { increment: reqItem.cantidad } },
+                        create: {
+                            productoId: originalItem.productoId,
+                            ubicacionId: originalItem.locationId,
+                            stock: reqItem.cantidad
+                        }
                     });
                 }
 
