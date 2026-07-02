@@ -1284,6 +1284,9 @@ app.post('/api/ventas', async (req, res) => {
                 }
             }
             return venta;
+        }, {
+            timeout: 20000,
+            maxWait: 30000
         });
         res.json(resultado);
     } catch (error) {
