@@ -39,11 +39,11 @@ export function useReturn({ cuentas, fetchData }) {
     };
 
     // Process return
-    const processReturn = async (creditClient) => {
+    const processReturn = async () => {
         if (!selectedVenta) return;
 
         const itemsToReturn = Object.entries(returnItems)
-            .filter(([_, qty]) => qty > 0)
+            .filter(([, qty]) => qty > 0)
             .map(([itemVentaId, cantidad]) => ({
                 itemVentaId: parseInt(itemVentaId),
                 cantidad: parseFloat(cantidad)

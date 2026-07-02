@@ -1547,6 +1547,9 @@ app.post('/api/devoluciones-venta', async (req, res) => {
                     costoTotal: -costoTotalDevuelto
                 }
             };
+        }, {
+            timeout: 20000,
+            maxWait: 30000
         });
 
         res.json(resultado);
@@ -1675,6 +1678,9 @@ app.post('/api/devoluciones', async (req, res) => {
                 await tx.venta.update({ where: { id: ventaOriginal.id }, data: { estado: 'anulada' } });
             }
             return devolucion;
+        }, {
+            timeout: 20000,
+            maxWait: 30000
         });
         res.json(resultado);
     } catch (error) {

@@ -149,7 +149,7 @@ export default function HistorialVentas() {
         setIsReturning(true);
         try {
             const itemsToSend = Object.entries(returnItems)
-                .filter(([_, qty]) => qty > 0)
+                .filter(([, qty]) => qty > 0)
                 .map(([id, qty]) => ({ itemVentaId: parseInt(id), cantidad: qty }));
 
             // Motivo opcional o genérico si no se llena
