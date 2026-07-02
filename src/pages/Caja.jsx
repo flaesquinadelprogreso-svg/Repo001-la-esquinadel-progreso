@@ -209,6 +209,34 @@ export default function CajaBancos() {
         }
     };
 
+    const handleReversarAbonoProveedor = async (mov) => {
+        // Buscar el abonoPago asociado a este movimiento
+        try {
+            // El movimiento tiene abonoPagoId si se creó con la relación
+            if (!mov.abonoPagoId) {
+                return alert('Este movimiento no tiene un abono de proveedor asociado');
+            }
+            if (!confirm(`¿Revertir el pago a proveedor "${mov.descripcion || mov.categoria}" por ${formatPesos(mov.monto)}?`)) return;
+            await api.post(`/api/abonos-pago/${mov.abonoPagoId}/revertir`);
+            fetchData();
+        } catch (error) {
+            alert(error.response?.data?.error || 'Error al revertir abono a proveedor');
+        }
+    };
+
+    const handleReversarAbonoCobro = async (mov) => {
+        try {
+            if (!mov.abonoCobroId) {
+                return alert('Este movimiento no tiene un abono de cobro asociado');
+            }
+            if (!confirm(`¿Revertir el cobro de cartera "${mov.descripcion || mov.categoria}" por ${formatPesos(mov.monto)}?`)) return;
+            await api.post(`/api/abonos-cobro/${mov.abonoCobroId}/revertir`);
+            fetchData();
+        } catch (error) {
+            alert(error.response?.data?.error || 'Error al revertir abono de cobro');
+        }
+    };
+
     const totalDisponible = cuentas.reduce((sum, c) => sum + c.saldoActual, 0);
     const cajaPrincipalId = cuentas.find(c => c.tipo === 'caja')?.id;
 
@@ -592,6 +620,34 @@ export default function CajaBancos() {
                                             {mov.saldoDespues != null ? formatPesos(mov.saldoDespues) : '-'}
                                         </td>
                                         <td style={{ padding: '14px 10px', textAlign: 'center' }}>
+                                            {mov.tipo === 'salida' && mov.categoria === 'Pago a proveedor' && mov.abonoPagoId && (
+                                                <button
+                                                    onClick={() => handleReversarAbonoProveedor(mov)}
+                                                    title="Revertir pago a proveedor"
+                                                    style={{
+                                                        display: 'inline-flex', alignItems: 'center', gap: '3px',
+                                                        padding: '4px 8px', borderRadius: '6px',
+                                                        border: '1px solid #FCA5A5', backgroundColor: '#FEF2F2',
+                                                        cursor: 'pointer', fontSize: '11px', color: '#DC2626', fontWeight: 600
+                                                    }}
+                                                >
+                                                    <RotateCcw size={11} />R
+                                                </button>
+                                            )}
+                                            {mov.tipo === 'entrada' && mov.categoria === 'Cobro de cartera' && mov.abonoCobroId && (
+                                                <button
+                                                    onClick={() => handleReversarAbonoCobro(mov)}
+                                                    title="Revertir cobro de cartera"
+                                                    style={{
+                                                        display: 'inline-flex', alignItems: 'center', gap: '3px',
+                                                        padding: '4px 8px', borderRadius: '6px',
+                                                        border: '1px solid #FCA5A5', backgroundColor: '#FEF2F2',
+                                                        cursor: 'pointer', fontSize: '11px', color: '#DC2626', fontWeight: 600
+                                                    }}
+                                                >
+                                                    <RotateCcw size={11} />R
+                                                </button>
+                                            )}
                                             {mov.tipo === 'salida' && !['Venta POS', 'Cobro de cartera', 'Compra', 'Devolución', 'Saldo inicial', 'Traslado', 'Anticipo cliente', 'Consumo Anticipo', 'Pago a proveedor', 'Reversión de gasto'].includes(mov.categoria) && (
                                                 <button
                                                     onClick={() => { setShowReversarModal(mov); setReversarMonto(formatPesos(mov.monto)); }}

@@ -62,6 +62,27 @@ const formatFecha = (fecha) => {
     return new Date(fecha).toLocaleDateString('es-CO');
 };
 
+async function registrarAuditoria(req, tx, { accion, entidad, entidadId, descripcion, detalles }) {
+    if (!tx?.auditoria) return;
+    try {
+        const ip = req?.headers?.['x-forwarded-for']?.toString().split(',')[0]?.trim() || req?.ip || null;
+        await tx.auditoria.create({
+            data: {
+                accion,
+                entidad,
+                entidadId: entidadId != null ? parseInt(entidadId) : null,
+                usuarioId: req?.user?.id ? parseInt(req.user.id) : null,
+                descripcion: descripcion || `${accion} ${entidad}`,
+                detalles: detalles ? JSON.stringify(detalles) : null,
+                ip,
+                ruta: req?.originalUrl || null
+            }
+        });
+    } catch (error) {
+        logger.warn('No se pudo registrar auditoría:', { error: error.message, accion, entidad });
+    }
+}
+
 // Configuración de Winston
 const logger = winston.createLogger({
     level: 'info',
@@ -423,6 +444,32 @@ app.get('/api/auth/me', (req, res) => {
     res.json({ user: req.user });
 });
 
+app.get('/api/auditoria', async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Solo los administradores pueden ver la auditoría' });
+        }
+
+        const logs = await prisma.auditoria.findMany({
+            include: { usuario: { select: { username: true, role: true } } },
+            orderBy: { createdAt: 'desc' },
+            take: 200
+        });
+
+        const logsConDetalle = logs.map(log => ({
+            ...log,
+            detalles: log.detalles ? (() => {
+                try { return JSON.parse(log.detalles); } catch { return log.detalles; }
+            })() : null
+        }));
+
+        res.json(logsConDetalle);
+    } catch (error) {
+        logger.error('Error al obtener auditoría:', error);
+        res.status(500).json({ error: 'Error al obtener auditoría' });
+    }
+});
+
 // ═══════════════════════════════════════════════════════════════
 // CLIENTES
 // ═══════════════════════════════════════════════════════════════
@@ -509,6 +556,13 @@ app.get('/api/proveedores', async (req, res) => {
 app.post('/api/proveedores', async (req, res) => {
     try {
         const proveedor = await prisma.proveedor.create({ data: req.body });
+        await registrarAuditoria(req, prisma, {
+            accion: 'crear',
+            entidad: 'proveedor',
+            entidadId: proveedor.id,
+            descripcion: `Se creó el proveedor ${proveedor.nombre || proveedor.id}`,
+            detalles: { nombre: proveedor.nombre, documento: proveedor.documento, telefono: proveedor.telefono }
+        });
         res.json(proveedor);
     } catch (error) {
         res.status(500).json({ error: 'Error al crear proveedor' });
@@ -520,6 +574,13 @@ app.put('/api/proveedores/:id', async (req, res) => {
         const proveedor = await prisma.proveedor.update({
             where: { id: parseInt(req.params.id) },
             data: req.body
+        });
+        await registrarAuditoria(req, prisma, {
+            accion: 'actualizar',
+            entidad: 'proveedor',
+            entidadId: proveedor.id,
+            descripcion: `Se actualizó el proveedor ${proveedor.nombre || proveedor.id}`,
+            detalles: { cambios: req.body }
         });
         res.json(proveedor);
     } catch (error) {
@@ -534,12 +595,25 @@ app.delete('/api/proveedores/:id', async (req, res) => {
         const linkedPurchases = await prisma.compra.count({ where: { proveedorId: id } });
 
         if (linkedAccounts > 0 || linkedPurchases > 0) {
+            await registrarAuditoria(req, prisma, {
+                accion: 'intento-eliminar',
+                entidad: 'proveedor',
+                entidadId: id,
+                descripcion: 'Intento de eliminar proveedor con historial asociado',
+                detalles: { linkedAccounts, linkedPurchases }
+            });
             return res.status(409).json({
                 error: 'No se puede eliminar este proveedor porque tiene historial de compras o cuentas por pagar asociadas.'
             });
         }
 
         await prisma.proveedor.delete({ where: { id } });
+        await registrarAuditoria(req, prisma, {
+            accion: 'eliminar',
+            entidad: 'proveedor',
+            entidadId: id,
+            descripcion: `Se eliminó el proveedor ${id}`
+        });
         res.json({ success: true });
     } catch (error) {
         res.status(500).json({ error: 'Error al eliminar proveedor' });
@@ -1293,6 +1367,15 @@ app.post('/api/ventas', async (req, res) => {
                     });
                 }
             }
+
+            await registrarAuditoria(req, tx, {
+                accion: 'crear',
+                entidad: 'venta',
+                entidadId: venta.id,
+                descripcion: `Se registró la venta #${venta.id}`,
+                detalles: { numeroRecibo, clienteId, total: venta.total, metodoPago, itemsCount: finalItemsList.length }
+            });
+
             return venta;
         }, {
             timeout: 20000,
@@ -1542,6 +1625,21 @@ app.post('/api/devoluciones-venta', async (req, res) => {
                     data: { estado: 'parcial' }
                 });
             }
+
+            await registrarAuditoria(req, tx, {
+                accion: 'crear',
+                entidad: 'devolucion',
+                entidadId: ventaDevolucion.id,
+                descripcion: `Se registró la devolución #${ventaDevolucion.id}`,
+                detalles: {
+                    ventaOriginalId: ventaOriginal.id,
+                    numeroDevolucion,
+                    total: -totalDevuelto,
+                    motivo,
+                    metodoReembolso,
+                    esDevolucionFisica
+                }
+            });
 
             return {
                 devolucion: ventaDevolucion,
@@ -2369,6 +2467,12 @@ app.delete('/api/compras/:id', async (req, res) => {
             // 4. Eliminar items y compra
             await tx.itemCompra.deleteMany({ where: { compraId: id } });
             await tx.compra.delete({ where: { id } });
+            await registrarAuditoria(req, tx, {
+                accion: 'eliminar',
+                entidad: 'compra',
+                entidadId: id,
+                descripcion: `Se eliminó la compra #${id}`
+            });
         });
         res.json({ success: true });
     } catch (error) { res.status(500).json({ error: error.message }); }
@@ -2536,6 +2640,14 @@ app.put('/api/compras/:id', async (req, res) => {
                     });
                 }
             }
+
+            await registrarAuditoria(req, tx, {
+                accion: 'actualizar',
+                entidad: 'compra',
+                entidadId: compra.id,
+                descripcion: `Se actualizó la compra #${compra.id}`,
+                detalles: { proveedorId: compra.proveedorId, total: compra.total, numeroFactura }
+            });
 
             return compra;
         });
@@ -3470,6 +3582,9 @@ app.post('/api/clientes/:id/abono-fifo', async (req, res) => {
             const cuentasConSaldo = todasLasCuentas.filter(cta => (cta.monto - (cta.abonado || 0)) > 0);
 
             let abonoRestante = amount;
+            // El movimiento de caja solo puede enlazarse a un AbonoCobro (relación 1:1),
+            // por eso se enlaza al último abono generado cuando el pago cubre varias facturas.
+            let ultimoAbonoId = null;
 
             for (const cta of cuentasConSaldo) {
                 if (abonoRestante <= 0) break;
@@ -3478,7 +3593,7 @@ app.post('/api/clientes/:id/abono-fifo', async (req, res) => {
 
                 const montoAbonarAca = Math.min(saldo, abonoRestante);
 
-                await tx.abonoCobro.create({
+                const nuevoAbono = await tx.abonoCobro.create({
                     data: {
                         cuentaPorCobrarId: cta.id,
                         monto: montoAbonarAca,
@@ -3488,6 +3603,7 @@ app.post('/api/clientes/:id/abono-fifo', async (req, res) => {
                         usuarioId: req.user?.id || null
                     }
                 });
+                ultimoAbonoId = nuevoAbono.id;
 
                 const nuevoAbonado = (cta.abonado || 0) + montoAbonarAca;
                 await tx.cuentaPorCobrar.update({
@@ -3504,7 +3620,8 @@ app.post('/api/clientes/:id/abono-fifo', async (req, res) => {
             await crearMovimiento(tx, {
                 tipo: 'entrada', categoria: 'Cobro de cartera', monto: amount, metodo: metodo,
                 referencia: `Abono Cliente ${clienteId}`, cuentaId: accId,
-                usuarioId: req.user?.id || null
+                usuarioId: req.user?.id || null,
+                abonoCobroId: ultimoAbonoId
             });
 
             return { success: true };
@@ -3624,11 +3741,62 @@ app.post('/api/abonos-pago/:id/revertir', async (req, res) => {
             }
 
             await tx.abonoPago.delete({ where: { id } });
+            await registrarAuditoria(req, tx, {
+                accion: 'revertir',
+                entidad: 'abono-pago',
+                entidadId: abono.id,
+                descripcion: `Se revirtió el abono a proveedor #${abono.id}`,
+                detalles: { cuentaPorPagarId: abono.cuentaPorPagarId, monto: abono.monto }
+            });
         });
 
         res.json({ success: true });
     } catch (error) {
         logger.error('Error al revertir abono a proveedor:', error);
+        res.status(500).json({ error: error.message || 'Error al revertir el abono' });
+    }
+});
+
+// Revertir (eliminar) un abono individual de cobro: restaura el saldo pendiente
+// de la cuenta por cobrar y, si el abono tiene caja asociada, descuenta el dinero de esa cuenta.
+app.post('/api/abonos-cobro/:id/revertir', async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const abono = await prisma.abonoCobro.findUnique({
+            where: { id },
+            include: { cuenta: true, movimientoCaja: true }
+        });
+        if (!abono) return res.status(404).json({ error: 'Abono no encontrado' });
+
+        await prisma.$transaction(async (tx) => {
+            const nuevoAbonado = Math.max((abono.cuenta.abonado || 0) - abono.monto, 0);
+            await tx.cuentaPorCobrar.update({
+                where: { id: abono.cuentaPorCobrarId },
+                data: { abonado: nuevoAbonado, estado: 'pendiente' }
+            });
+
+            if (abono.movimientoCaja) {
+                await crearMovimiento(tx, {
+                    tipo: 'salida', categoria: 'Reversión de abono de cobro', monto: abono.monto,
+                    metodo: abono.movimientoCaja.metodo, cuentaId: abono.movimientoCaja.cuentaId,
+                    descripcion: `Reversión de abono #${abono.id} (${formatPesos(abono.monto)})`,
+                    referencia: `REV-ABC-${abono.id}`, usuarioId: req.user?.id || null
+                });
+            }
+
+            await tx.abonoCobro.delete({ where: { id } });
+            await registrarAuditoria(req, tx, {
+                accion: 'revertir',
+                entidad: 'abono-cobro',
+                entidadId: abono.id,
+                descripcion: `Se revirtió el abono de cobro #${abono.id}`,
+                detalles: { cuentaPorCobrarId: abono.cuentaPorCobrarId, monto: abono.monto }
+            });
+        });
+
+        res.json({ success: true });
+    } catch (error) {
+        logger.error('Error al revertir abono de cobro:', error);
         res.status(500).json({ error: error.message || 'Error al revertir el abono' });
     }
 });
@@ -3746,6 +3914,15 @@ app.post('/api/compras', async (req, res) => {
                     });
                 }
             }
+
+            await registrarAuditoria(req, tx, {
+                accion: 'crear',
+                entidad: 'compra',
+                entidadId: compra.id,
+                descripcion: `Se registró la compra #${compra.id}`,
+                detalles: { proveedorId: compra.proveedorId, total: compra.total, numeroFactura, metodoPago, itemsCount: items?.length }
+            });
+
             return compra;
         });
         res.json(resultado);

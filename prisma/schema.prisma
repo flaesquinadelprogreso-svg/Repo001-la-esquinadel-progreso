@@ -468,6 +468,22 @@ model Usuario {
   abonosCobro     AbonoCobro[]     @relation("AbonoCobroUsuario")
   abonosPago      AbonoPago[]      @relation("AbonoPagoUsuario")
   cotizaciones    Cotizacion[]     @relation("CotizacionUsuario")
+  auditorias      Auditoria[]      @relation("AuditoriaUsuario")
+}
+
+model Auditoria {
+  id          Int      @id @default(autoincrement())
+  accion      String
+  entidad     String
+  entidadId   Int?
+  usuarioId   Int?
+  descripcion String?
+  detalles    String?
+  ip          String?
+  ruta        String?
+  createdAt   DateTime @default(now())
+
+  usuario     Usuario? @relation("AuditoriaUsuario", fields: [usuarioId], references: [id])
 }
 
 model Rol {
