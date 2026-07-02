@@ -529,7 +529,17 @@ app.put('/api/proveedores/:id', async (req, res) => {
 
 app.delete('/api/proveedores/:id', async (req, res) => {
     try {
-        await prisma.proveedor.delete({ where: { id: parseInt(req.params.id) } });
+        const id = parseInt(req.params.id);
+        const linkedAccounts = await prisma.cuentaPorPagar.count({ where: { proveedorId: id } });
+        const linkedPurchases = await prisma.compra.count({ where: { proveedorId: id } });
+
+        if (linkedAccounts > 0 || linkedPurchases > 0) {
+            return res.status(409).json({
+                error: 'No se puede eliminar este proveedor porque tiene historial de compras o cuentas por pagar asociadas.'
+            });
+        }
+
+        await prisma.proveedor.delete({ where: { id } });
         res.json({ success: true });
     } catch (error) {
         res.status(500).json({ error: 'Error al eliminar proveedor' });
