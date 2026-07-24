@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Plus, Grid3X3, List, Edit, AlertTriangle, Eye, Upload, X, Image, MapPin, ArrowRightLeft, PackagePlus, Trash2, MinusCircle, PlusCircle, FileSpreadsheet } from 'lucide-react';
+import { Search, Plus, Grid3X3, List, Edit, AlertTriangle, Eye, Upload, X, Image, MapPin, ArrowRightLeft, PackagePlus, Trash2, MinusCircle, PlusCircle, FileSpreadsheet, Download } from 'lucide-react';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
@@ -55,6 +55,13 @@ export default function Inventario() {
     const [showEntryModal, setShowEntryModal] = useState(null);
     const [showLocationModal, setShowLocationModal] = useState(false);
     const [newLocationName, setNewLocationName] = useState('');
+
+    // Exportar Excel
+    const [showExportModal, setShowExportModal] = useState(false);
+    const [exportDateFrom, setExportDateFrom] = useState('');
+    const [exportDateTo, setExportDateTo] = useState('');
+    const [exportUbicacionId, setExportUbicacionId] = useState('');
+    const [isExporting, setIsExporting] = useState(false);
 
     // Importación Excel
     const fileImportRef = useRef(null);
@@ -576,6 +583,84 @@ export default function Inventario() {
         }
     };
 
+    const handleExportExcel = async () => {
+        setIsExporting(true);
+        try {
+            // Trae el listado completo de productos activos (sin paginar)
+            const res = await api.get('/productos');
+            let allProducts = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+
+            // Filtro por fecha de creación
+            if (exportDateFrom) {
+                const from = new Date(`${exportDateFrom}T00:00:00`);
+                allProducts = allProducts.filter(p => p.createdAt && new Date(p.createdAt) >= from);
+            }
+            if (exportDateTo) {
+                const to = new Date(`${exportDateTo}T23:59:59`);
+                allProducts = allProducts.filter(p => p.createdAt && new Date(p.createdAt) <= to);
+            }
+
+            // Filtro por bodega/sección
+            const ubicacionSeleccionada = exportUbicacionId
+                ? ubicaciones.find(u => String(u.id) === String(exportUbicacionId))
+                : null;
+            if (ubicacionSeleccionada) {
+                allProducts = allProducts.filter(p =>
+                    p.stockUbicaciones?.some(s => s.ubicacionId === ubicacionSeleccionada.id)
+                );
+            }
+
+            if (allProducts.length === 0) {
+                alert('No se encontraron productos con los filtros seleccionados.');
+                setIsExporting(false);
+                return;
+            }
+
+            const excelData = allProducts.map(p => {
+                const row = {
+                    'Código': p.codigo || '',
+                    'Nombre': p.nombre || '',
+                    'Categoría': p.categoria || 'Sin Categoría',
+                    'Precio': p.precio || 0,
+                    'Costo': p.costo || 0,
+                    'Stock Mínimo': p.stockMinimo || 0,
+                };
+
+                if (ubicacionSeleccionada) {
+                    const stockUbi = p.stockUbicaciones?.find(s => s.ubicacionId === ubicacionSeleccionada.id);
+                    row[`Stock en ${ubicacionSeleccionada.nombre}`] = formatQty(stockUbi?.stock ?? 0);
+                } else {
+                    ubicaciones.forEach(u => {
+                        const stockUbi = p.stockUbicaciones?.find(s => s.ubicacionId === u.id);
+                        row[`Stock ${u.nombre}`] = formatQty(stockUbi?.stock ?? 0);
+                    });
+                    row['Stock Total'] = formatQty(getTotalStock(p));
+                }
+
+                row['Fecha Creación'] = p.createdAt ? new Date(p.createdAt).toLocaleDateString('es-CO') : '';
+                return row;
+            });
+
+            const worksheet = XLSX.utils.json_to_sheet(excelData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Inventario');
+
+            const nameParts = ['inventario'];
+            if (ubicacionSeleccionada) nameParts.push(ubicacionSeleccionada.nombre.replace(/\s+/g, '_'));
+            if (exportDateFrom) nameParts.push(`desde-${exportDateFrom}`);
+            if (exportDateTo) nameParts.push(`hasta-${exportDateTo}`);
+            nameParts.push(new Date().toISOString().split('T')[0]);
+
+            XLSX.writeFile(workbook, `${nameParts.join('_')}.xlsx`);
+            setShowExportModal(false);
+        } catch (error) {
+            console.error('Error exportando inventario:', error);
+            alert('Error al generar el archivo de Excel.');
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
     // Abbreviate location names for card display
     const abreviarUbicacion = (name) => {
         const abrevs = {
@@ -808,6 +893,9 @@ export default function Inventario() {
                         {isImporting && importProgress.total > 0
                             ? `${importProgress.current} / ${importProgress.total}`
                             : isImporting ? 'Leyendo archivo...' : 'Importar'}
+                    </Button>
+                    <Button variant="secondary" onClick={() => setShowExportModal(true)} style={{ padding: '8px 12px', fontSize: '13px' }}>
+                        <Download size={16} style={{ marginRight: '4px' }} />Exportar
                     </Button>
                     <Button variant="secondary" onClick={() => setShowLocationModal(true)} style={{ padding: '8px 12px', fontSize: '13px' }}>
                         <MapPin size={16} style={{ marginRight: '4px' }} />Ubicación
@@ -1483,6 +1571,60 @@ export default function Inventario() {
 
                         <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid #E5E7EB' }}>
                             <Button variant="secondary" onClick={() => setShowLocationModal(false)}>Cerrar</Button>
+                        </div>
+                    </div>
+                </Modal>
+            )}
+            {showExportModal && (
+                <Modal isOpen={true} onClose={() => setShowExportModal(false)} title="Exportar Inventario a Excel" size="sm">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#1A1A2E', marginBottom: '8px' }}>Filtrar por fecha de creación (opcional)</label>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <div style={{ flex: 1 }}>
+                                    <label style={{ display: 'block', fontSize: '12px', color: '#6B7280', marginBottom: '4px' }}>Desde</label>
+                                    <input
+                                        type="date"
+                                        value={exportDateFrom}
+                                        onChange={(e) => setExportDateFrom(e.target.value)}
+                                        style={{ width: '100%', padding: '8px 10px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                    />
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <label style={{ display: 'block', fontSize: '12px', color: '#6B7280', marginBottom: '4px' }}>Hasta</label>
+                                    <input
+                                        type="date"
+                                        value={exportDateTo}
+                                        onChange={(e) => setExportDateTo(e.target.value)}
+                                        style={{ width: '100%', padding: '8px 10px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#1A1A2E', marginBottom: '8px' }}>Bodega / Sección</label>
+                            <select
+                                value={exportUbicacionId}
+                                onChange={(e) => setExportUbicacionId(e.target.value)}
+                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none', backgroundColor: '#fff' }}
+                            >
+                                <option value="">Todas las bodegas</option>
+                                {ubicaciones.map(u => (
+                                    <option key={u.id} value={u.id}>{u.nombre}</option>
+                                ))}
+                            </select>
+                            <p style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '6px' }}>
+                                Si seleccionas una bodega, solo se incluirán productos con stock registrado en esa ubicación.
+                            </p>
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '8px', borderTop: '1px solid #E5E7EB' }}>
+                            <Button variant="secondary" onClick={() => setShowExportModal(false)} disabled={isExporting}>Cancelar</Button>
+                            <Button onClick={handleExportExcel} disabled={isExporting}>
+                                <Download size={16} style={{ marginRight: '4px' }} />
+                                {isExporting ? 'Generando...' : 'Descargar Excel'}
+                            </Button>
                         </div>
                     </div>
                 </Modal>
