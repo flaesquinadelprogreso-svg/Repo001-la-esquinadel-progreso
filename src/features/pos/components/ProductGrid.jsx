@@ -33,7 +33,7 @@ export default function ProductGrid({ products, services, recentItems, isSearchi
         <div id="pos-catalog" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
             {/* Header con título y botón historial */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <span style={{ fontSize: '14px', fontWeight: 600, color: '#1A1A2E' }}>Productos y Servicios</span>
+                <span style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>Productos y Servicios</span>
                 <button
                     onClick={onHistoryClick}
                     style={{
@@ -43,7 +43,7 @@ export default function ProductGrid({ products, services, recentItems, isSearchi
                         fontSize: '11px',
                         padding: '4px 8px',
                         backgroundColor: '#F3F4F6',
-                        border: '1px solid #E5E7EB',
+                        border: '1px solid #ECECEC',
                         borderRadius: '6px',
                         cursor: 'pointer',
                         color: '#6B7280'
@@ -62,7 +62,7 @@ export default function ProductGrid({ products, services, recentItems, isSearchi
                     placeholder="Buscar producto o servicio..."
                     value={search}
                     onChange={(e) => onSearchChange(e.target.value)}
-                    style={{ width: '100%', padding: '8px 8px 8px 30px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '12px', outline: 'none', backgroundColor: '#fff' }}
+                    style={{ width: '100%', padding: '8px 8px 8px 30px', border: '1px solid #ECECEC', borderRadius: '8px', fontSize: '12px', outline: 'none', backgroundColor: '#fff' }}
                 />
             </div>
 
@@ -81,9 +81,9 @@ export default function ProductGrid({ products, services, recentItems, isSearchi
                                 key={isService ? `service-${item.id}` : item.id}
                                 onClick={() => isService ? onServiceClick(item) : onProductClick(item)}
                                 style={{
-                                    backgroundColor: isService ? '#FFFBEB' : '#fff',
+                                    backgroundColor: isService ? '#FFF9E6' : '#fff',
                                     borderRadius: '8px',
-                                    border: `1px solid ${isService ? '#FDE68A' : '#E5E7EB'}`,
+                                    border: `1px solid ${isService ? '#FFF1BF' : '#ECECEC'}`,
                                     padding: '6px',
                                     cursor: 'pointer',
                                     opacity: !isService && totalStock <= 0 ? 0.5 : 1,
@@ -94,24 +94,24 @@ export default function ProductGrid({ products, services, recentItems, isSearchi
                                     justifyContent: 'center',
                                     minHeight: 0
                                 }}
-                                onMouseEnter={e => { e.currentTarget.style.borderColor = isService ? '#F59E0B' : '#F2A900'; e.currentTarget.style.boxShadow = isService ? '0 2px 8px rgba(245,158,11,0.15)' : '0 2px 8px rgba(0,0,0,0.08)'; }}
-                                onMouseLeave={e => { e.currentTarget.style.borderColor = isService ? '#FDE68A' : '#E5E7EB'; e.currentTarget.style.boxShadow = 'none'; }}
+                                onMouseEnter={e => { e.currentTarget.style.borderColor = isService ? '#D69A00' : '#F5B400'; e.currentTarget.style.boxShadow = isService ? '0 2px 8px rgba(245,158,11,0.15)' : '0 2px 8px rgba(0,0,0,0.08)'; }}
+                                onMouseLeave={e => { e.currentTarget.style.borderColor = isService ? '#FFF1BF' : '#ECECEC'; e.currentTarget.style.boxShadow = 'none'; }}
                             >
-                                <div style={{ flex: 1, minHeight: 0, backgroundColor: isService ? '#FEF3C7' : '#F8FAFC', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '4px' }}>
+                                <div style={{ flex: 1, minHeight: 0, backgroundColor: isService ? '#FFF1BF' : '#F3F4F6', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '4px' }}>
                                     {isService ? (
-                                        <Hammer size={16} color="#D97706" />
+                                        <Hammer size={16} color="#D69A00" />
                                     ) : item.imagen ? (
                                         <img src={item.imagen} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} />
                                     ) : (
-                                        <Package size={16} color="#94A3B8" />
+                                        <Package size={16} color="#9CA3AF" />
                                     )}
                                 </div>
-                                <div style={{ fontSize: '10px', fontWeight: 600, color: '#1A1A2E', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                <div style={{ fontSize: '10px', fontWeight: 600, color: '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                     {item.nombre}
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px' }}>
-                                    <span style={{ fontSize: '10px', fontWeight: 700, color: '#059669' }}>{formatPesos(item.precio)}</span>
-                                    <span style={{ fontSize: '8px', backgroundColor: isService ? '#FDE68A' : (totalStock <= 5 ? '#FEE2E2' : '#E2E8F0'), padding: '1px 4px', borderRadius: '3px', color: isService ? '#92400E' : (totalStock <= 5 ? '#DC2626' : '#475569'), fontWeight: 500 }}>
+                                    <span style={{ fontSize: '10px', fontWeight: 700, color: '#16A34A' }}>{formatPesos(item.precio)}</span>
+                                    <span style={{ fontSize: '8px', backgroundColor: isService ? '#FFF1BF' : (totalStock <= 5 ? '#FDECEC' : '#F3F4F6'), padding: '1px 4px', borderRadius: '3px', color: isService ? '#D69A00' : (totalStock <= 5 ? '#DC2626' : '#6B7280'), fontWeight: 500 }}>
                                         {isService ? 'Servicio' : totalStock}
                                     </span>
                                 </div>
@@ -128,8 +128,8 @@ export default function ProductGrid({ products, services, recentItems, isSearchi
                     style={{
                         marginTop: '6px',
                         padding: '6px',
-                        backgroundColor: '#FFF8E1',
-                        border: '1px solid #F2A900',
+                        backgroundColor: '#FFF9E6',
+                        border: '1px solid #F5B400',
                         borderRadius: '8px',
                         cursor: 'pointer',
                         display: 'flex',
@@ -138,7 +138,7 @@ export default function ProductGrid({ products, services, recentItems, isSearchi
                         gap: '6px',
                         fontSize: '12px',
                         fontWeight: 600,
-                        color: '#92400E',
+                        color: '#D69A00',
                         width: '100%'
                     }}
                 >
@@ -153,8 +153,8 @@ export default function ProductGrid({ products, services, recentItems, isSearchi
                     <div style={{ backgroundColor: '#fff', borderRadius: '12px', width: '90%', maxWidth: '500px', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}
                         onClick={e => e.stopPropagation()}>
                         {/* Header */}
-                        <div style={{ padding: '16px', borderBottom: '1px solid #E5E7EB', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '15px', fontWeight: 700, color: '#1A1A2E' }}>
+                        <div style={{ padding: '16px', borderBottom: '1px solid #ECECEC', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '15px', fontWeight: 700, color: '#111827' }}>
                                 Resultados para "{search}" ({allCombined.length})
                             </span>
                             <button onClick={() => setShowAllModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280' }}>
@@ -183,21 +183,21 @@ export default function ProductGrid({ products, services, recentItems, isSearchi
                                             borderBottom: '1px solid #F3F4F6',
                                             opacity: !isService && totalStock <= 0 ? 0.5 : 1
                                         }}
-                                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FFF8E1'}
+                                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FFF9E6'}
                                         onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                                     >
-                                        <div style={{ width: '36px', height: '36px', borderRadius: '6px', backgroundColor: isService ? '#FEF3C7' : '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                            {isService ? <Hammer size={16} color="#D97706" /> :
+                                        <div style={{ width: '36px', height: '36px', borderRadius: '6px', backgroundColor: isService ? '#FFF1BF' : '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                            {isService ? <Hammer size={16} color="#D69A00" /> :
                                                 item.imagen ? <img src={item.imagen} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '6px' }} /> :
-                                                    <Package size={16} color="#94A3B8" />}
+                                                    <Package size={16} color="#9CA3AF" />}
                                         </div>
                                         <div style={{ flex: 1, minWidth: 0 }}>
-                                            <div style={{ fontSize: '13px', fontWeight: 600, color: '#1A1A2E' }}>{item.nombre}</div>
+                                            <div style={{ fontSize: '13px', fontWeight: 600, color: '#111827' }}>{item.nombre}</div>
                                             <div style={{ fontSize: '11px', color: '#6B7280' }}>{item.codigo || ''}</div>
                                         </div>
                                         <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                                            <div style={{ fontSize: '13px', fontWeight: 700, color: '#059669' }}>{formatPesos(item.precio)}</div>
-                                            <span style={{ fontSize: '10px', backgroundColor: isService ? '#FDE68A' : (totalStock <= 5 ? '#FEE2E2' : '#E2E8F0'), padding: '1px 6px', borderRadius: '3px', color: isService ? '#92400E' : (totalStock <= 5 ? '#DC2626' : '#475569'), fontWeight: 500 }}>
+                                            <div style={{ fontSize: '13px', fontWeight: 700, color: '#16A34A' }}>{formatPesos(item.precio)}</div>
+                                            <span style={{ fontSize: '10px', backgroundColor: isService ? '#FFF1BF' : (totalStock <= 5 ? '#FDECEC' : '#F3F4F6'), padding: '1px 6px', borderRadius: '3px', color: isService ? '#D69A00' : (totalStock <= 5 ? '#DC2626' : '#6B7280'), fontWeight: 500 }}>
                                                 {isService ? 'Servicio' : `Stock: ${totalStock}`}
                                             </span>
                                         </div>

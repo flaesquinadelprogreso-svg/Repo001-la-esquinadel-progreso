@@ -36,13 +36,13 @@ export default function Roles() {
             </div>
 
             {/* Roles table */}
-            <div id="roles-config-table" style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E5EA', borderRadius: '10px', overflow: 'hidden' }}>
-                <div style={{ padding: '16px 20px', borderBottom: '1px solid #E2E5EA' }}>
-                    <h2 style={{ fontSize: '15px', fontWeight: 600, color: '#1A1A2E' }}>Roles Definidos</h2>
+            <div id="roles-config-table" style={{ backgroundColor: '#FFFFFF', border: '1px solid #ECECEC', borderRadius: '10px', overflow: 'hidden' }}>
+                <div style={{ padding: '16px 20px', borderBottom: '1px solid #ECECEC' }}>
+                    <h2 style={{ fontSize: '15px', fontWeight: 600, color: '#111827' }}>Roles Definidos</h2>
                 </div>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
-                        <tr style={{ backgroundColor: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
+                        <tr style={{ backgroundColor: '#F9FAFB', borderBottom: '1px solid #ECECEC' }}>
                             {['#', 'Rol', 'Descripción', 'Acciones'].map(h => (
                                 <th key={h} style={{ padding: '12px 20px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>{h}</th>
                             ))}
@@ -56,16 +56,16 @@ export default function Roles() {
                         ) : (
                             roles.map((r, idx) => (
                                 <tr key={r.id} onClick={() => setShowPerms(r)}
-                                    style={{ borderBottom: idx < roles.length - 1 ? '1px solid #F0F2F5' : 'none', cursor: 'pointer' }}
+                                    style={{ borderBottom: idx < roles.length - 1 ? '1px solid #F3F3F3' : 'none', cursor: 'pointer' }}
                                     onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FAFBFC'}
                                     onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                                     <td style={{ padding: '14px 20px', fontSize: '13px', color: '#9CA3AF' }}>{r.id}</td>
-                                    <td style={{ padding: '14px 20px', fontSize: '13px', fontWeight: 500, color: '#1A1A2E' }}>{r.nombre || r.name}</td>
+                                    <td style={{ padding: '14px 20px', fontSize: '13px', fontWeight: 500, color: '#111827' }}>{r.nombre || r.name}</td>
                                     <td style={{ padding: '14px 20px', fontSize: '13px', color: '#6B7280' }}>{r.descripcion || r.description || '-'}</td>
                                     <td style={{ padding: '14px 20px' }}>
                                         <div style={{ display: 'flex', gap: '6px' }}>
-                                            <button style={{ padding: '6px', borderRadius: '6px', border: '1px solid #E2E5EA', background: '#FFFFFF', cursor: 'pointer' }}><Eye size={14} style={{ color: '#6B7280' }} /></button>
-                                            <button style={{ padding: '6px', borderRadius: '6px', border: '1px solid #E2E5EA', background: '#FFFFFF', cursor: 'pointer' }}><Edit size={14} style={{ color: '#6B7280' }} /></button>
+                                            <button style={{ padding: '6px', borderRadius: '6px', border: '1px solid #ECECEC', background: '#FFFFFF', cursor: 'pointer' }}><Eye size={14} style={{ color: '#6B7280' }} /></button>
+                                            <button style={{ padding: '6px', borderRadius: '6px', border: '1px solid #ECECEC', background: '#FFFFFF', cursor: 'pointer' }}><Edit size={14} style={{ color: '#6B7280' }} /></button>
                                         </div>
                                     </td>
                                 </tr>
@@ -82,9 +82,9 @@ export default function Roles() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                         <p style={{ fontSize: '13px', color: '#6B7280' }}>Configura permisos para <strong>{showPerms.nombre || showPerms.name}</strong></p>
                         {permModules.map(mod => (
-                            <div key={mod} style={{ border: '1px solid #E2E5EA', borderRadius: '8px', overflow: 'hidden' }}>
-                                <div style={{ padding: '12px 18px', backgroundColor: '#FFF8E7', borderBottom: '1px solid #E2E5EA' }}>
-                                    <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#F2A900' }}>{mod}</h4>
+                            <div key={mod} style={{ border: '1px solid #ECECEC', borderRadius: '8px', overflow: 'hidden' }}>
+                                <div style={{ padding: '12px 18px', backgroundColor: '#FFF9E6', borderBottom: '1px solid #ECECEC' }}>
+                                    <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#D69A00' }}>{mod}</h4>
                                 </div>
                                 {permissions.filter(p => p.module === mod).map(perm => {
                                     const rp = rolePermissions.find(rp => rp.roleId === showPerms.id && rp.permissionId === perm.id);
@@ -92,16 +92,16 @@ export default function Roles() {
                                     return (
                                         <div key={perm.id} style={{
                                             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                                            padding: '12px 18px', borderBottom: '1px solid #F0F2F5'
+                                            padding: '12px 18px', borderBottom: '1px solid #F3F3F3'
                                         }}>
                                             <div>
-                                                <p style={{ fontSize: '13px', color: '#1A1A2E' }}>{perm.label}</p>
+                                                <p style={{ fontSize: '13px', color: '#111827' }}>{perm.label}</p>
                                                 <p style={{ fontSize: '11px', color: '#9CA3AF' }}>{perm.action}</p>
                                             </div>
                                             <div style={{
                                                 width: '40px', height: '22px', borderRadius: '11px',
                                                 display: 'flex', alignItems: 'center', cursor: 'pointer',
-                                                backgroundColor: on ? '#F2A900' : '#E2E5EA',
+                                                backgroundColor: on ? '#F5B400' : '#ECECEC',
                                                 justifyContent: on ? 'flex-end' : 'flex-start',
                                                 padding: '2px', transition: 'all 150ms'
                                             }}>

@@ -63,7 +63,7 @@
 
     #inventario-table-container tr {
         background-color: #fff !important;
-        border: 1px solid #E5E7EB !important;
+        border: 1px solid #ECECEC !important;
         border-radius: 8px !important;
         margin-bottom: 12px !important;
         padding: 16px !important;
@@ -89,12 +89,12 @@
         width: 40% !important;
         text-align: left !important;
         font-weight: 600 !important;
-        color: #4B5563 !important;
+        color: #6B7280 !important;
         white-space: nowrap !important;
     }
 
     #inventario-table-container td:last-child {
-        border-top: 1px solid #E5E7EB !important;
+        border-top: 1px solid #ECECEC !important;
         margin-top: 8px !important;
         padding-top: 12px !important;
         justify-content: center !important;

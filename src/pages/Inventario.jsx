@@ -23,9 +23,9 @@ const formatQty = (qty) => {
 // Location colors
 const ubicacionColor = (name) => {
     const colors = {
-        'Bodega Principal': '#F2A900',
-        'Mostrador': '#10B981',
-        'Vitrina': '#8B5CF6',
+        'Bodega Principal': '#F5B400',
+        'Mostrador': '#16A34A',
+        'Vitrina': '#2563EB',
     };
     return colors[name] || '#6B7280';
 };
@@ -690,7 +690,7 @@ export default function Inventario() {
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 overflow: 'hidden',
-                                border: '1px solid #E5E7EB'
+                                border: '1px solid #ECECEC'
                             }}>
                                 {product.imagen ? (
                                     <img src={product.imagen} alt={product.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -700,20 +700,20 @@ export default function Inventario() {
                             </div>
                             {isLow && (
                                 <div style={{ position: 'absolute', top: '0px', right: '0px', backgroundColor: '#fff', borderRadius: '50%', padding: '2px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-                                    <AlertTriangle size={14} color="#EF4444" />
+                                    <AlertTriangle size={14} color="#DC2626" />
                                 </div>
                             )}
                         </div>
                     </div>
 
                     {/* Product Code (Small, Gray, Left) */}
-                    <p style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '2px', fontWeight: 500 }}>{product.codigo}</p>
+                    <p style={{ fontSize: '10px', color: '#9CA3AF', marginBottom: '2px', fontWeight: 500 }}>{product.codigo}</p>
 
                     {/* Name */}
                     <h3 style={{
-                        fontSize: '13px',
+                        fontSize: '12px',
                         fontWeight: 600,
-                        color: '#1A1A2E',
+                        color: '#111827',
                         marginBottom: '2px',
                         lineHeight: '1.3'
                     }} title={product.nombre}>
@@ -724,7 +724,7 @@ export default function Inventario() {
 
                     {/* Value (Price) */}
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginBottom: '8px', marginTop: '8px' }}>
-                        <span style={{ fontSize: '15px', fontWeight: 700, color: '#F2A900' }}>
+                        <span style={{ fontSize: '13px', fontWeight: 700, color: '#111827' }}>
                             {formatPesos(product.precio)}
                         </span>
 
@@ -735,7 +735,7 @@ export default function Inventario() {
                                     display: 'inline-flex',
                                     alignItems: 'center',
                                     gap: '4px',
-                                    backgroundColor: isLow ? '#FEF2F2' : '#F3F4F6',
+                                    backgroundColor: isLow ? '#FDECEC' : '#F3F4F6',
                                     padding: '4px 8px',
                                     borderRadius: '4px',
                                     border: 'none',
@@ -745,8 +745,8 @@ export default function Inventario() {
                                 onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
                                 onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
                             >
-                                <PackagePlus size={12} color={isLow ? '#EF4444' : '#6B7280'} />
-                                <span style={{ fontSize: '12px', fontWeight: 700, color: isLow ? '#EF4444' : '#1A1A2E' }}>
+                                <PackagePlus size={12} color={isLow ? '#DC2626' : '#6B7280'} />
+                                <span style={{ fontSize: '12px', fontWeight: 700, color: isLow ? '#DC2626' : '#111827' }}>
                                     {formatQty(totalStock)}
                                 </span>
                             </button>
@@ -755,7 +755,7 @@ export default function Inventario() {
                 </div>
 
                 {/* Bottom Action Bar */}
-                <div style={{ display: 'flex', borderTop: '1px solid #E5E7EB', marginTop: 'auto' }}>
+                <div style={{ display: 'flex', borderTop: '1px solid #ECECEC', marginTop: 'auto' }}>
                     <button
                         onClick={() => product.type === 'service' ? onEditService(product) : onEdit(product)}
                         title="Editar"
@@ -765,7 +765,7 @@ export default function Inventario() {
                             backgroundColor: 'transparent',
                             color: '#6B7280',
                             border: 'none',
-                            borderRight: '1px solid #E5E7EB',
+                            borderRight: '1px solid #ECECEC',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
@@ -812,7 +812,7 @@ export default function Inventario() {
                                 flex: 1,
                                 padding: '8px',
                                 backgroundColor: 'transparent',
-                                color: '#EF4444',
+                                color: '#DC2626',
                                 border: 'none',
                                 cursor: 'pointer',
                                 display: 'flex',
@@ -823,7 +823,7 @@ export default function Inventario() {
                                 borderBottomRightRadius: '8px',
                                 transition: 'background 150ms'
                             }}
-                            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FEF2F2'}
+                            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FDECEC'}
                             onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                         >
                             <Trash2 size={14} /> <span style={{ fontWeight: 500 }}>Borrar</span>
@@ -839,12 +839,12 @@ export default function Inventario() {
             {/* Header consolidado */}
             <div id="inventario-header-consolidado" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', flexShrink: 0 }}>
                 <div style={{ minWidth: '200px' }}>
-                    <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#1A1A2E' }}>Inventario</h1>
+                    <h1 style={{ fontSize: '20px', fontWeight: 600, color: '#111827' }}>Inventario</h1>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '2px' }}>
-                        <span style={{ fontSize: '12px', backgroundColor: '#EEF2FF', color: '#4F46E5', padding: '2px 8px', borderRadius: '10px', fontWeight: 600 }}>
+                        <span style={{ fontSize: '12px', backgroundColor: '#EFF4FF', color: '#2563EB', padding: '2px 8px', borderRadius: '999px', fontWeight: 600 }}>
                             {totalProducts} productos
                         </span>
-                        <span style={{ fontSize: '12px', backgroundColor: '#FFFBEB', color: '#D97706', padding: '2px 8px', borderRadius: '10px', fontWeight: 600 }}>
+                        <span style={{ fontSize: '12px', backgroundColor: '#FFF9E6', color: '#D69A00', padding: '2px 8px', borderRadius: '999px', fontWeight: 600 }}>
                             {services.length} servicios
                         </span>
                     </div>
@@ -858,13 +858,13 @@ export default function Inventario() {
                             placeholder="Buscar por nombre o código..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            style={{ width: '100%', padding: '8px 12px 8px 40px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                            style={{ width: '100%', padding: '8px 12px 8px 40px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px', outline: 'none' }}
                         />
                     </div>
                     <select
                         value={categoryFilter}
                         onChange={(e) => setCategoryFilter(e.target.value)}
-                        style={{ padding: '8px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none', backgroundColor: '#fff' }}
+                        style={{ padding: '8px 12px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px', outline: 'none', backgroundColor: '#fff' }}
                     >
                         {categories.map(cat => (
                             <option key={cat} value={cat}>{cat}</option>
@@ -872,10 +872,10 @@ export default function Inventario() {
                     </select>
                     <div style={{ display: 'flex', gap: '2px', backgroundColor: '#F3F4F6', padding: '2px', borderRadius: '4px' }}>
                         <button onClick={() => setView('grid')} style={{ padding: '6px', border: 'none', borderRadius: '4px', cursor: 'pointer', backgroundColor: view === 'grid' ? '#fff' : 'transparent' }}>
-                            <Grid3X3 size={16} color={view === 'grid' ? '#1A1A2E' : '#6B7280'} />
+                            <Grid3X3 size={16} color={view === 'grid' ? '#111827' : '#6B7280'} />
                         </button>
                         <button onClick={() => setView('list')} style={{ padding: '6px', border: 'none', borderRadius: '4px', cursor: 'pointer', backgroundColor: view === 'list' ? '#fff' : 'transparent' }}>
-                            <List size={16} color={view === 'list' ? '#1A1A2E' : '#6B7280'} />
+                            <List size={16} color={view === 'list' ? '#111827' : '#6B7280'} />
                         </button>
                     </div>
                 </div>
@@ -888,7 +888,7 @@ export default function Inventario() {
                         accept=".xlsx, .xls"
                         onChange={handleImportExcel}
                     />
-                    <Button onClick={() => fileImportRef.current?.click()} style={{ backgroundColor: '#10B981', color: 'white', border: 'none', padding: '8px 12px', fontSize: '13px' }} disabled={isImporting}>
+                    <Button variant="secondary" onClick={() => fileImportRef.current?.click()} style={{ padding: '8px 12px', fontSize: '13px' }} disabled={isImporting}>
                         <FileSpreadsheet size={16} style={{ marginRight: '4px' }} />
                         {isImporting && importProgress.total > 0
                             ? `${importProgress.current} / ${importProgress.total}`
@@ -909,18 +909,18 @@ export default function Inventario() {
             {isImporting && importProgress.total > 0 && (
                 <div style={{ marginBottom: '8px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                        <span style={{ fontSize: '12px', fontWeight: 600, color: '#374151' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 600, color: '#6B7280' }}>
                             Importando productos...
                         </span>
-                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#10B981' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#16A34A' }}>
                             {importProgress.current} de {importProgress.total} ({Math.round((importProgress.current / importProgress.total) * 100)}%)
                         </span>
                     </div>
-                    <div style={{ width: '100%', height: '8px', backgroundColor: '#E5E7EB', borderRadius: '4px', overflow: 'hidden' }}>
+                    <div style={{ width: '100%', height: '8px', backgroundColor: '#ECECEC', borderRadius: '4px', overflow: 'hidden' }}>
                         <div style={{
                             width: `${(importProgress.current / importProgress.total) * 100}%`,
                             height: '100%',
-                            backgroundColor: '#10B981',
+                            backgroundColor: '#16A34A',
                             borderRadius: '4px',
                             transition: 'width 0.3s ease'
                         }} />
@@ -951,10 +951,10 @@ export default function Inventario() {
                         ))}
                     </div>
                 ) : (
-                    <div id="inventario-table-container" style={{ backgroundColor: '#fff', borderRadius: '4px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
+                    <div id="inventario-table-container" style={{ backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #ECECEC', overflow: 'hidden' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                             <thead>
-                                <tr style={{ backgroundColor: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
+                                <tr style={{ borderBottom: '1px solid #ECECEC' }}>
                                     <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#6B7280' }}>Código</th>
                                     <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#6B7280' }}>Nombre</th>
                                     <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#6B7280' }}>Dato</th>
@@ -976,10 +976,10 @@ export default function Inventario() {
                                             {item.type === 'product' ? (
                                                 <button
                                                     onClick={() => setShowStockPopup(item)}
-                                                    style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', backgroundColor: getTotalStock(item) <= 5 ? '#FEF2F2' : '#F3F4F6', padding: '4px 8px', borderRadius: '4px', border: 'none', cursor: 'pointer' }}
+                                                    style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', backgroundColor: getTotalStock(item) <= 5 ? '#FDECEC' : '#F3F4F6', padding: '4px 8px', borderRadius: '4px', border: 'none', cursor: 'pointer' }}
                                                 >
-                                                    <PackagePlus size={12} color={getTotalStock(item) <= 5 ? '#EF4444' : '#6B7280'} />
-                                                    <span style={{ fontSize: '13px', fontWeight: 600, color: getTotalStock(item) <= 5 ? '#EF4444' : '#1A1A2E' }}>{formatQty(getTotalStock(item))}</span>
+                                                    <PackagePlus size={12} color={getTotalStock(item) <= 5 ? '#DC2626' : '#6B7280'} />
+                                                    <span style={{ fontSize: '13px', fontWeight: 600, color: getTotalStock(item) <= 5 ? '#DC2626' : '#111827' }}>{formatQty(getTotalStock(item))}</span>
                                                 </button>
                                             ) : '-'}
                                         </td>
@@ -989,7 +989,7 @@ export default function Inventario() {
                                                 <button onClick={() => setShowTransferModal({ product: item, originId: '', destId: '', quantity: 0 })} style={{ padding: '6px', background: 'none', border: 'none', cursor: 'pointer' }} title="Traslado"><ArrowRightLeft size={16} color="#6B7280" /></button>
                                             )}
                                             {item.type === 'service' && (
-                                                <button onClick={() => handleDeleteService(item.id)} style={{ padding: '6px', background: 'none', border: 'none', cursor: 'pointer' }} title="Eliminar"><Trash2 size={16} color="#EF4444" /></button>
+                                                <button onClick={() => handleDeleteService(item.id)} style={{ padding: '6px', background: 'none', border: 'none', cursor: 'pointer' }} title="Eliminar"><Trash2 size={16} color="#DC2626" /></button>
                                             )}
                                         </td>
                                     </tr>
@@ -1010,7 +1010,7 @@ export default function Inventario() {
                     >
                         Anterior
                     </Button>
-                    <span style={{ fontSize: '14px', fontWeight: 500, color: '#4B5563' }}>
+                    <span style={{ fontSize: '14px', fontWeight: 500, color: '#6B7280' }}>
                         Página {page} de {totalPages}
                     </span>
                     <Button
@@ -1034,9 +1034,9 @@ export default function Inventario() {
                                 <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', backgroundColor: '#F9FAFB', borderRadius: '4px', border: '1px solid #F3F4F6' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                         <div style={{ width: '8px', height: '8px', borderRadius: '1px', backgroundColor: ubicacionColor(s.ubicacion?.nombre) }} />
-                                        <span style={{ fontSize: '13px', color: '#4B5563', fontWeight: 500 }}>{s.ubicacion?.nombre}</span>
+                                        <span style={{ fontSize: '13px', color: '#6B7280', fontWeight: 500 }}>{s.ubicacion?.nombre}</span>
                                     </div>
-                                    <span style={{ fontSize: '14px', fontWeight: 700, color: '#1A1A2E' }}>{formatQty(s.stock)}</span>
+                                    <span style={{ fontSize: '14px', fontWeight: 700, color: '#111827' }}>{formatQty(s.stock)}</span>
                                 </div>
                             ))}
                             {(!showStockPopup.stockUbicaciones || showStockPopup.stockUbicaciones.filter(s => s.stock > 0).length === 0) && (
@@ -1061,15 +1061,15 @@ export default function Inventario() {
             {showTransferModal && (
                 <Modal isOpen={true} onClose={() => setShowTransferModal(null)} title={`Trasladar: ${showTransferModal.product?.nombre}`}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minWidth: '350px' }}>
-                        <div style={{ padding: '10px', backgroundColor: '#F0F9FF', border: '1px solid #BAE6FD', borderRadius: '4px', textAlign: 'center' }}>
-                            <span style={{ fontSize: '12px', fontWeight: 600, color: '#0369A1' }}>Stock Total: {formatQty(getTotalStock(showTransferModal.product))}</span>
+                        <div style={{ padding: '12px', backgroundColor: '#EFF4FF', border: '1px solid #ECECEC', borderRadius: '12px', textAlign: 'center' }}>
+                            <span style={{ fontSize: '12px', fontWeight: 600, color: '#2563EB' }}>Stock Total: {formatQty(getTotalStock(showTransferModal.product))}</span>
                         </div>
                         <div>
                             <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Ubicación Origen</label>
                             <select
                                 value={showTransferModal.originId}
                                 onChange={(e) => setShowTransferModal(prev => ({ ...prev, originId: e.target.value }))}
-                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px', outline: 'none' }}
                             >
                                 <option value="">Seleccionar...</option>
                                 {ubicaciones.map(u => {
@@ -1088,7 +1088,7 @@ export default function Inventario() {
                             <select
                                 value={showTransferModal.destId}
                                 onChange={(e) => setShowTransferModal(prev => ({ ...prev, destId: e.target.value }))}
-                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px', outline: 'none' }}
                             >
                                 <option value="">Seleccionar...</option>
                                 {ubicaciones.map(u => {
@@ -1110,7 +1110,7 @@ export default function Inventario() {
                                 step="0.01"
                                 value={showTransferModal.quantity || ''}
                                 onChange={(e) => setShowTransferModal(prev => ({ ...prev, quantity: e.target.value }))}
-                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px', outline: 'none' }}
                             />
                         </div>
                         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
@@ -1130,7 +1130,7 @@ export default function Inventario() {
                             <select
                                 value={showEntryModal.locationId}
                                 onChange={(e) => setShowEntryModal(prev => ({ ...prev, locationId: e.target.value }))}
-                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px', outline: 'none' }}
                             >
                                 <option value="">Seleccionar...</option>
                                 {ubicaciones.map(u => (
@@ -1146,7 +1146,7 @@ export default function Inventario() {
                                 step="0.01"
                                 value={showEntryModal.quantity || ''}
                                 onChange={(e) => setShowEntryModal(prev => ({ ...prev, quantity: e.target.value }))}
-                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px', outline: 'none' }}
                             />
                         </div>
                         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
@@ -1171,7 +1171,7 @@ export default function Inventario() {
                                 type="text"
                                 value={editService.codigo}
                                 readOnly
-                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none', backgroundColor: '#F3F4F6', color: '#6B7280', cursor: 'not-allowed' }}
+                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px', outline: 'none', backgroundColor: '#F3F4F6', color: '#6B7280', cursor: 'not-allowed' }}
                                 placeholder="Ej: SERVT1"
                             />
                         </div>
@@ -1181,7 +1181,7 @@ export default function Inventario() {
                                 type="text"
                                 value={editService.nombre}
                                 onChange={(e) => setEditService(prev => ({ ...prev, nombre: e.target.value }))}
-                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px', outline: 'none' }}
                                 placeholder="Ej: Reparación de taladro"
                             />
                         </div>
@@ -1191,7 +1191,7 @@ export default function Inventario() {
                                 type="text"
                                 value={formatPesos(editService.precio)}
                                 onChange={(e) => handleCurrencyChange(e.target.value, (val) => setEditService(prev => ({ ...prev, precio: val })))}
-                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px', outline: 'none' }}
                                 placeholder="Ej: $10.000"
                             />
                         </div>
@@ -1200,7 +1200,7 @@ export default function Inventario() {
                             <textarea
                                 value={editService.descripcion || ''}
                                 onChange={(e) => setEditService(prev => ({ ...prev, descripcion: e.target.value }))}
-                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none', minHeight: '80px', resize: 'vertical' }}
+                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px', outline: 'none', minHeight: '80px', resize: 'vertical' }}
                                 placeholder="Opcional..."
                             />
                         </div>
@@ -1237,7 +1237,7 @@ export default function Inventario() {
                                             fontSize: '13px',
                                             fontWeight: 500,
                                             backgroundColor: editTab === tab ? '#fff' : 'transparent',
-                                            color: editTab === tab ? '#1A1A2E' : '#6B7280',
+                                            color: editTab === tab ? '#111827' : '#6B7280',
                                             textTransform: 'capitalize'
                                         }}
                                     >
@@ -1258,7 +1258,7 @@ export default function Inventario() {
                                             type="text"
                                             value={editProduct.nombre || ''}
                                             onChange={(e) => setEditProduct(prev => ({ ...prev, nombre: e.target.value }))}
-                                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px', outline: 'none' }}
                                         />
                                     </div>
 
@@ -1269,7 +1269,7 @@ export default function Inventario() {
                                                 type="text"
                                                 value={editProduct.codigo || ''}
                                                 onChange={(e) => setEditProduct(prev => ({ ...prev, codigo: e.target.value }))}
-                                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px', outline: 'none' }}
                                             />
                                         </div>
                                         <div>
@@ -1278,7 +1278,7 @@ export default function Inventario() {
                                                 type="text"
                                                 value={editProduct.categoria || ''}
                                                 onChange={(e) => setEditProduct(prev => ({ ...prev, categoria: e.target.value }))}
-                                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px', outline: 'none' }}
                                             />
                                         </div>
                                     </div>
@@ -1290,7 +1290,7 @@ export default function Inventario() {
                                                 type="text"
                                                 value={formatPesos(editProduct.costo)}
                                                 onChange={(e) => handleCurrencyChange(e.target.value, (val) => setEditProduct(prev => ({ ...prev, costo: val })))}
-                                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px', outline: 'none' }}
                                             />
                                         </div>
                                         <div>
@@ -1299,7 +1299,7 @@ export default function Inventario() {
                                                 type="number"
                                                 value={editProduct.stockMinimo || ''}
                                                 onChange={(e) => setEditProduct(prev => ({ ...prev, stockMinimo: parseInt(e.target.value) || 0 }))}
-                                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px', outline: 'none' }}
                                             />
                                         </div>
                                     </div>
@@ -1311,7 +1311,7 @@ export default function Inventario() {
                                                 type="text"
                                                 value={formatPesos(editProduct.precio)}
                                                 onChange={(e) => handleCurrencyChange(e.target.value, (val) => setEditProduct(prev => ({ ...prev, precio: val })))}
-                                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px', outline: 'none' }}
                                             />
                                         </div>
                                         <div>
@@ -1321,7 +1321,7 @@ export default function Inventario() {
                                                 placeholder="Opcional"
                                                 value={formatPesos(editProduct.precioMayor)}
                                                 onChange={(e) => handleCurrencyChange(e.target.value, (val) => setEditProduct(prev => ({ ...prev, precioMayor: val })))}
-                                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px', outline: 'none' }}
                                             />
                                         </div>
                                     </div>
@@ -1332,23 +1332,23 @@ export default function Inventario() {
                                             value={editProduct.descripcion || ''}
                                             onChange={(e) => setEditProduct(prev => ({ ...prev, descripcion: e.target.value }))}
                                             rows={2}
-                                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', resize: 'none', outline: 'none' }}
+                                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '14px', resize: 'none', outline: 'none' }}
                                         />
                                     </div>
                                 </div>
 
                                 {/* Right Column: Image Section */}
                                 <div style={{
-                                    border: '1px dashed #E5E7EB',
+                                    border: '1px dashed #ECECEC',
                                     borderRadius: '4px',
                                     padding: '24px',
                                     display: 'flex',
                                     flexDirection: 'column',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    backgroundColor: '#FAFAFB'
+                                    backgroundColor: '#FAFAFA'
                                 }}>
-                                    <span style={{ fontSize: '13px', fontWeight: 500, color: '#1A1A2E', marginBottom: '20px' }}>Imagen</span>
+                                    <span style={{ fontSize: '13px', fontWeight: 500, color: '#111827', marginBottom: '20px' }}>Imagen</span>
 
                                     <div style={{
                                         width: '120px',
@@ -1376,7 +1376,7 @@ export default function Inventario() {
                                         onClick={() => fileInputRef.current?.click()}
                                         style={{
                                             padding: '10px 20px',
-                                            backgroundColor: '#2D4077',
+                                            backgroundColor: '#2563EB',
                                             color: '#fff',
                                             border: 'none',
                                             borderRadius: '4px',
@@ -1386,8 +1386,8 @@ export default function Inventario() {
                                             width: '100%',
                                             transition: 'background 150ms'
                                         }}
-                                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#1E2D5A'}
-                                        onMouseLeave={e => e.currentTarget.style.backgroundColor = '#2D4077'}
+                                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#1D4ED8'}
+                                        onMouseLeave={e => e.currentTarget.style.backgroundColor = '#2563EB'}
                                     >
                                         Seleccionar archivo
                                     </button>
@@ -1397,7 +1397,7 @@ export default function Inventario() {
                                     {editProduct.imagen && (
                                         <button
                                             onClick={() => setEditProduct(prev => ({ ...prev, imagen: null }))}
-                                            style={{ marginTop: '8px', background: 'none', border: 'none', color: '#EF4444', fontSize: '12px', cursor: 'pointer', fontWeight: 500 }}
+                                            style={{ marginTop: '8px', background: 'none', border: 'none', color: '#DC2626', fontSize: '12px', cursor: 'pointer', fontWeight: 500 }}
                                         >
                                             Eliminar imagen
                                         </button>
@@ -1411,15 +1411,15 @@ export default function Inventario() {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
                                 {/* Aumentar */}
-                                <div style={{ padding: '16px', border: '1px solid #E5E7EB', borderRadius: '8px', backgroundColor: '#F9FAFB' }}>
-                                    <p style={{ fontSize: '13px', fontWeight: 700, color: '#1A1A2E', margin: '0 0 12px 0' }}>Aumentar Stock</p>
+                                <div style={{ padding: '16px', border: '1px solid #ECECEC', borderRadius: '8px', backgroundColor: '#F9FAFB' }}>
+                                    <p style={{ fontSize: '13px', fontWeight: 700, color: '#111827', margin: '0 0 12px 0' }}>Aumentar Stock</p>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                         <div>
                                             <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Ubicación</label>
                                             <select
                                                 value={editProduct.increaseLocation || ''}
                                                 onChange={(e) => setEditProduct(prev => ({ ...prev, increaseLocation: e.target.value }))}
-                                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px', outline: 'none' }}
                                             >
                                                 <option value="">Seleccionar...</option>
                                                 {ubicaciones.map((u) => {
@@ -1436,7 +1436,7 @@ export default function Inventario() {
                                                 step="0.01"
                                                 value={editProduct.increaseQty || ''}
                                                 onChange={(e) => setEditProduct(prev => ({ ...prev, increaseQty: e.target.value }))}
-                                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px', outline: 'none' }}
                                             />
                                         </div>
                                         <Button onClick={handleIncreaseStock} style={{ alignSelf: 'flex-start' }}>
@@ -1446,15 +1446,15 @@ export default function Inventario() {
                                 </div>
 
                                 {/* Disminuir */}
-                                <div style={{ padding: '16px', border: '1px solid #E5E7EB', borderRadius: '8px', backgroundColor: '#F9FAFB' }}>
-                                    <p style={{ fontSize: '13px', fontWeight: 700, color: '#1A1A2E', margin: '0 0 12px 0' }}>Disminuir Stock</p>
+                                <div style={{ padding: '16px', border: '1px solid #ECECEC', borderRadius: '8px', backgroundColor: '#F9FAFB' }}>
+                                    <p style={{ fontSize: '13px', fontWeight: 700, color: '#111827', margin: '0 0 12px 0' }}>Disminuir Stock</p>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                         <div>
                                             <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Ubicación</label>
                                             <select
                                                 value={editProduct.decreaseLocation || ''}
                                                 onChange={(e) => setEditProduct(prev => ({ ...prev, decreaseLocation: e.target.value }))}
-                                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px', outline: 'none' }}
                                             >
                                                 <option value="">Seleccionar...</option>
                                                 {editProduct.stockLocations?.map((s, idx) => (
@@ -1470,7 +1470,7 @@ export default function Inventario() {
                                                 step="0.01"
                                                 value={editProduct.decreaseQty || ''}
                                                 onChange={(e) => setEditProduct(prev => ({ ...prev, decreaseQty: e.target.value }))}
-                                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px', outline: 'none' }}
                                             />
                                         </div>
                                         <Button onClick={handleDecreaseStock} style={{ alignSelf: 'flex-start' }}>
@@ -1483,10 +1483,10 @@ export default function Inventario() {
                         )}
 
                         {/* Footer */}
-                        <div id="inventario-producto-footer" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '32px', paddingTop: '16px', borderTop: '1px solid #E5E7EB' }}>
+                        <div id="inventario-producto-footer" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '32px', paddingTop: '16px', borderTop: '1px solid #ECECEC' }}>
                             <div>
                                 {editProduct.id && (
-                                    <Button variant="secondary" onClick={() => handleDeleteProduct(editProduct.id)} style={{ color: '#EF4444' }}>
+                                    <Button variant="secondary" onClick={() => handleDeleteProduct(editProduct.id)} style={{ color: '#DC2626' }}>
                                         <Trash2 size={16} style={{ marginRight: '6px' }} />Eliminar
                                     </Button>
                                 )}
@@ -1505,15 +1505,15 @@ export default function Inventario() {
                 <Modal isOpen={true} onClose={() => setShowLocationModal(false)} title="Gestión de Ubicaciones" size="sm">
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                         {/* Create New Location */}
-                        <div style={{ padding: '16px', backgroundColor: '#F9FAFB', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
-                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#1A1A2E', marginBottom: '12px' }}>Añadir Nueva Ubicación</label>
+                        <div style={{ padding: '16px', backgroundColor: '#F9FAFB', borderRadius: '8px', border: '1px solid #ECECEC' }}>
+                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#111827', marginBottom: '12px' }}>Añadir Nueva Ubicación</label>
                             <div style={{ display: 'flex', gap: '8px' }}>
                                 <input
                                     type="text"
                                     value={newLocationName}
                                     onChange={(e) => setNewLocationName(e.target.value)}
                                     placeholder="Ej: Bodega Sur"
-                                    style={{ flex: 1, padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                    style={{ flex: 1, padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px', outline: 'none' }}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' && newLocationName.trim()) handleCreateLocation();
                                     }}
@@ -1524,11 +1524,11 @@ export default function Inventario() {
 
                         {/* Existing Locations List */}
                         <div>
-                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#1A1A2E', marginBottom: '12px' }}>Ubicaciones Existentes</label>
+                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#111827', marginBottom: '12px' }}>Ubicaciones Existentes</label>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                 {ubicaciones.map(u => (
-                                    <div key={u.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', backgroundColor: '#fff' }}>
-                                        <span style={{ fontSize: '14px', color: '#1A1A2E', fontWeight: 500 }}>{u.nombre}</span>
+                                    <div key={u.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', backgroundColor: '#fff' }}>
+                                        <span style={{ fontSize: '14px', color: '#111827', fontWeight: 500 }}>{u.nombre}</span>
                                         <div style={{ display: 'flex', gap: '4px' }}>
                                             <button
                                                 onClick={async () => {
@@ -1561,7 +1561,7 @@ export default function Inventario() {
                                                 style={{ padding: '6px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                                 title="Eliminar"
                                             >
-                                                <Trash2 size={16} color="#EF4444" />
+                                                <Trash2 size={16} color="#DC2626" />
                                             </button>
                                         </div>
                                     </div>
@@ -1569,7 +1569,7 @@ export default function Inventario() {
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid #E5E7EB' }}>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '8px', borderTop: '1px solid #ECECEC' }}>
                             <Button variant="secondary" onClick={() => setShowLocationModal(false)}>Cerrar</Button>
                         </div>
                     </div>
@@ -1579,7 +1579,7 @@ export default function Inventario() {
                 <Modal isOpen={true} onClose={() => setShowExportModal(false)} title="Exportar Inventario a Excel" size="sm">
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                         <div>
-                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#1A1A2E', marginBottom: '8px' }}>Filtrar por fecha de creación (opcional)</label>
+                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#111827', marginBottom: '8px' }}>Filtrar por fecha de creación (opcional)</label>
                             <div style={{ display: 'flex', gap: '8px' }}>
                                 <div style={{ flex: 1 }}>
                                     <label style={{ display: 'block', fontSize: '12px', color: '#6B7280', marginBottom: '4px' }}>Desde</label>
@@ -1587,7 +1587,7 @@ export default function Inventario() {
                                         type="date"
                                         value={exportDateFrom}
                                         onChange={(e) => setExportDateFrom(e.target.value)}
-                                        style={{ width: '100%', padding: '8px 10px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                        style={{ width: '100%', padding: '8px 10px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px', outline: 'none' }}
                                     />
                                 </div>
                                 <div style={{ flex: 1 }}>
@@ -1596,18 +1596,18 @@ export default function Inventario() {
                                         type="date"
                                         value={exportDateTo}
                                         onChange={(e) => setExportDateTo(e.target.value)}
-                                        style={{ width: '100%', padding: '8px 10px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                        style={{ width: '100%', padding: '8px 10px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px', outline: 'none' }}
                                     />
                                 </div>
                             </div>
                         </div>
 
                         <div>
-                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#1A1A2E', marginBottom: '8px' }}>Bodega / Sección</label>
+                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#111827', marginBottom: '8px' }}>Bodega / Sección</label>
                             <select
                                 value={exportUbicacionId}
                                 onChange={(e) => setExportUbicacionId(e.target.value)}
-                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none', backgroundColor: '#fff' }}
+                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px', outline: 'none', backgroundColor: '#fff' }}
                             >
                                 <option value="">Todas las bodegas</option>
                                 {ubicaciones.map(u => (
@@ -1619,7 +1619,7 @@ export default function Inventario() {
                             </p>
                         </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '8px', borderTop: '1px solid #E5E7EB' }}>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '8px', borderTop: '1px solid #ECECEC' }}>
                             <Button variant="secondary" onClick={() => setShowExportModal(false)} disabled={isExporting}>Cancelar</Button>
                             <Button onClick={handleExportExcel} disabled={isExporting}>
                                 <Download size={16} style={{ marginRight: '4px' }} />
@@ -1638,11 +1638,11 @@ export default function Inventario() {
                 }}>
                     <div style={{
                         width: '48px', height: '48px', border: '5px solid rgba(255,255,255,0.3)',
-                        borderTop: '5px solid #10B981', borderRadius: '50%',
+                        borderTop: '5px solid #16A34A', borderRadius: '50%',
                         animation: 'spin 1s linear infinite', marginBottom: '16px'
                     }}></div>
                     <h2 style={{ fontSize: '20px', fontWeight: 'bold' }}>Procesando Excel...</h2>
-                    <p style={{ fontSize: '14px', marginTop: '8px', color: '#D1D5DB' }}>Esto puede tardar unos segundos. Por favor, no actualice la página.</p>
+                    <p style={{ fontSize: '14px', marginTop: '8px', color: '#ECECEC' }}>Esto puede tardar unos segundos. Por favor, no actualice la página.</p>
                     <style>
                         {`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}
                     </style>

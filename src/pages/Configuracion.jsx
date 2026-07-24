@@ -158,21 +158,21 @@ export default function Configuracion() {
         <div id="config-root" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div id="config-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
-                    <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#1A1A2E' }}>Configuración</h1>
+                    <h1 style={{ fontSize: '20px', fontWeight: 600, color: '#111827' }}>Configuración</h1>
                     <p style={{ fontSize: '13px', color: '#6B7280', marginTop: '4px' }}>Ajustes del sistema</p>
                 </div>
                 <Button icon={Save}>Guardar Cambios</Button>
             </div>
 
-            <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E5EA', borderRadius: '10px', overflow: 'hidden' }}>
+            <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #ECECEC', borderRadius: '10px', overflow: 'hidden' }}>
                 {/* Tabs */}
-                <div id="config-tabs" style={{ display: 'flex', borderBottom: '2px solid #E2E5EA' }}>
+                <div id="config-tabs" style={{ display: 'flex', borderBottom: '2px solid #ECECEC' }}>
                     {tabs.map(t => (
                         <button key={t.id} onClick={() => setTab(t.id)} style={{
                             display: 'flex', alignItems: 'center', gap: '8px',
                             padding: '14px 24px', fontSize: '13px', fontWeight: tab === t.id ? 600 : 500,
-                            color: tab === t.id ? '#F2A900' : '#6B7280', backgroundColor: 'transparent',
-                            border: 'none', borderBottom: tab === t.id ? '2px solid #F2A900' : '2px solid transparent',
+                            color: tab === t.id ? '#D69A00' : '#6B7280', backgroundColor: 'transparent',
+                            border: 'none', borderBottom: tab === t.id ? '2px solid #F5B400' : '2px solid transparent',
                             marginBottom: '-2px', cursor: 'pointer', transition: 'all 150ms'
                         }}>
                             <t.icon size={16} />{t.label}
@@ -184,9 +184,9 @@ export default function Configuracion() {
                 <div style={{ padding: '28px', maxWidth: (tab === 'whatsapp' || tab === 'roles' || tab === 'cajas' || tab === 'sistema') ? '100%' : '520px' }}>
                     {tab === 'general' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 20px', backgroundColor: '#FFF8E7', borderRadius: '10px' }}>
-                                <Globe size={20} style={{ color: '#F2A900' }} />
-                                <div><p style={{ fontSize: '13px', fontWeight: 600, color: '#1A1A2E' }}>Configuración General</p><p style={{ fontSize: '11px', color: '#9CA3AF' }}>Ajustes básicos del sistema</p></div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 20px', backgroundColor: '#FFF9E6', borderRadius: '10px' }}>
+                                <Globe size={20} style={{ color: '#D69A00' }} />
+                                <div><p style={{ fontSize: '13px', fontWeight: 600, color: '#111827' }}>Configuración General</p><p style={{ fontSize: '11px', color: '#9CA3AF' }}>Ajustes básicos del sistema</p></div>
                             </div>
                             <Select label="Idioma" options={[{ value: 'es', label: 'Español' }, { value: 'en', label: 'English' }]} />
                             <Select label="Zona horaria" options={[{ value: 'America/Bogota', label: 'América/Bogotá (UTC-5)' }, { value: 'America/Mexico_City', label: 'América/Ciudad de México (UTC-6)' }]} />
@@ -197,9 +197,9 @@ export default function Configuracion() {
 
                     {tab === 'empresa' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 20px', backgroundColor: '#FFF8E7', borderRadius: '10px' }}>
-                                <Building2 size={20} style={{ color: '#F2A900' }} />
-                                <div><p style={{ fontSize: '13px', fontWeight: 600, color: '#1A1A2E' }}>Datos de la Empresa</p><p style={{ fontSize: '11px', color: '#9CA3AF' }}>Información legal y de contacto</p></div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 20px', backgroundColor: '#FFF9E6', borderRadius: '10px' }}>
+                                <Building2 size={20} style={{ color: '#D69A00' }} />
+                                <div><p style={{ fontSize: '13px', fontWeight: 600, color: '#111827' }}>Datos de la Empresa</p><p style={{ fontSize: '11px', color: '#9CA3AF' }}>Información legal y de contacto</p></div>
                             </div>
                             <Input label="Razón Social" defaultValue="FERRETERIA LA ESQUINA DEL PROGRESO" />
                             <Input label="NIT" defaultValue="19.591.012-2" />
@@ -214,14 +214,14 @@ export default function Configuracion() {
 
                     {tab === 'impuestos' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 20px', backgroundColor: '#FFF8E7', borderRadius: '10px' }}>
-                                <Receipt size={20} style={{ color: '#F2A900' }} />
-                                <div><p style={{ fontSize: '13px', fontWeight: 600, color: '#1A1A2E' }}>Impuestos</p><p style={{ fontSize: '11px', color: '#9CA3AF' }}>Tasas y retenciones aplicables</p></div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 20px', backgroundColor: '#FFF9E6', borderRadius: '10px' }}>
+                                <Receipt size={20} style={{ color: '#D69A00' }} />
+                                <div><p style={{ fontSize: '13px', fontWeight: 600, color: '#111827' }}>Impuestos</p><p style={{ fontSize: '11px', color: '#9CA3AF' }}>Tasas y retenciones aplicables</p></div>
                             </div>
                             <Select label="IVA General" options={[{ value: '19', label: '19%' }, { value: '5', label: '5%' }, { value: '0', label: '0% — Exento' }]} />
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px', backgroundColor: '#F0F2F5', borderRadius: '8px' }}>
-                                <input type="checkbox" id="iva-incl" defaultChecked style={{ width: '18px', height: '18px', accentColor: '#F2A900' }} />
-                                <label htmlFor="iva-incl" style={{ fontSize: '13px', color: '#1A1A2E', cursor: 'pointer' }}>Incluir IVA en precio de venta</label>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px', backgroundColor: '#F8F9FB', borderRadius: '8px' }}>
+                                <input type="checkbox" id="iva-incl" defaultChecked style={{ width: '18px', height: '18px', accentColor: '#F5B400' }} />
+                                <label htmlFor="iva-incl" style={{ fontSize: '13px', color: '#111827', cursor: 'pointer' }}>Incluir IVA en precio de venta</label>
                             </div>
                             <Select label="Retención" options={[{ value: '0', label: 'No aplica' }, { value: '2.5', label: '2.5%' }]} />
                         </div>
@@ -229,20 +229,20 @@ export default function Configuracion() {
 
                     {tab === 'impresion' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 20px', backgroundColor: '#FFF8E7', borderRadius: '10px' }}>
-                                <Printer size={20} style={{ color: '#F2A900' }} />
-                                <div><p style={{ fontSize: '13px', fontWeight: 600, color: '#1A1A2E' }}>Impresión</p><p style={{ fontSize: '11px', color: '#9CA3AF' }}>Formato de tickets y recibos</p></div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 20px', backgroundColor: '#FFF9E6', borderRadius: '10px' }}>
+                                <Printer size={20} style={{ color: '#D69A00' }} />
+                                <div><p style={{ fontSize: '13px', fontWeight: 600, color: '#111827' }}>Impresión</p><p style={{ fontSize: '11px', color: '#9CA3AF' }}>Formato de tickets y recibos</p></div>
                             </div>
                             <Select label="Impresora" options={[{ value: 'thermal', label: 'Térmica (80mm)' }, { value: 'standard', label: 'Estándar (A4)' }]} />
                             <Input label="Encabezado del ticket" defaultValue="FERRETERIA LA ESQUINA DEL PROGRESO" />
                             <Input label="Pie del ticket" defaultValue="¡Gracias por su compra!" />
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px', backgroundColor: '#F0F2F5', borderRadius: '8px' }}>
-                                <input type="checkbox" id="logo" defaultChecked style={{ width: '18px', height: '18px', accentColor: '#F2A900' }} />
-                                <label htmlFor="logo" style={{ fontSize: '13px', color: '#1A1A2E', cursor: 'pointer' }}>Imprimir logo en ticket</label>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px', backgroundColor: '#F8F9FB', borderRadius: '8px' }}>
+                                <input type="checkbox" id="logo" defaultChecked style={{ width: '18px', height: '18px', accentColor: '#F5B400' }} />
+                                <label htmlFor="logo" style={{ fontSize: '13px', color: '#111827', cursor: 'pointer' }}>Imprimir logo en ticket</label>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px', backgroundColor: '#F0F2F5', borderRadius: '8px' }}>
-                                <input type="checkbox" id="autoprint" style={{ width: '18px', height: '18px', accentColor: '#F2A900' }} />
-                                <label htmlFor="autoprint" style={{ fontSize: '13px', color: '#1A1A2E', cursor: 'pointer' }}>Impresión automática al vender</label>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px', backgroundColor: '#F8F9FB', borderRadius: '8px' }}>
+                                <input type="checkbox" id="autoprint" style={{ width: '18px', height: '18px', accentColor: '#F5B400' }} />
+                                <label htmlFor="autoprint" style={{ fontSize: '13px', color: '#111827', cursor: 'pointer' }}>Impresión automática al vender</label>
                             </div>
                         </div>
                     )}
@@ -254,19 +254,19 @@ export default function Configuracion() {
                     {tab === 'sistema' && isAdmin && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '600px' }}>
                             {/* Backup Section */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 20px', backgroundColor: '#FFF8E7', borderRadius: '10px', border: '1px solid #C7D2E0' }}>
-                                <Database size={20} style={{ color: '#F2A900' }} />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 20px', backgroundColor: '#FFF9E6', borderRadius: '10px', border: '1px solid #ECECEC' }}>
+                                <Database size={20} style={{ color: '#D69A00' }} />
                                 <div>
-                                    <p style={{ fontSize: '13px', fontWeight: 600, color: '#1A1A2E' }}>Respaldo de Base de Datos</p>
+                                    <p style={{ fontSize: '13px', fontWeight: 600, color: '#111827' }}>Respaldo de Base de Datos</p>
                                     <p style={{ fontSize: '11px', color: '#6B7280' }}>Descarga y restaura copias de seguridad</p>
                                 </div>
                             </div>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-                                <div style={{ padding: '20px', backgroundColor: '#FFF', border: '1px solid #E2E5EA', borderRadius: '10px' }}>
+                                <div style={{ padding: '20px', backgroundColor: '#FFF', border: '1px solid #ECECEC', borderRadius: '10px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                                        <Download size={18} color="#F2A900" />
-                                        <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#1A1A2E' }}>Descargar</h3>
+                                        <Download size={18} color="#D69A00" />
+                                        <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>Descargar</h3>
                                     </div>
                                     <p style={{ fontSize: '12px', color: '#6B7280', lineHeight: '1.5', marginBottom: '14px' }}>
                                         Descarga toda la base de datos como archivo JSON.
@@ -275,8 +275,8 @@ export default function Configuracion() {
                                         onClick={handleDownloadBackup}
                                         disabled={backupLoading}
                                         style={{
-                                            width: '100%', padding: '10px 16px', backgroundColor: '#F2A900', color: '#FFF',
-                                            border: 'none', borderRadius: '8px', fontWeight: 600, fontSize: '13px',
+                                            width: '100%', padding: '10px 16px', backgroundColor: '#F5B400', color: '#111827',
+                                            border: 'none', borderRadius: '10px', fontWeight: 600, fontSize: '13px',
                                             cursor: backupLoading ? 'not-allowed' : 'pointer', opacity: backupLoading ? 0.7 : 1,
                                             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
                                         }}
@@ -286,10 +286,10 @@ export default function Configuracion() {
                                     </button>
                                 </div>
 
-                                <div style={{ padding: '20px', backgroundColor: '#FFF', border: '1px solid #E2E5EA', borderRadius: '10px' }}>
+                                <div style={{ padding: '20px', backgroundColor: '#FFF', border: '1px solid #ECECEC', borderRadius: '10px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z" fill="#4285F4"/><path d="M12 2v16l6.79 3 .71-.71z" fill="#0066DA"/><path d="M4.5 20.29l.71.71L12 18V2z" fill="#00AC47"/><path d="M22 12l-5.5-9.5L12 2v10z" fill="#EA4335"/><path d="M12 12v6l6.79 3L22 12z" fill="#00832D"/><path d="M2 12l2.5 8.29L12 18V12z" fill="#2684FC"/><path d="M12 2L6.5 11.5 2 12h10z" fill="#FFBA00"/></svg>
-                                        <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#1A1A2E' }}>Google Drive</h3>
+                                        <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>Google Drive</h3>
                                     </div>
                                     <p style={{ fontSize: '12px', color: '#6B7280', lineHeight: '1.5', marginBottom: '14px' }}>
                                         Sube el backup directamente a Google Drive. Automático cada 15 días.
@@ -309,10 +309,10 @@ export default function Configuracion() {
                                     </button>
                                 </div>
 
-                                <div style={{ padding: '20px', backgroundColor: '#FFF', border: '1px solid #E2E5EA', borderRadius: '10px' }}>
+                                <div style={{ padding: '20px', backgroundColor: '#FFF', border: '1px solid #ECECEC', borderRadius: '10px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                                        <Upload size={18} color="#D97706" />
-                                        <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#1A1A2E' }}>Restaurar</h3>
+                                        <Upload size={18} color="#DC2626" />
+                                        <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>Restaurar</h3>
                                     </div>
                                     <p style={{ fontSize: '12px', color: '#6B7280', lineHeight: '1.5', marginBottom: '14px' }}>
                                         Restaura desde un archivo. <strong style={{ color: '#DC2626' }}>Reemplaza todo.</strong>
@@ -320,8 +320,8 @@ export default function Configuracion() {
                                     <button
                                         onClick={() => setShowRestoreModal(true)}
                                         style={{
-                                            width: '100%', padding: '10px 16px', backgroundColor: '#FFF', color: '#D97706',
-                                            border: '2px solid #D97706', borderRadius: '8px', fontWeight: 600, fontSize: '13px',
+                                            width: '100%', padding: '10px 16px', backgroundColor: '#FFF', color: '#DC2626',
+                                            border: '2px solid #DC2626', borderRadius: '8px', fontWeight: 600, fontSize: '13px',
                                             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
                                         }}
                                     >
@@ -331,8 +331,8 @@ export default function Configuracion() {
                                 </div>
                             </div>
 
-                            <div style={{ padding: '12px 16px', backgroundColor: gdriveConfigured ? '#F0FDF4' : '#FFFBEB', borderRadius: '8px', border: `1px solid ${gdriveConfigured ? '#BBF7D0' : '#FDE68A'}` }}>
-                                <p style={{ fontSize: '12px', color: gdriveConfigured ? '#166534' : '#92400E', lineHeight: '1.5' }}>
+                            <div style={{ padding: '12px 16px', backgroundColor: gdriveConfigured ? '#EAF7EE' : '#FFF9E6', borderRadius: '8px', border: `1px solid ${gdriveConfigured ? 'rgba(22,163,74,0.3)' : '#FFF1BF'}` }}>
+                                <p style={{ fontSize: '12px', color: gdriveConfigured ? '#16A34A' : '#D69A00', lineHeight: '1.5' }}>
                                     {gdriveConfigured
                                         ? <><strong>Backup automático activo:</strong> Se genera y sube a Google Drive los días 1 y 15 de cada mes a las 2:00 AM (Colombia). Se conservan los últimos 6 backups (~3 meses).</>
                                         : <><strong>Google Drive no configurado.</strong> Configure las credenciales abajo para activar el backup automático.</>
@@ -341,7 +341,7 @@ export default function Configuracion() {
                             </div>
 
                             {/* Google Drive Config */}
-                            <div style={{ padding: '20px', backgroundColor: '#FFF', border: '1px solid #E2E5EA', borderRadius: '10px' }}>
+                            <div style={{ padding: '20px', backgroundColor: '#FFF', border: '1px solid #ECECEC', borderRadius: '10px' }}>
                                 <div
                                     onClick={() => setShowGdriveConfig(!showGdriveConfig)}
                                     style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}
@@ -356,7 +356,7 @@ export default function Configuracion() {
                                             <path d="M73.4 26.5 60.65 4.5c-.8-1.4-1.95-2.5-3.3-3.3L43.6 25l16.2 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>
                                         </svg>
                                         <div>
-                                            <p style={{ fontSize: '14px', fontWeight: 600, color: '#1A1A2E' }}>Configurar Google Drive</p>
+                                            <p style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>Configurar Google Drive</p>
                                             <p style={{ fontSize: '11px', color: '#6B7280' }}>
                                                 {gdriveConfigured ? 'Conectado' : 'No configurado'} — click para {showGdriveConfig ? 'ocultar' : 'expandir'}
                                             </p>
@@ -367,8 +367,8 @@ export default function Configuracion() {
 
                                 {showGdriveConfig && (
                                     <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                                        <div style={{ padding: '12px', backgroundColor: '#F8FAFC', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-                                            <p style={{ fontSize: '12px', color: '#475569', lineHeight: '1.6' }}>
+                                        <div style={{ padding: '12px', backgroundColor: '#F3F4F6', borderRadius: '8px', border: '1px solid #F3F4F6' }}>
+                                            <p style={{ fontSize: '12px', color: '#6B7280', lineHeight: '1.6' }}>
                                                 <strong>Pasos:</strong><br/>
                                                 1. Ir a <strong>console.cloud.google.com</strong> → Crear proyecto<br/>
                                                 2. Activar <strong>Google Drive API</strong> en Biblioteca<br/>
@@ -379,7 +379,7 @@ export default function Configuracion() {
                                         </div>
 
                                         <div>
-                                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px', color: '#374151' }}>
+                                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px', color: '#6B7280' }}>
                                                 Credenciales JSON (cuenta de servicio):
                                             </label>
                                             <textarea
@@ -388,15 +388,15 @@ export default function Configuracion() {
                                                 placeholder={gdriveCredentials === '__saved__' ? 'Credenciales guardadas. Pegue nuevas para reemplazar.' : 'Pegue aquí el contenido del archivo JSON...'}
                                                 rows={4}
                                                 style={{
-                                                    width: '100%', padding: '10px', border: '1px solid #D1D5DB', borderRadius: '8px',
+                                                    width: '100%', padding: '10px', border: '1px solid #ECECEC', borderRadius: '8px',
                                                     fontSize: '12px', fontFamily: 'monospace', resize: 'vertical',
-                                                    backgroundColor: gdriveCredentials === '__saved__' ? '#F0FDF4' : '#FFF'
+                                                    backgroundColor: gdriveCredentials === '__saved__' ? '#EAF7EE' : '#FFF'
                                                 }}
                                             />
                                         </div>
 
                                         <div>
-                                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px', color: '#374151' }}>
+                                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px', color: '#6B7280' }}>
                                                 ID de la carpeta en Google Drive:
                                             </label>
                                             <input
@@ -405,7 +405,7 @@ export default function Configuracion() {
                                                 onChange={(e) => setGdriveFolderId(e.target.value)}
                                                 placeholder="Ej: 1ABCdefGHijKLMnopQRStuvWXyz"
                                                 style={{
-                                                    width: '100%', padding: '10px', border: '1px solid #D1D5DB', borderRadius: '8px',
+                                                    width: '100%', padding: '10px', border: '1px solid #ECECEC', borderRadius: '8px',
                                                     fontSize: '13px', fontFamily: 'monospace'
                                                 }}
                                             />
@@ -418,7 +418,7 @@ export default function Configuracion() {
                                             onClick={handleSaveGdriveConfig}
                                             disabled={gdriveSaving || (!gdriveFolderId)}
                                             style={{
-                                                padding: '10px 20px', backgroundColor: gdriveFolderId ? '#059669' : '#9CA3AF', color: '#FFF',
+                                                padding: '10px 20px', backgroundColor: gdriveFolderId ? '#16A34A' : '#9CA3AF', color: '#FFF',
                                                 border: 'none', borderRadius: '8px', fontWeight: 600, fontSize: '13px',
                                                 cursor: gdriveFolderId ? 'pointer' : 'not-allowed', opacity: gdriveSaving ? 0.7 : 1,
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
@@ -432,18 +432,18 @@ export default function Configuracion() {
                             </div>
 
                             {/* Danger Zone */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 20px', backgroundColor: '#FEF2F2', borderRadius: '10px', border: '1px solid #FECACA', marginTop: '12px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 20px', backgroundColor: '#FDECEC', borderRadius: '10px', border: '1px solid rgba(220,38,38,0.35)', marginTop: '12px' }}>
                                 <AlertTriangle size={20} style={{ color: '#DC2626' }} />
                                 <div>
-                                    <p style={{ fontSize: '13px', fontWeight: 600, color: '#991B1B' }}>Zona de Peligro</p>
-                                    <p style={{ fontSize: '11px', color: '#B91C1C' }}>Acciones irreversibles del sistema</p>
+                                    <p style={{ fontSize: '13px', fontWeight: 600, color: '#DC2626' }}>Zona de Peligro</p>
+                                    <p style={{ fontSize: '11px', color: '#DC2626' }}>Acciones irreversibles del sistema</p>
                                 </div>
                             </div>
 
-                            <div style={{ padding: '20px', backgroundColor: '#FFF', border: '2px solid #FCA5A5', borderRadius: '10px' }}>
+                            <div style={{ padding: '20px', backgroundColor: '#FFF', border: '2px solid rgba(220,38,38,0.35)', borderRadius: '10px' }}>
                                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '20px' }}>
                                     <div>
-                                        <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#991B1B', marginBottom: '6px' }}>Resetear Sistema</h3>
+                                        <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#DC2626', marginBottom: '6px' }}>Resetear Sistema</h3>
                                         <p style={{ fontSize: '12px', color: '#6B7280', lineHeight: '1.5' }}>
                                             Elimina <strong>todos los datos</strong>: ventas, compras, movimientos de caja,
                                             cierres, cuentas por cobrar/pagar, productos, servicios, stock, devoluciones
@@ -474,16 +474,16 @@ export default function Configuracion() {
             {/* Modal de Restaurar Backup */}
             <Modal isOpen={showRestoreModal} onClose={() => { setShowRestoreModal(false); setRestoreConfirmText(''); setRestoreFile(null); }} title="Restaurar Backup">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minWidth: '420px' }}>
-                    <div style={{ padding: '14px', backgroundColor: '#FFFBEB', borderRadius: '8px', border: '1px solid #FDE68A', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-                        <AlertTriangle size={20} style={{ color: '#D97706', flexShrink: 0, marginTop: '2px' }} />
-                        <div style={{ fontSize: '13px', color: '#92400E', lineHeight: '1.5' }}>
+                    <div style={{ padding: '14px', backgroundColor: '#FFF9E6', borderRadius: '8px', border: '1px solid #FFF1BF', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                        <AlertTriangle size={20} style={{ color: '#DC2626', flexShrink: 0, marginTop: '2px' }} />
+                        <div style={{ fontSize: '13px', color: '#D69A00', lineHeight: '1.5' }}>
                             <strong>Esta acción reemplazará TODOS los datos actuales</strong> con los del archivo de backup.
                             Asegúrese de tener un backup actual antes de continuar.
                         </div>
                     </div>
 
                     <div>
-                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '8px', color: '#374151' }}>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '8px', color: '#6B7280' }}>
                             Seleccionar archivo de backup (.json):
                         </label>
                         <input
@@ -491,18 +491,18 @@ export default function Configuracion() {
                             type="file"
                             accept=".json"
                             onChange={(e) => setRestoreFile(e.target.files[0] || null)}
-                            style={{ width: '100%', padding: '8px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '13px' }}
+                            style={{ width: '100%', padding: '8px', border: '1px solid #ECECEC', borderRadius: '8px', fontSize: '13px' }}
                         />
                         {restoreFile && (
-                            <p style={{ fontSize: '12px', color: '#059669', marginTop: '6px' }}>
+                            <p style={{ fontSize: '12px', color: '#16A34A', marginTop: '6px' }}>
                                 Archivo: {restoreFile.name} ({(restoreFile.size / 1024 / 1024).toFixed(2)} MB)
                             </p>
                         )}
                     </div>
 
                     <div>
-                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '8px', color: '#374151' }}>
-                            Para confirmar, escriba <strong style={{ color: '#D97706' }}>RESTAURAR</strong>:
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '8px', color: '#6B7280' }}>
+                            Para confirmar, escriba <strong style={{ color: '#DC2626' }}>RESTAURAR</strong>:
                         </label>
                         <input
                             type="text"
@@ -510,9 +510,9 @@ export default function Configuracion() {
                             onChange={(e) => setRestoreConfirmText(e.target.value)}
                             placeholder="Escriba RESTAURAR"
                             style={{
-                                width: '100%', padding: '10px 14px', border: '2px solid #E5E7EB', borderRadius: '8px',
+                                width: '100%', padding: '10px 14px', border: '2px solid #ECECEC', borderRadius: '8px',
                                 fontSize: '15px', fontWeight: 600, textAlign: 'center', letterSpacing: '2px',
-                                borderColor: restoreConfirmText === 'RESTAURAR' ? '#D97706' : '#E5E7EB'
+                                borderColor: restoreConfirmText === 'RESTAURAR' ? '#DC2626' : '#ECECEC'
                             }}
                         />
                     </div>
@@ -525,7 +525,7 @@ export default function Configuracion() {
                             onClick={handleRestore}
                             disabled={restoreConfirmText !== 'RESTAURAR' || !restoreFile || restoreLoading}
                             style={{
-                                padding: '10px 24px', backgroundColor: (restoreConfirmText === 'RESTAURAR' && restoreFile) ? '#D97706' : '#9CA3AF',
+                                padding: '10px 24px', backgroundColor: (restoreConfirmText === 'RESTAURAR' && restoreFile) ? '#DC2626' : '#9CA3AF',
                                 color: '#FFF', border: 'none', borderRadius: '8px', fontWeight: 600, fontSize: '13px',
                                 cursor: (restoreConfirmText === 'RESTAURAR' && restoreFile) ? 'pointer' : 'not-allowed',
                                 opacity: restoreLoading ? 0.7 : 1
@@ -540,9 +540,9 @@ export default function Configuracion() {
             {/* Modal de confirmación Panic Reset */}
             <Modal isOpen={showPanicModal} onClose={() => { setShowPanicModal(false); setPanicConfirmText(''); }} title="Confirmar Reset del Sistema">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minWidth: '420px' }}>
-                    <div style={{ padding: '14px', backgroundColor: '#FEF2F2', borderRadius: '8px', border: '1px solid #FECACA', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                    <div style={{ padding: '14px', backgroundColor: '#FDECEC', borderRadius: '8px', border: '1px solid rgba(220,38,38,0.35)', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
                         <AlertTriangle size={20} style={{ color: '#DC2626', flexShrink: 0, marginTop: '2px' }} />
-                        <div style={{ fontSize: '13px', color: '#991B1B', lineHeight: '1.5' }}>
+                        <div style={{ fontSize: '13px', color: '#DC2626', lineHeight: '1.5' }}>
                             <strong>Esta acción es IRREVERSIBLE.</strong><br />
                             Se eliminarán todas las ventas, compras, movimientos de caja, cierres,
                             cuentas por cobrar/pagar, productos, servicios, stock, devoluciones
@@ -551,7 +551,7 @@ export default function Configuracion() {
                     </div>
 
                     <div>
-                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '8px', color: '#374151' }}>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '8px', color: '#6B7280' }}>
                             Para confirmar, escriba <strong style={{ color: '#DC2626' }}>RESETEAR</strong> en el campo:
                         </label>
                         <input
@@ -560,9 +560,9 @@ export default function Configuracion() {
                             onChange={(e) => setPanicConfirmText(e.target.value)}
                             placeholder="Escriba RESETEAR"
                             style={{
-                                width: '100%', padding: '10px 14px', border: '2px solid #E5E7EB', borderRadius: '8px',
+                                width: '100%', padding: '10px 14px', border: '2px solid #ECECEC', borderRadius: '8px',
                                 fontSize: '15px', fontWeight: 600, textAlign: 'center', letterSpacing: '2px',
-                                borderColor: panicConfirmText === 'RESETEAR' ? '#DC2626' : '#E5E7EB'
+                                borderColor: panicConfirmText === 'RESETEAR' ? '#DC2626' : '#ECECEC'
                             }}
                         />
                     </div>

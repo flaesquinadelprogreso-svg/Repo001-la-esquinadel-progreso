@@ -360,10 +360,10 @@ export default function NuevaCompra() {
             {/* Header / Actions */}
             <div id="nueva-compra-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <button onClick={() => navigate('/compras')} style={{ border: 'none', background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#F3F4F6', color: '#4B5563', transition: 'background 0.2s' }}>
+                    <button onClick={() => navigate('/compras')} style={{ border: 'none', background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#F3F4F6', color: '#6B7280', transition: 'background 0.2s' }}>
                         <ArrowLeft size={18} />
                     </button>
-                    <h1 style={{ fontSize: '24px', fontWeight: 600, color: '#F2A900' }}>{isEditing ? 'Editar orden de compra' : 'Nueva orden de compra'}</h1>
+                    <h1 style={{ fontSize: '20px', fontWeight: 600, color: '#111827' }}>{isEditing ? 'Editar orden de compra' : 'Nueva orden de compra'}</h1>
                 </div>
                 <div style={{ display: 'flex', gap: '8px' }}>
                     <Button variant="secondary" onClick={() => navigate('/compras')}>Cancelar</Button>
@@ -409,7 +409,7 @@ export default function NuevaCompra() {
                                         }}
                                         onFocus={() => setShowProveedorDropdown(true)}
                                         onBlur={() => setTimeout(() => setShowProveedorDropdown(false), 200)}
-                                        style={{ width: '100%', padding: '8px 32px', border: '1px solid #D1D5DB', borderRadius: '6px', fontSize: '13px', outline: 'none' }}
+                                        style={{ width: '100%', padding: '8px 32px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '13px', outline: 'none' }}
                                     />
                                     {proveedorId && (
                                         <button onClick={() => { setProveedorId(''); setProveedorSearch(''); }} style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF' }}>
@@ -418,7 +418,7 @@ export default function NuevaCompra() {
                                     )}
                                 </div>
                                 {showProveedorDropdown && proveedores.filter(p => !proveedorSearch || (p.nombre || p.name || '').toLowerCase().includes(proveedorSearch.toLowerCase())).length > 0 && !proveedorId && (
-                                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #D1D5DB', borderRadius: '6px', marginTop: '4px', maxHeight: '200px', overflowY: 'auto', zIndex: 50, boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
+                                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #ECECEC', borderRadius: '6px', marginTop: '4px', maxHeight: '200px', overflowY: 'auto', zIndex: 50, boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
                                         {proveedores.filter(p => !proveedorSearch || (p.nombre || p.name || '').toLowerCase().includes(proveedorSearch.toLowerCase())).map(p => (
                                             <div key={p.id} onClick={() => { setProveedorId(p.id); setProveedorSearch(p.nombre || p.name || ''); setShowProveedorDropdown(false); }} style={{ padding: '10px 12px', cursor: 'pointer', fontSize: '13px', borderBottom: '1px solid #F3F4F6' }} onMouseOver={e => e.target.style.backgroundColor = '#F3F4F6'} onMouseOut={e => e.target.style.backgroundColor = 'transparent'}>
                                                 {p.nombre || p.name || 'Sin nombre'}
@@ -434,18 +434,18 @@ export default function NuevaCompra() {
                                     width: '34px',
                                     height: '34px',
                                     borderRadius: '6px',
-                                    border: '1px solid #D1D5DB',
+                                    border: '1px solid #ECECEC',
                                     backgroundColor: '#fff',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     flexShrink: 0,
-                                    color: '#4F46E5',
+                                    color: '#2563EB',
                                     transition: 'all 0.2s'
                                 }}
-                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#EEF2FF'; e.currentTarget.style.borderColor = '#4F46E5'; }}
-                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.borderColor = '#D1D5DB'; }}
+                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#EFF4FF'; e.currentTarget.style.borderColor = '#2563EB'; }}
+                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.borderColor = '#ECECEC'; }}
                             >
                                 <Plus size={16} />
                             </button>
@@ -476,9 +476,9 @@ export default function NuevaCompra() {
                                             flex: 1,
                                             padding: '8px 6px',
                                             borderRadius: '6px',
-                                            border: metodoPago === m.value ? '2px solid #F2A900' : '1px solid #D1D5DB',
-                                            backgroundColor: metodoPago === m.value ? '#EFF6FF' : '#fff',
-                                            color: metodoPago === m.value ? '#1D4ED8' : '#4B5563',
+                                            border: metodoPago === m.value ? '2px solid #F5B400' : '1px solid #ECECEC',
+                                            backgroundColor: metodoPago === m.value ? '#FFF9E6' : '#fff',
+                                            color: metodoPago === m.value ? '#D69A00' : '#6B7280',
                                             fontSize: '11px',
                                             fontWeight: metodoPago === m.value ? 600 : 400,
                                             cursor: 'pointer',
@@ -496,10 +496,10 @@ export default function NuevaCompra() {
                             </div>
                         </div>
                         {metodoPago === 'multiple' && (
-                            <div style={{ padding: '16px', backgroundColor: '#F9FAFB', borderRadius: '8px', border: '1px solid #E5E7EB', gridColumn: '1 / -1', boxSizing: 'border-box', overflow: 'hidden' }}>
+                            <div style={{ padding: '16px', backgroundColor: '#F9FAFB', borderRadius: '8px', border: '1px solid #ECECEC', gridColumn: '1 / -1', boxSizing: 'border-box', overflow: 'hidden' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
                                     <span style={{ fontSize: '13px', fontWeight: 600, color: '#111827', whiteSpace: 'nowrap' }}>Pagos Múltiples</span>
-                                    <div style={{ fontSize: '12px', fontWeight: 600, color: multiplePayments.reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0) === totales.neto ? '#10B981' : '#EF4444', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>
+                                    <div style={{ fontSize: '12px', fontWeight: 600, color: multiplePayments.reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0) === totales.neto ? '#16A34A' : '#DC2626', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>
                                         Total cubierto: {formatPesos(multiplePayments.reduce((acc, curr) => acc + (parseFloat(curr.monto) || 0), 0))} / {formatPesos(totales.neto)}
                                     </div>
                                 </div>
@@ -513,7 +513,7 @@ export default function NuevaCompra() {
                                                     const targetCuenta = cuentas.find(c => newMetodo === 'efectivo' ? c.tipo === 'caja' : c.tipo === 'banco');
                                                     setMultiplePayments(prev => prev.map((p, i) => i === index ? { ...p, metodo: newMetodo, cuentaId: targetCuenta ? targetCuenta.id : '' } : p));
                                                 }}
-                                                style={{ flex: '1 1 0px', minWidth: 0, padding: '8px', border: '1px solid #D1D5DB', borderRadius: '6px', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
+                                                style={{ flex: '1 1 0px', minWidth: 0, padding: '8px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
                                             >
                                                 <option value="efectivo">Efectivo</option>
                                                 <option value="banco">Banco / Transferencia</option>
@@ -524,7 +524,7 @@ export default function NuevaCompra() {
                                                 <select
                                                     value={pago.cuentaId}
                                                     onChange={(e) => setMultiplePayments(prev => prev.map((p, i) => i === index ? { ...p, cuentaId: e.target.value } : p))}
-                                                    style={{ flex: '2 1 0px', minWidth: 0, padding: '8px', border: '1px solid #D1D5DB', borderRadius: '6px', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
+                                                    style={{ flex: '2 1 0px', minWidth: 0, padding: '8px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
                                                 >
                                                     <option value="">Seleccionar cuenta...</option>
                                                     {cuentas.filter(c => pago.metodo === 'efectivo' ? c.tipo === 'caja' : c.tipo === 'banco').map(c => (
@@ -543,12 +543,12 @@ export default function NuevaCompra() {
                                                 value={pago.monto}
                                                 onChange={(e) => setMultiplePayments(prev => prev.map((p, i) => i === index ? { ...p, monto: e.target.value } : p))}
                                                 placeholder="Monto"
-                                                style={{ flex: '1 1 0px', minWidth: 0, padding: '8px', border: '1px solid #D1D5DB', borderRadius: '6px', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
+                                                style={{ flex: '1 1 0px', minWidth: 0, padding: '8px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
                                             />
 
                                             <button
                                                 onClick={() => setMultiplePayments(prev => prev.filter((_, i) => i !== index))}
-                                                style={{ padding: '8px', color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer', opacity: multiplePayments.length > 1 ? 1 : 0.5 }}
+                                                style={{ padding: '8px', color: '#DC2626', background: 'none', border: 'none', cursor: 'pointer', opacity: multiplePayments.length > 1 ? 1 : 0.5 }}
                                                 disabled={multiplePayments.length === 1}
                                             >
                                                 <Trash2 size={16} />
@@ -561,7 +561,7 @@ export default function NuevaCompra() {
                                         const defaultCaja = cuentas.find(c => c.tipo === 'caja');
                                         setMultiplePayments(prev => [...prev, { id: Date.now(), metodo: 'efectivo', monto: 0, cuentaId: defaultCaja ? defaultCaja.id : '' }]);
                                     }}
-                                    style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '12px', fontWeight: 600, color: '#4F46E5', backgroundColor: '#EEF2FF', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
+                                    style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '12px', fontWeight: 600, color: '#2563EB', backgroundColor: '#EFF4FF', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
                                 >
                                     <Plus size={14} /> Agregar línea de pago
                                 </button>
@@ -573,7 +573,7 @@ export default function NuevaCompra() {
                                 <select
                                     value={cuentaId}
                                     onChange={e => setCuentaId(e.target.value)}
-                                    style={{ width: '100%', padding: '8px 12px', border: '1px solid #D1D5DB', borderRadius: '6px', fontSize: '13px', outline: 'none' }}
+                                    style={{ width: '100%', padding: '8px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '13px', outline: 'none' }}
                                 >
                                     <option value="">Seleccionar cuenta...</option>
                                     {cuentas.filter(c => metodoPago === 'efectivo' ? c.tipo === 'caja' : c.tipo === 'banco').map(c => (
@@ -599,8 +599,8 @@ export default function NuevaCompra() {
                                                 }}
                                                 style={{
                                                     flex: 1, padding: '4px', fontSize: '11px',
-                                                    backgroundColor: '#F3F4F6', color: '#374151',
-                                                    border: '1px solid #D1D5DB', borderRadius: '4px',
+                                                    backgroundColor: '#F3F4F6', color: '#6B7280',
+                                                    border: '1px solid #ECECEC', borderRadius: '4px',
                                                     cursor: 'pointer', fontWeight: 600
                                                 }}
                                             >
@@ -615,10 +615,10 @@ export default function NuevaCompra() {
                 </div>
 
                 {/* Grid Detalle Ítems */}
-                <div id="nueva-compra-table-container" style={{ borderTop: '1px solid #E5E7EB', paddingTop: '16px', paddingBottom: '150px', overflowX: 'auto' }}>
+                <div id="nueva-compra-table-container" style={{ borderTop: '1px solid #ECECEC', paddingTop: '16px', paddingBottom: '150px', overflowX: 'auto' }}>
                     <table style={{ minWidth: '1200px', width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                         <thead>
-                            <tr style={{ borderBottom: '2px solid #E5E7EB', color: '#1F2937', fontWeight: 600 }}>
+                            <tr style={{ borderBottom: '2px solid #ECECEC', color: '#111827', fontWeight: 600 }}>
                                 <th style={{ padding: '8px', textAlign: 'left', width: '40px' }}>#</th>
                                 <th style={{ padding: '8px', textAlign: 'left', minWidth: '200px' }}>Ítem</th>
                                 <th style={{ padding: '8px', textAlign: 'left', minWidth: '150px' }}>Descripción</th>
@@ -646,7 +646,7 @@ export default function NuevaCompra() {
                                                     onChange={e => handleItemChange(item.id, 'productoSearch', e.target.value)}
                                                     onFocus={() => handleItemChange(item.id, 'showProductoDropdown', true)}
                                                     onBlur={() => setTimeout(() => handleItemChange(item.id, 'showProductoDropdown', false), 200)}
-                                                    style={{ width: '100%', padding: '6px 24px 6px 8px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '12px', outline: 'none' }}
+                                                    style={{ width: '100%', padding: '6px 24px 6px 8px', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '12px', outline: 'none' }}
                                                 />
                                                 {item.productoId && (
                                                     <button onClick={() => { handleItemChange(item.id, 'productoId', ''); handleItemChange(item.id, 'productoSearch', ''); }} style={{ position: 'absolute', right: '4px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', padding: '2px' }}>
@@ -654,7 +654,7 @@ export default function NuevaCompra() {
                                                     </button>
                                                 )}
                                                 {item.showProductoDropdown && productos.filter(p => !item.productoSearch || (p.nombre || '').toLowerCase().includes((item.productoSearch || '').toLowerCase()) || (p.codigo || '').toLowerCase().includes((item.productoSearch || '').toLowerCase())).length > 0 && !item.productoId && (
-                                                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #D1D5DB', borderRadius: '4px', marginTop: '2px', maxHeight: '150px', overflowY: 'auto', zIndex: 30, boxShadow: '0 4px 10px rgba(0,0,0,0.15)' }}>
+                                                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #ECECEC', borderRadius: '4px', marginTop: '2px', maxHeight: '150px', overflowY: 'auto', zIndex: 30, boxShadow: '0 4px 10px rgba(0,0,0,0.15)' }}>
                                                         {productos.filter(p => !item.productoSearch || (p.nombre || '').toLowerCase().includes((item.productoSearch || '').toLowerCase()) || (p.codigo || '').toLowerCase().includes((item.productoSearch || '').toLowerCase())).map(p => (
                                                             <div key={p.id} onMouseDown={(e) => {
                                                                 e.preventDefault(); // Prevent input from losing focus immediately
@@ -688,8 +688,8 @@ export default function NuevaCompra() {
                                                     style={{
                                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                         width: '26px', height: '26px', borderRadius: '4px', flexShrink: 0,
-                                                        border: '1px solid #D1D5DB', backgroundColor: '#F9FAFB',
-                                                        cursor: 'pointer', fontSize: '14px', fontWeight: 700, color: '#F2A900'
+                                                        border: '1px solid #ECECEC', backgroundColor: '#F9FAFB',
+                                                        cursor: 'pointer', fontSize: '14px', fontWeight: 700, color: '#D69A00'
                                                     }}
                                                 >
                                                     <Plus size={14} />
@@ -701,21 +701,21 @@ export default function NuevaCompra() {
                                                 placeholder="Nombre ítem"
                                                 value={item.productoSearch || ''}
                                                 onChange={e => handleItemChange(item.id, 'productoSearch', e.target.value)}
-                                                style={{ width: '100%', padding: '6px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '12px', outline: 'none' }}
+                                                style={{ width: '100%', padding: '6px', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '12px', outline: 'none' }}
                                             />
                                         )}
                                     </td>
                                     <td style={{ padding: '4px' }}>
-                                        <input type="text" value={item.descripcion} onChange={e => handleItemChange(item.id, 'descripcion', e.target.value)} style={{ width: '100%', padding: '6px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '12px', outline: 'none' }} />
+                                        <input type="text" value={item.descripcion} onChange={e => handleItemChange(item.id, 'descripcion', e.target.value)} style={{ width: '100%', padding: '6px', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '12px', outline: 'none' }} />
                                     </td>
                                     <td style={{ padding: '4px' }}>
-                                        <select value={item.ubicacionId} onChange={e => handleItemChange(item.id, 'ubicacionId', e.target.value)} style={{ width: '100%', padding: '6px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '12px', outline: 'none' }}>
+                                        <select value={item.ubicacionId} onChange={e => handleItemChange(item.id, 'ubicacionId', e.target.value)} style={{ width: '100%', padding: '6px', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '12px', outline: 'none' }}>
                                             <option value="">Destino...</option>
                                             {ubicaciones.map(u => <option key={u.id} value={u.id}>{u.nombre}</option>)}
                                         </select>
                                     </td>
                                     <td style={{ padding: '4px' }}>
-                                        <input type="text" inputMode="decimal" value={item.cantidad} onChange={e => { let v = e.target.value.replace(',', '.'); if (v === '' || /^\d*\.?\d*$/.test(v)) handleItemChange(item.id, 'cantidad', v); }} onBlur={e => { const val = parseFloat(e.target.value); handleItemChange(item.id, 'cantidad', val > 0 ? String(val) : '1'); }} style={{ width: '100%', padding: '6px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '12px', textAlign: 'right', outline: 'none' }} />
+                                        <input type="text" inputMode="decimal" value={item.cantidad} onChange={e => { let v = e.target.value.replace(',', '.'); if (v === '' || /^\d*\.?\d*$/.test(v)) handleItemChange(item.id, 'cantidad', v); }} onBlur={e => { const val = parseFloat(e.target.value); handleItemChange(item.id, 'cantidad', val > 0 ? String(val) : '1'); }} style={{ width: '100%', padding: '6px', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '12px', textAlign: 'right', outline: 'none' }} />
                                     </td>
                                     <td style={{ padding: '4px' }}>
                                         <input
@@ -725,11 +725,11 @@ export default function NuevaCompra() {
                                                 const numericValue = e.target.value.replace(/\D/g, '');
                                                 handleItemChange(item.id, 'precioUnit', numericValue ? parseInt(numericValue, 10) : 0);
                                             }}
-                                            style={{ width: '100%', padding: '6px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '12px', textAlign: 'right', outline: 'none' }}
+                                            style={{ width: '100%', padding: '6px', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '12px', textAlign: 'right', outline: 'none' }}
                                         />
                                     </td>
                                     <td style={{ padding: '4px' }}>
-                                        <input type="number" value={item.descuento} onChange={e => handleItemChange(item.id, 'descuento', e.target.value)} style={{ width: '100%', padding: '6px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '12px', textAlign: 'right', outline: 'none' }} />
+                                        <input type="number" value={item.descuento} onChange={e => handleItemChange(item.id, 'descuento', e.target.value)} style={{ width: '100%', padding: '6px', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '12px', textAlign: 'right', outline: 'none' }} />
                                     </td>
                                     <td style={{ padding: '4px' }}>
                                         {(() => {
@@ -756,7 +756,7 @@ export default function NuevaCompra() {
                                         <input type="text" readOnly value={item.valor.toLocaleString('es-CO')} style={{ width: '100%', padding: '6px', border: '1px solid transparent', backgroundColor: 'transparent', fontSize: '12px', textAlign: 'right', fontWeight: 600, color: '#111827' }} />
                                     </td>
                                     <td style={{ padding: '4px', textAlign: 'center' }}>
-                                        <button onClick={() => removeRow(item.id)} style={{ padding: '4px', color: items.length > 1 ? '#EF4444' : '#D1D5DB', background: 'none', border: 'none', cursor: items.length > 1 ? 'pointer' : 'default' }}>
+                                        <button onClick={() => removeRow(item.id)} style={{ padding: '4px', color: items.length > 1 ? '#DC2626' : '#ECECEC', background: 'none', border: 'none', cursor: items.length > 1 ? 'pointer' : 'default' }}>
                                             <Trash2 size={16} />
                                         </button>
                                     </td>
@@ -767,39 +767,39 @@ export default function NuevaCompra() {
                 </div>
 
                 <div style={{ padding: '12px 0' }}>
-                    <button onClick={addRow} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#F3F4F6', color: '#374151', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '12px', fontWeight: 500, cursor: 'pointer', transition: 'background 0.2s' }}>
+                    <button onClick={addRow} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: '#F3F4F6', color: '#6B7280', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '12px', fontWeight: 500, cursor: 'pointer', transition: 'background 0.2s' }}>
                         <Plus size={14} /> Fila adicional
                     </button>
                 </div>
 
                 {/* Footer Totals */}
-                <div id="nueva-compra-footer" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '40px', marginTop: '32px', borderTop: '1px solid #E5E7EB', paddingTop: '24px' }}>
+                <div id="nueva-compra-footer" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '40px', marginTop: '32px', borderTop: '1px solid #ECECEC', paddingTop: '24px' }}>
                     <div>
                         <label style={{ fontSize: '12px', color: '#6B7280', display: 'block', marginBottom: '8px' }}>Observaciones</label>
                         <textarea
                             value={observaciones}
                             onChange={e => setObservaciones(e.target.value)}
-                            style={{ width: '100%', height: '120px', padding: '12px', border: '1px solid #D1D5DB', borderRadius: '6px', resize: 'none', fontSize: '13px', outlineColor: '#F2A900' }}
+                            style={{ width: '100%', height: '120px', padding: '12px', border: '1px solid #ECECEC', borderRadius: '6px', resize: 'none', fontSize: '13px', outlineColor: '#F5B400' }}
                             placeholder="Escribe aquí las observaciones del documento..."
                         ></textarea>
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
-                            <span style={{ color: '#4B5563' }}>Total bruto</span>
+                            <span style={{ color: '#6B7280' }}>Total bruto</span>
                             <span style={{ fontWeight: 500 }}>{formatPesos(totales.bruto)}</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
-                            <span style={{ color: '#4B5563' }}>Descuentos</span>
-                            <span style={{ fontWeight: 500, color: '#EF4444' }}>- {formatPesos(totales.descuentos)}</span>
+                            <span style={{ color: '#6B7280' }}>Descuentos</span>
+                            <span style={{ fontWeight: 500, color: '#DC2626' }}>- {formatPesos(totales.descuentos)}</span>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #E5E7EB', paddingBottom: '8px' }}>
-                            <span style={{ color: '#4B5563' }}>Subtotal</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #ECECEC', paddingBottom: '8px' }}>
+                            <span style={{ color: '#6B7280' }}>Subtotal</span>
                             <span style={{ fontWeight: 600 }}>{formatPesos(subtotalCalc)}</span>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 16px', marginTop: '8px', backgroundColor: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '6px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 16px', marginTop: '8px', backgroundColor: '#F9FAFB', border: '1px solid #ECECEC', borderRadius: '6px' }}>
                             <span style={{ fontWeight: 700, fontSize: '14px', color: '#111827' }}>Total neto</span>
-                            <span style={{ fontWeight: 800, fontSize: '16px', color: '#F2A900' }}>{formatPesos(totales.neto)}</span>
+                            <span style={{ fontWeight: 700, fontSize: '16px', color: '#111827' }}>{formatPesos(totales.neto)}</span>
                         </div>
                     </div>
                 </div>
@@ -811,23 +811,23 @@ export default function NuevaCompra() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minWidth: '400px' }}>
                     <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Nombre *</label>
-                        <input type="text" value={newProveedor.nombre} onChange={e => setNewProveedor(prev => ({ ...prev, nombre: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="Nombre del proveedor" />
+                        <input type="text" value={newProveedor.nombre} onChange={e => setNewProveedor(prev => ({ ...prev, nombre: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }} placeholder="Nombre del proveedor" />
                     </div>
                     <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>NIT *</label>
-                        <input type="text" value={newProveedor.nit} onChange={e => setNewProveedor(prev => ({ ...prev, nit: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="Número de NIT" />
+                        <input type="text" value={newProveedor.nit} onChange={e => setNewProveedor(prev => ({ ...prev, nit: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }} placeholder="Número de NIT" />
                     </div>
                     <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Teléfono</label>
-                        <input type="text" value={newProveedor.telefono} onChange={e => setNewProveedor(prev => ({ ...prev, telefono: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="Número de teléfono" />
+                        <input type="text" value={newProveedor.telefono} onChange={e => setNewProveedor(prev => ({ ...prev, telefono: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }} placeholder="Número de teléfono" />
                     </div>
                     <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Email</label>
-                        <input type="email" value={newProveedor.email} onChange={e => setNewProveedor(prev => ({ ...prev, email: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="correo@ejemplo.com" />
+                        <input type="email" value={newProveedor.email} onChange={e => setNewProveedor(prev => ({ ...prev, email: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }} placeholder="correo@ejemplo.com" />
                     </div>
                     <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Dirección</label>
-                        <input type="text" value={newProveedor.direccion} onChange={e => setNewProveedor(prev => ({ ...prev, direccion: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="Dirección" />
+                        <input type="text" value={newProveedor.direccion} onChange={e => setNewProveedor(prev => ({ ...prev, direccion: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }} placeholder="Dirección" />
                     </div>
                     <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
                         <Button variant="secondary" onClick={() => setShowNewProveedor(false)}>Cancelar</Button>
@@ -849,7 +849,7 @@ export default function NuevaCompra() {
                                         type="text"
                                         value={editProduct.nombre || ''}
                                         onChange={(e) => setEditProduct(prev => ({ ...prev, nombre: e.target.value }))}
-                                        style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                        style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
                                     />
                                 </div>
 
@@ -860,7 +860,7 @@ export default function NuevaCompra() {
                                             type="text"
                                             value={editProduct.codigo || ''}
                                             onChange={(e) => setEditProduct(prev => ({ ...prev, codigo: e.target.value }))}
-                                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
                                         />
                                     </div>
                                     <div>
@@ -869,7 +869,7 @@ export default function NuevaCompra() {
                                             type="text"
                                             value={editProduct.categoria || ''}
                                             onChange={(e) => setEditProduct(prev => ({ ...prev, categoria: e.target.value }))}
-                                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
                                         />
                                     </div>
                                 </div>
@@ -881,7 +881,7 @@ export default function NuevaCompra() {
                                             type="text"
                                             value={formatPesos(editProduct.costo)}
                                             onChange={(e) => handleCurrencyChange(e.target.value, (val) => setEditProduct(prev => ({ ...prev, costo: val })))}
-                                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
                                         />
                                     </div>
                                     <div>
@@ -890,7 +890,7 @@ export default function NuevaCompra() {
                                             type="number"
                                             value={editProduct.stockMinimo || ''}
                                             onChange={(e) => setEditProduct(prev => ({ ...prev, stockMinimo: parseInt(e.target.value) || 0 }))}
-                                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
                                         />
                                     </div>
                                 </div>
@@ -902,7 +902,7 @@ export default function NuevaCompra() {
                                             type="text"
                                             value={formatPesos(editProduct.precio)}
                                             onChange={(e) => handleCurrencyChange(e.target.value, (val) => setEditProduct(prev => ({ ...prev, precio: val })))}
-                                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
                                         />
                                     </div>
                                     <div>
@@ -912,7 +912,7 @@ export default function NuevaCompra() {
                                             placeholder="Opcional"
                                             value={formatPesos(editProduct.precioMayor)}
                                             onChange={(e) => handleCurrencyChange(e.target.value, (val) => setEditProduct(prev => ({ ...prev, precioMayor: val })))}
-                                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
+                                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '14px', outline: 'none' }}
                                         />
                                     </div>
                                 </div>
@@ -923,14 +923,14 @@ export default function NuevaCompra() {
                                         value={editProduct.descripcion || ''}
                                         onChange={(e) => setEditProduct(prev => ({ ...prev, descripcion: e.target.value }))}
                                         rows={2}
-                                        style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '14px', resize: 'none', outline: 'none' }}
+                                        style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '14px', resize: 'none', outline: 'none' }}
                                     />
                                 </div>
                             </div>
 
                             {/* Right Column: Image Section */}
                             <div style={{
-                                border: '1px dashed #E5E7EB',
+                                border: '1px dashed #ECECEC',
                                 borderRadius: '4px',
                                 padding: '24px',
                                 display: 'flex',
@@ -939,7 +939,7 @@ export default function NuevaCompra() {
                                 justifyContent: 'center',
                                 backgroundColor: '#FAFAFB'
                             }}>
-                                <span style={{ fontSize: '13px', fontWeight: 500, color: '#1A1A2E', marginBottom: '20px' }}>Imagen</span>
+                                <span style={{ fontSize: '13px', fontWeight: 500, color: '#111827', marginBottom: '20px' }}>Imagen</span>
 
                                 <div style={{
                                     width: '120px',
@@ -967,7 +967,7 @@ export default function NuevaCompra() {
                                     onClick={() => fileInputRef.current?.click()}
                                     style={{
                                         padding: '10px 20px',
-                                        backgroundColor: '#2D4077',
+                                        backgroundColor: '#2563EB',
                                         color: '#fff',
                                         border: 'none',
                                         borderRadius: '4px',
@@ -977,8 +977,8 @@ export default function NuevaCompra() {
                                         width: '100%',
                                         transition: 'background 150ms'
                                     }}
-                                    onMouseEnter={e => e.currentTarget.style.backgroundColor = '#1E2D5A'}
-                                    onMouseLeave={e => e.currentTarget.style.backgroundColor = '#2D4077'}
+                                    onMouseEnter={e => e.currentTarget.style.backgroundColor = '#1D4ED8'}
+                                    onMouseLeave={e => e.currentTarget.style.backgroundColor = '#2563EB'}
                                 >
                                     Seleccionar archivo
                                 </button>
@@ -988,7 +988,7 @@ export default function NuevaCompra() {
                                 {editProduct.imagen && (
                                     <button
                                         onClick={() => setEditProduct(prev => ({ ...prev, imagen: null }))}
-                                        style={{ marginTop: '8px', background: 'none', border: 'none', color: '#EF4444', fontSize: '12px', cursor: 'pointer', fontWeight: 500 }}
+                                        style={{ marginTop: '8px', background: 'none', border: 'none', color: '#DC2626', fontSize: '12px', cursor: 'pointer', fontWeight: 500 }}
                                     >
                                         Eliminar imagen
                                     </button>
@@ -997,7 +997,7 @@ export default function NuevaCompra() {
                         </div>
 
                         {/* Footer */}
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '32px', paddingTop: '16px', borderTop: '1px solid #E5E7EB' }}>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '32px', paddingTop: '16px', borderTop: '1px solid #ECECEC' }}>
                             <div style={{ display: 'flex', gap: '12px' }}>
                                 <Button variant="secondary" onClick={() => { setShowQuickProduct(false); setEditProduct(null); }}>Cancelar</Button>
                                 <Button onClick={handleQuickProductSave}>Guardar Cambios</Button>

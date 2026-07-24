@@ -182,7 +182,7 @@ export default function HistorialVentas() {
             {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                 <div>
-                    <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#1A1A2E' }}>Historial de Ventas</h1>
+                    <h1 style={{ fontSize: '20px', fontWeight: 600, color: '#111827' }}>Historial de Ventas</h1>
                     <p style={{ fontSize: '14px', color: '#6B7280', marginTop: '4px' }}>
                         Consulta ventas pasadas, busca por recibo o cliente y gestiona devoluciones.
                     </p>
@@ -192,7 +192,7 @@ export default function HistorialVentas() {
             {/* Filters Bar */}
             <div id="historial-filtros" style={{
                 display: 'flex', gap: '16px', marginBottom: '24px', backgroundColor: '#FFFFFF',
-                padding: '16px', borderRadius: '12px', border: '1px solid #E5E7EB', flexWrap: 'wrap'
+                padding: '16px', borderRadius: '12px', border: '1px solid #ECECEC', flexWrap: 'wrap'
             }}>
                 <div style={{ flex: '1 1 300px', position: 'relative' }}>
                     <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }} />
@@ -201,7 +201,7 @@ export default function HistorialVentas() {
                         placeholder="Buscar por recibo o nombre del cliente..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{ width: '100%', padding: '10px 12px 10px 36px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '14px' }}
+                        style={{ width: '100%', padding: '10px 12px 10px 36px', border: '1px solid #ECECEC', borderRadius: '8px', fontSize: '14px' }}
                     />
                 </div>
 
@@ -210,7 +210,7 @@ export default function HistorialVentas() {
                     <select
                         value={selectedMonth}
                         onChange={(e) => setSelectedMonth(e.target.value)}
-                        style={{ padding: '10px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '14px', minWidth: '150px' }}
+                        style={{ padding: '10px', border: '1px solid #ECECEC', borderRadius: '8px', fontSize: '14px', minWidth: '150px' }}
                     >
                         <option value="">Todos los meses</option>
                         {availableMonths.map(month => {
@@ -226,7 +226,7 @@ export default function HistorialVentas() {
                     <select
                         value={selectedPaymentMethod}
                         onChange={(e) => setSelectedPaymentMethod(e.target.value)}
-                        style={{ padding: '10px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '14px', minWidth: '180px' }}
+                        style={{ padding: '10px', border: '1px solid #ECECEC', borderRadius: '8px', fontSize: '14px', minWidth: '180px' }}
                     >
                         <option value="">Todos los métodos</option>
                         <option value="efectivo">Efectivo</option>
@@ -242,7 +242,7 @@ export default function HistorialVentas() {
                             setSelectedMonth('');
                             setSelectedPaymentMethod('');
                         }}
-                        style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '10px 16px', border: 'none', backgroundColor: '#FEF2F2', color: '#DC2626', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '10px 16px', border: 'none', backgroundColor: '#FDECEC', color: '#DC2626', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}
                     >
                         <X size={16} /> Limpiar Filtros
                     </button>
@@ -250,7 +250,7 @@ export default function HistorialVentas() {
             </div>
 
             {/* List */}
-            <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
+            <div style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px solid #ECECEC', overflow: 'hidden' }}>
                 {loading ? (
                     <div style={{ textAlign: 'center', padding: '60px', color: '#6B7280' }}>
                         Cargando historial de ventas...
@@ -258,26 +258,26 @@ export default function HistorialVentas() {
                 ) : filteredHistory.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '60px', color: '#6B7280' }}>
                         <History size={48} style={{ margin: '0 auto 16px', opacity: 0.3 }} />
-                        <p style={{ fontSize: '16px', fontWeight: 500, color: '#374151' }}>No se encontraron ventas</p>
+                        <p style={{ fontSize: '16px', fontWeight: 500, color: '#6B7280' }}>No se encontraron ventas</p>
                         <p style={{ fontSize: '14px', marginTop: '8px' }}>Intente ajustar o limpiar los filtros de búsqueda.</p>
                     </div>
                 ) : (
                     <div>
                         {filteredHistory.map((venta) => (
-                            <div key={venta.id} style={{ borderBottom: '1px solid #E5E7EB' }}>
+                            <div key={venta.id} style={{ borderBottom: '1px solid #ECECEC' }}>
                                 {/* Sale Header onClick */}
                                 <div
                                     className="historial-venta-row-header"
                                     onClick={() => handleExpandToggle(venta)}
                                     style={{
-                                        backgroundColor: expandedHistoryId === venta.id ? '#F8FAFC' : '#FFFFFF',
+                                        backgroundColor: expandedHistoryId === venta.id ? '#F3F4F6' : '#FFFFFF',
                                         padding: '10px 16px',
                                         display: 'flex',
                                         justifyContent: 'space-between',
                                         alignItems: 'center',
                                         cursor: 'pointer',
                                         transition: 'background-color 0.2s',
-                                        borderLeft: expandedHistoryId === venta.id ? '4px solid #F2A900' : '4px solid transparent'
+                                        borderLeft: expandedHistoryId === venta.id ? '4px solid #F5B400' : '4px solid transparent'
                                     }}
                                 >
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -293,21 +293,21 @@ export default function HistorialVentas() {
                                         <div>
                                             <div style={{ fontWeight: 600, fontSize: '13px', display: 'flex', gap: '6px', alignItems: 'center' }}>
                                                 <span>Recibo: {venta.numeroRecibo}</span>
-                                                <span style={{ fontSize: '11px', padding: '1px 6px', borderRadius: '4px', backgroundColor: '#E0E7FF', color: '#4338CA', fontWeight: 500 }}>
+                                                <span style={{ fontSize: '11px', padding: '1px 6px', borderRadius: '4px', backgroundColor: '#EFF4FF', color: '#2563EB', fontWeight: 500 }}>
                                                     {venta.cliente?.nombre || 'Cliente General'}
                                                 </span>
                                                 {venta.usuario?.username && (
-                                                    <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '4px', backgroundColor: '#F0FDF4', color: '#15803D', fontWeight: 500 }}>
+                                                    <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '4px', backgroundColor: '#EAF7EE', color: '#16A34A', fontWeight: 500 }}>
                                                         {venta.usuario.username}
                                                     </span>
                                                 )}
                                                 {venta.totalDevuelto > 0 && (
-                                                    <span style={{ fontSize: '11px', padding: '1px 6px', borderRadius: '4px', backgroundColor: '#FEF2F2', color: '#DC2626', fontWeight: 500 }}>
+                                                    <span style={{ fontSize: '11px', padding: '1px 6px', borderRadius: '4px', backgroundColor: '#FDECEC', color: '#DC2626', fontWeight: 500 }}>
                                                         Con Devoluciones
                                                     </span>
                                                 )}
                                                 {venta.estado === 'anulada' && (
-                                                    <span style={{ fontSize: '11px', padding: '1px 6px', borderRadius: '4px', backgroundColor: '#F3F4F6', color: '#4B5563', fontWeight: 500 }}>
+                                                    <span style={{ fontSize: '11px', padding: '1px 6px', borderRadius: '4px', backgroundColor: '#F3F4F6', color: '#6B7280', fontWeight: 500 }}>
                                                         Devolución Total
                                                     </span>
                                                 )}
@@ -332,9 +332,9 @@ export default function HistorialVentas() {
 
                                 {/* Items & Inline Return (Only if expanded) */}
                                 {expandedHistoryId === venta.id && (
-                                    <div className="historial-venta-detalle" style={{ padding: '12px 16px 16px 40px', backgroundColor: '#F8FAFC', borderTop: '1px solid #E5E7EB' }}>
+                                    <div className="historial-venta-detalle" style={{ padding: '12px 16px 16px 40px', backgroundColor: '#F3F4F6', borderTop: '1px solid #ECECEC' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                            <span style={{ fontSize: '13px', fontWeight: 600, color: '#1A1A2E' }}>Detalle de Artículos{venta.tipo !== 'DEVOLUCION' ? ' y Devolución' : ''}</span>
+                                            <span style={{ fontSize: '13px', fontWeight: 600, color: '#111827' }}>Detalle de Artículos{venta.tipo !== 'DEVOLUCION' ? ' y Devolución' : ''}</span>
                                             {venta.tipo !== 'DEVOLUCION' && venta.estado !== 'anulada' && (
                                                 <button
                                                     onClick={() => {
@@ -345,7 +345,7 @@ export default function HistorialVentas() {
                                                         });
                                                         setReturnItems(all);
                                                     }}
-                                                    style={{ padding: '4px 10px', fontSize: '11px', border: '1px solid #D1D5DB', borderRadius: '4px', backgroundColor: '#FFF', cursor: 'pointer', fontWeight: 500 }}
+                                                    style={{ padding: '4px 10px', fontSize: '11px', border: '1px solid #ECECEC', borderRadius: '4px', backgroundColor: '#FFF', cursor: 'pointer', fontWeight: 500 }}
                                                 >
                                                     Devolver Factura Completa
                                                 </button>
@@ -353,9 +353,9 @@ export default function HistorialVentas() {
                                         </div>
 
                                         <div className="historial-venta-tabla-container">
-                                            <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse', backgroundColor: '#FFF', border: '1px solid #E5E7EB', borderRadius: '6px', overflow: 'hidden' }}>
+                                            <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse', backgroundColor: '#FFF', border: '1px solid #ECECEC', borderRadius: '6px', overflow: 'hidden' }}>
                                                 <thead>
-                                                    <tr style={{ color: '#6B7280', borderBottom: '1px solid #E5E7EB', backgroundColor: '#F9FAFB' }}>
+                                                    <tr style={{ color: '#6B7280', borderBottom: '1px solid #ECECEC', backgroundColor: '#F9FAFB' }}>
                                                         <th style={{ textAlign: 'left', padding: '6px 10px' }}>Producto</th>
                                                         <th style={{ textAlign: 'center', padding: '6px 10px', width: '70px' }}>{venta.tipo === 'DEVOLUCION' ? 'Cantidad' : 'Comprado'}</th>
                                                         {venta.tipo !== 'DEVOLUCION' && <th style={{ textAlign: 'center', padding: '6px 10px', width: '70px' }}>Devuelto</th>}
@@ -369,9 +369,9 @@ export default function HistorialVentas() {
                                                         const currentReturn = returnItems[item.id] || 0;
 
                                                         return (
-                                                            <tr key={item.id || i} style={{ borderBottom: '1px solid #F1F5F9' }}>
+                                                            <tr key={item.id || i} style={{ borderBottom: '1px solid #F3F4F6' }}>
                                                                 <td style={{ padding: '8px 10px' }}>
-                                                                    <div style={{ fontWeight: 500, color: '#1A1A2E' }}>{item.nombre}</div>
+                                                                    <div style={{ fontWeight: 500, color: '#111827' }}>{item.nombre}</div>
                                                                     <div style={{ fontSize: '10px', color: '#9CA3AF', marginTop: '1px' }}>{item.codigo}</div>
                                                                 </td>
                                                                 <td style={{ textAlign: 'center', padding: '8px 10px', fontWeight: 600 }}>{item.cantidad}</td>
@@ -386,7 +386,7 @@ export default function HistorialVentas() {
                                                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>
                                                                                 <button
                                                                                     onClick={() => setReturnItems(prev => ({ ...prev, [item.id]: Math.max(0, (prev[item.id] || 0) - 1) }))}
-                                                                                    style={{ padding: '1px 6px', border: '1px solid #E5E7EB', borderRadius: '4px', backgroundColor: '#F3F4F6', cursor: 'pointer', fontSize: '12px' }}
+                                                                                    style={{ padding: '1px 6px', border: '1px solid #ECECEC', borderRadius: '4px', backgroundColor: '#F3F4F6', cursor: 'pointer', fontSize: '12px' }}
                                                                                 >-</button>
                                                                                 <input
                                                                                     type="number"
@@ -397,11 +397,11 @@ export default function HistorialVentas() {
                                                                                         const val = Math.min(parseInt(e.target.value) || 0, disponible);
                                                                                         setReturnItems(prev => ({ ...prev, [item.id]: val || 0 }));
                                                                                     }}
-                                                                                    style={{ width: '36px', padding: '2px', border: '1px solid #D1D5DB', borderRadius: '4px', textAlign: 'center', fontSize: '12px', MozAppearance: 'textfield' }}
+                                                                                    style={{ width: '36px', padding: '2px', border: '1px solid #ECECEC', borderRadius: '4px', textAlign: 'center', fontSize: '12px', MozAppearance: 'textfield' }}
                                                                                 />
                                                                                 <button
                                                                                     onClick={() => setReturnItems(prev => ({ ...prev, [item.id]: Math.min(disponible, (prev[item.id] || 0) + 1) }))}
-                                                                                    style={{ padding: '1px 6px', border: '1px solid #E5E7EB', borderRadius: '4px', backgroundColor: '#F3F4F6', cursor: 'pointer', fontSize: '12px' }}
+                                                                                    style={{ padding: '1px 6px', border: '1px solid #ECECEC', borderRadius: '4px', backgroundColor: '#F3F4F6', cursor: 'pointer', fontSize: '12px' }}
                                                                                 >+</button>
                                                                             </div>
                                                                         ) : (
@@ -418,27 +418,27 @@ export default function HistorialVentas() {
                                         </div>
 
                                         {venta.totalDevuelto > 0 && (
-                                            <div style={{ marginTop: '16px', padding: '12px', backgroundColor: '#FEF2F2', borderRadius: '8px', border: '1px solid #FECACA', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <span style={{ color: '#991B1B', fontWeight: 600, fontSize: '14px' }}>Dinero total reembolsado previamente:</span>
+                                            <div style={{ marginTop: '16px', padding: '12px', backgroundColor: '#FDECEC', borderRadius: '8px', border: '1px solid rgba(220,38,38,0.35)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <span style={{ color: '#DC2626', fontWeight: 600, fontSize: '14px' }}>Dinero total reembolsado previamente:</span>
                                                 <span style={{ color: '#DC2626', fontWeight: 700, fontSize: '16px' }}>{formatPesos(venta.totalDevuelto)}</span>
                                             </div>
                                         )}
 
                                         {/* Inline Return Controls */}
                                         {(calculateReturnTotals(venta).total > 0 || Object.values(returnItems).some(qty => qty > 0)) && (
-                                            <div className="historial-devolucion-controles" style={{ marginTop: '12px', padding: '12px 16px', backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '6px', display: 'flex', gap: '20px' }}>
+                                            <div className="historial-devolucion-controles" style={{ marginTop: '12px', padding: '12px 16px', backgroundColor: '#FFFFFF', border: '1px solid #ECECEC', borderRadius: '6px', display: 'flex', gap: '20px' }}>
 
                                                 {/* Left: Settings */}
                                                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                                     <div>
-                                                        <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, marginBottom: '4px', color: '#1A1A2E' }}>Destino del Reembolso</label>
+                                                        <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, marginBottom: '4px', color: '#111827' }}>Destino del Reembolso</label>
                                                         <select
                                                             value={refundMethod[venta.id] || 'efectivo'}
                                                             onChange={(e) => {
                                                                 setRefundMethod(prev => ({ ...prev, [venta.id]: e.target.value }));
                                                                 setSelectedAccountId(prev => ({ ...prev, [venta.id]: '' }));
                                                             }}
-                                                            style={{ width: '100%', padding: '6px 10px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '12px' }}
+                                                            style={{ width: '100%', padding: '6px 10px', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '12px' }}
                                                         >
                                                             <option value="efectivo">Regresar en Efectivo</option>
                                                             <option value="banco">Transferencia Bancaria</option>
@@ -450,11 +450,11 @@ export default function HistorialVentas() {
 
                                                     {refundMethod[venta.id] !== 'credito' && (
                                                         <div>
-                                                            <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, marginBottom: '4px', color: '#4B5563' }}>Cuenta de Pago (Salida)</label>
+                                                            <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, marginBottom: '4px', color: '#6B7280' }}>Cuenta de Pago (Salida)</label>
                                                             <select
                                                                 value={selectedAccountId[venta.id] || ''}
                                                                 onChange={(e) => setSelectedAccountId(prev => ({ ...prev, [venta.id]: e.target.value }))}
-                                                                style={{ width: '100%', padding: '6px 10px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '12px' }}
+                                                                style={{ width: '100%', padding: '6px 10px', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '12px' }}
                                                             >
                                                                 <option value="">Seleccione cuenta financiera...</option>
                                                                 {cuentas.filter(c => c.tipo === (refundMethod[venta.id] === 'efectivo' ? 'caja' : 'banco')).map(c => (
@@ -465,22 +465,22 @@ export default function HistorialVentas() {
                                                     )}
 
                                                     <div>
-                                                        <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, marginBottom: '4px', color: '#1A1A2E' }}>Motivo (Opcional)</label>
+                                                        <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, marginBottom: '4px', color: '#111827' }}>Motivo (Opcional)</label>
                                                         <input
                                                             type="text"
                                                             value={returnReason}
                                                             onChange={(e) => setReturnReason(e.target.value)}
                                                             placeholder="Ej: Producto dañado..."
-                                                            style={{ width: '100%', padding: '6px 10px', border: '1px solid #E5E7EB', borderRadius: '4px', fontSize: '12px' }}
+                                                            style={{ width: '100%', padding: '6px 10px', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '12px' }}
                                                         />
                                                     </div>
                                                 </div>
 
                                                 {/* Right: Totals & Action */}
-                                                <div className="historial-devolucion-totales" style={{ width: '220px', backgroundColor: '#F0FDF4', padding: '12px', borderRadius: '6px', border: '1px solid #BBF7D0', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                                                <div className="historial-devolucion-totales" style={{ width: '220px', backgroundColor: '#EAF7EE', padding: '12px', borderRadius: '6px', border: '1px solid rgba(22,163,74,0.3)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                                                     <div style={{ textAlign: 'center', marginBottom: '10px' }}>
-                                                        <div style={{ fontSize: '10px', color: '#166534', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Monto a Reembolsar</div>
-                                                        <div style={{ fontSize: '20px', fontWeight: 800, color: '#15803D', marginTop: '2px' }}>
+                                                        <div style={{ fontSize: '10px', color: '#16A34A', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Monto a Reembolsar</div>
+                                                        <div style={{ fontSize: '20px', fontWeight: 800, color: '#16A34A', marginTop: '2px' }}>
                                                             {formatPesos(calculateReturnTotals(venta).total)}
                                                         </div>
                                                     </div>

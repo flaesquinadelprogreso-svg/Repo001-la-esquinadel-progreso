@@ -1,28 +1,54 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 @import "./styles/global-mobile.css";
 @source "../src/**/*.{js,jsx,ts,tsx}";
 
+/*
+ * Sistema de diseño — paleta reducida (premium ERP/POS).
+ * --color-navy conserva su nombre histórico (lo referencian clases Tailwind
+ * como text-navy/border-navy) pero ahora vale el amarillo Primario del
+ * sistema; evita renombrar para no romper esas clases.
+ */
 @theme {
-  --color-navy: #F2A900;
-  --color-navy-light: #FFBF00;
-  --color-navy-dark: #D4950A;
-  --color-navy-50: #FFF8E7;
-  --color-navy-100: #FFF0CC;
-  --color-accent: #F2A900;
-  --color-bg: #F0F2F5;
+  /* Marca / Primario */
+  --color-navy: #F5B400;
+  --color-navy-light: #FFC933;
+  --color-navy-dark: #D69A00;
+  --color-navy-50: #FFF9E6;
+  --color-navy-100: #FFF1BF;
+  --color-accent: #F5B400;
+  --color-primary: #F5B400;
+
+  /* Funcionales (únicos colores además del primario y los neutros) */
+  --color-info: #2563EB;
+  --color-info-light: #EFF4FF;
+  --color-success: #16A34A;
+  --color-success-light: #EAF7EE;
+  --color-danger: #DC2626;
+  --color-danger-light: #FDECEC;
+
+  /* Neutros */
+  --color-bg: #F8F9FB;
   --color-card: #FFFFFF;
-  --color-border: #E2E5EA;
-  --color-border-light: #F0F2F5;
-  --color-txt: #1A1A2E;
+  --color-sidebar: #FFFFFF;
+  --color-topbar: #FFFFFF;
+  --color-border: #ECECEC;
+  --color-border-light: #F3F3F3;
+  --color-txt: #111827;
   --color-txt-secondary: #6B7280;
   --color-txt-muted: #9CA3AF;
-  --color-success: #16A34A;
-  --color-success-light: #DCFCE7;
-  --color-danger: #DC2626;
-  --color-danger-light: #FEE2E2;
-  --color-warning: #D97706;
-  --color-warning-light: #FEF3C7;
+
+  /* Radios */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-input: 14px;
+  --radius-pill: 999px;
+
+  /* Sombras suaves (sin sombras pesadas ni degradados) */
+  --shadow-card: 0 1px 2px rgba(17, 24, 39, 0.04), 0 1px 3px rgba(17, 24, 39, 0.06);
+  --shadow-card-hover: 0 4px 10px rgba(17, 24, 39, 0.06), 0 2px 4px rgba(17, 24, 39, 0.04);
+  --shadow-modal: 0 20px 40px rgba(17, 24, 39, 0.14);
 }
 
 /* ============================================ */
@@ -38,12 +64,12 @@ html {
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   color: var(--color-txt);
   background-color: var(--color-bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  line-height: 1.5;
+  line-height: 1.6;
   height: 100%;
   margin: 0;
   overflow: hidden;

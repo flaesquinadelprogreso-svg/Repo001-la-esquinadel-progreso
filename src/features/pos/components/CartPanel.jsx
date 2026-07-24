@@ -9,15 +9,15 @@ const formatQty = (qty) => {
 
 export default function CartPanel({ cart, clearCart, updateQty, setDirectQty, removeFromCart, togglePrecioMayor }) {
     return (
-        <div id="pos-cart" style={{ flex: 4, minWidth: 0, backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div id="pos-cart" style={{ flex: 4, minWidth: 0, backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #ECECEC', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             {/* Cart Header */}
-            <div style={{ padding: '16px', borderBottom: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ padding: '16px', borderBottom: '1px solid #ECECEC', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <ShoppingCart size={20} color="#1A1A2E" />
+                    <ShoppingCart size={20} color="#111827" />
                     <span style={{ fontSize: '16px', fontWeight: 600 }}>Carrito</span>
                 </div>
                 {cart.length > 0 && (
-                    <button onClick={clearCart} style={{ padding: '4px 8px', fontSize: '12px', color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer' }}>
+                    <button onClick={clearCart} style={{ padding: '4px 8px', fontSize: '12px', color: '#DC2626', background: 'none', border: 'none', cursor: 'pointer' }}>
                         Limpiar
                     </button>
                 )}
@@ -40,22 +40,22 @@ export default function CartPanel({ cart, clearCart, updateQty, setDirectQty, re
                                     alignItems: 'center',
                                     gap: '10px',
                                     padding: '8px 12px',
-                                    backgroundColor: item.isService ? '#FFFBEB' : '#F9FAFB',
+                                    backgroundColor: item.isService ? '#FFF9E6' : '#F9FAFB',
                                     borderRadius: '10px',
                                     border: '1px solid',
-                                    borderColor: item.isService ? '#FEF3C7' : '#F3F4F6'
+                                    borderColor: item.isService ? '#FFF1BF' : '#F3F4F6'
                                 }}>
                                     <div style={{
                                         width: '32px',
                                         height: '32px',
-                                        backgroundColor: item.isService ? '#FEF3C7' : '#EEF2FF',
+                                        backgroundColor: item.isService ? '#FFF1BF' : '#EFF4FF',
                                         borderRadius: '8px',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         flexShrink: 0
                                     }}>
-                                        {item.isService ? <Hammer size={16} color="#D97706" /> : <Package size={16} color="#4F46E5" />}
+                                        {item.isService ? <Hammer size={16} color="#D69A00" /> : <Package size={16} color="#2563EB" />}
                                     </div>
 
                                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -77,9 +77,9 @@ export default function CartPanel({ cart, clearCart, updateQty, setDirectQty, re
                                                     style={{
                                                         padding: '1px 4px',
                                                         borderRadius: '4px',
-                                                        border: `1.5px solid ${item.isPrecioMayor ? '#4F46E5' : '#D1D5DB'}`,
-                                                        backgroundColor: item.isPrecioMayor ? '#EEF2FF' : '#fff',
-                                                        color: item.isPrecioMayor ? '#4F46E5' : '#9CA3AF',
+                                                        border: `1.5px solid ${item.isPrecioMayor ? '#2563EB' : '#ECECEC'}`,
+                                                        backgroundColor: item.isPrecioMayor ? '#EFF4FF' : '#fff',
+                                                        color: item.isPrecioMayor ? '#2563EB' : '#9CA3AF',
                                                         fontSize: '9px',
                                                         fontWeight: 800,
                                                         cursor: 'pointer',
@@ -92,7 +92,7 @@ export default function CartPanel({ cart, clearCart, updateQty, setDirectQty, re
                                         </div>
                                     </div>
 
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#fff', padding: '2px', borderRadius: '6px', border: '1px solid #E5E7EB' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#fff', padding: '2px', borderRadius: '6px', border: '1px solid #ECECEC' }}>
                                         <button
                                             onClick={() => updateQty(item.id, item.isService, -1)}
                                             style={{ width: '22px', height: '22px', borderRadius: '4px', border: 'none', background: '#F9FAFB', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -132,7 +132,7 @@ export default function CartPanel({ cart, clearCart, updateQty, setDirectQty, re
 
                                     <button
                                         onClick={() => removeFromCart(item.id, item.isService)}
-                                        style={{ padding: '4px', background: 'none', border: 'none', cursor: 'pointer', color: '#EF4444', opacity: 0.6 }}
+                                        style={{ padding: '4px', background: 'none', border: 'none', cursor: 'pointer', color: '#DC2626', opacity: 0.6 }}
                                         onMouseEnter={e => e.currentTarget.style.opacity = 1}
                                         onMouseLeave={e => e.currentTarget.style.opacity = 0.6}
                                     >

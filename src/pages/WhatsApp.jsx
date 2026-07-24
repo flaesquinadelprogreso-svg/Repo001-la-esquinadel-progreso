@@ -132,14 +132,14 @@ export default function WhatsApp() {
     const isSessionExpired = status.status === 'DISCONNECTED' && status.hasSavedSession;
 
     const statusConfig = isConnected
-        ? { bg: '#DCFCE7', text: '#16A34A', border: 'rgba(22,163,74,0.3)', label: 'Conectado', sub: 'Sesion activa - listo para enviar' }
+        ? { bg: '#EAF7EE', text: '#16A34A', border: 'rgba(22,163,74,0.3)', label: 'Conectado', sub: 'Sesion activa - listo para enviar' }
         : isQR
-            ? { bg: '#FEF3C7', text: '#D97706', border: 'rgba(217,119,6,0.3)', label: 'Esperando Escaneo', sub: 'Escanea el QR con tu WhatsApp' }
+            ? { bg: '#FFF9E6', text: '#D69A00', border: 'rgba(217,119,6,0.3)', label: 'Esperando Escaneo', sub: 'Escanea el QR con tu WhatsApp' }
             : isConnecting
-                ? { bg: '#DBEAFE', text: '#2563EB', border: 'rgba(37,99,235,0.3)', label: 'Conectando...', sub: 'Reconectando sesion guardada...' }
+                ? { bg: '#EFF4FF', text: '#2563EB', border: 'rgba(37,99,235,0.3)', label: 'Conectando...', sub: 'Reconectando sesion guardada...' }
                 : isSessionExpired
-                    ? { bg: '#FEF3C7', text: '#D97706', border: 'rgba(217,119,6,0.3)', label: 'Sesion expirada', sub: 'La sesion anterior ya no es valida. Limpie y vuelva a vincular.' }
-                    : { bg: '#FEE2E2', text: '#DC2626', border: 'rgba(220,38,38,0.3)', label: 'Desconectado', sub: 'Vincule su dispositivo para enviar alertas' };
+                    ? { bg: '#FFF9E6', text: '#D69A00', border: 'rgba(217,119,6,0.3)', label: 'Sesion expirada', sub: 'La sesion anterior ya no es valida. Limpie y vuelva a vincular.' }
+                    : { bg: '#FDECEC', text: '#DC2626', border: 'rgba(220,38,38,0.3)', label: 'Desconectado', sub: 'Vincule su dispositivo para enviar alertas' };
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '600px' }}>
@@ -177,10 +177,10 @@ export default function WhatsApp() {
             {isQR && status.qr && (
                 <div style={{
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px',
-                    padding: '32px', backgroundColor: '#fff', border: '1px solid #E2E5EA', borderRadius: '12px'
+                    padding: '32px', backgroundColor: '#fff', border: '1px solid #ECECEC', borderRadius: '12px'
                 }}>
-                    <p style={{ fontSize: '14px', fontWeight: 600, color: '#1A1A2E' }}>Escanea este codigo con WhatsApp:</p>
-                    <div style={{ padding: '16px', backgroundColor: '#fff', borderRadius: '8px', border: '2px solid #E5E7EB' }}>
+                    <p style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>Escanea este codigo con WhatsApp:</p>
+                    <div style={{ padding: '16px', backgroundColor: '#fff', borderRadius: '8px', border: '2px solid #ECECEC' }}>
                         <QRCodeSVG value={status.qr} size={250} />
                     </div>
                     <p style={{ fontSize: '12px', color: '#6B7280', textAlign: 'center', lineHeight: '1.5' }}>
@@ -191,9 +191,9 @@ export default function WhatsApp() {
 
             {/* Numero Destino */}
             <div style={{
-                padding: '24px', backgroundColor: '#fff', border: '1px solid #E2E5EA', borderRadius: '12px'
+                padding: '24px', backgroundColor: '#fff', border: '1px solid #ECECEC', borderRadius: '12px'
             }}>
-                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#1A1A2E', marginBottom: '4px' }}>Numero Destino de Alertas</h3>
+                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#111827', marginBottom: '4px' }}>Numero Destino de Alertas</h3>
                 <p style={{ fontSize: '12px', color: '#6B7280', marginBottom: '16px' }}>
                     Las alertas de cuentas por cobrar se enviaran a este numero. Use codigo de pais (ej: 573001234567)
                 </p>
@@ -225,9 +225,9 @@ export default function WhatsApp() {
 
             {/* Enviar Resumen */}
             <div style={{
-                padding: '24px', backgroundColor: '#fff', border: '1px solid #E2E5EA', borderRadius: '12px'
+                padding: '24px', backgroundColor: '#fff', border: '1px solid #ECECEC', borderRadius: '12px'
             }}>
-                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#1A1A2E', marginBottom: '4px' }}>Enviar Resumen de Cobranza</h3>
+                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#111827', marginBottom: '4px' }}>Enviar Resumen de Cobranza</h3>
                 <p style={{ fontSize: '12px', color: '#6B7280', marginBottom: '16px' }}>
                     Envia un resumen de todas las cuentas por cobrar (vencidas y pendientes) al numero configurado.
                 </p>
@@ -260,7 +260,7 @@ export default function WhatsApp() {
                 {resultado && (
                     <div style={{
                         marginTop: '12px', padding: '12px 16px', borderRadius: '8px',
-                        backgroundColor: resultado.type === 'success' ? '#DCFCE7' : '#FEE2E2',
+                        backgroundColor: resultado.type === 'success' ? '#EAF7EE' : '#FDECEC',
                         color: resultado.type === 'success' ? '#16A34A' : '#DC2626',
                         fontSize: '13px', fontWeight: 500,
                         display: 'flex', alignItems: 'center', gap: '8px'

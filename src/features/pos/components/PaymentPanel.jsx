@@ -104,7 +104,7 @@ export default function PaymentPanel({
     );
 
     return (
-        <div id="pos-payments" style={{ flex: 1, minHeight: 0, backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
+        <div id="pos-payments" style={{ flex: 1, minHeight: 0, backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #ECECEC', display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
             <div style={{ padding: '12px', minWidth: 0, width: '100%', boxSizing: 'border-box', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '8px' }}>
                 {/* Totals and tax selector */}
                 <div>
@@ -157,8 +157,8 @@ export default function PaymentPanel({
                             style={{
                                 padding: '6px 4px',
                                 borderRadius: '6px',
-                                border: paymentMethod === method.id ? '2px solid #F2A900' : '1px solid #E5E7EB',
-                                backgroundColor: paymentMethod === method.id ? '#F0F7FF' : '#fff',
+                                border: paymentMethod === method.id ? '2px solid #F5B400' : '1px solid #ECECEC',
+                                backgroundColor: paymentMethod === method.id ? '#FFF9E6' : '#fff',
                                 cursor: 'pointer',
                                 display: 'flex',
                                 flexDirection: 'column',
@@ -169,8 +169,8 @@ export default function PaymentPanel({
                                 justifyContent: 'center'
                             }}
                         >
-                            <method.icon size={14} color={paymentMethod === method.id ? '#F2A900' : '#9CA3AF'} />
-                            <span style={{ fontSize: '10px', fontWeight: 600, color: paymentMethod === method.id ? '#F2A900' : '#6B7280' }}>
+                            <method.icon size={14} color={paymentMethod === method.id ? '#D69A00' : '#9CA3AF'} />
+                            <span style={{ fontSize: '10px', fontWeight: 600, color: paymentMethod === method.id ? '#D69A00' : '#6B7280' }}>
                                 {method.label}
                             </span>
                         </button>
@@ -184,7 +184,7 @@ export default function PaymentPanel({
                         <select
                             value={selectedAccountId}
                             onChange={(e) => setSelectedAccountId(e.target.value)}
-                            style={{ width: '100%', padding: '10px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                            style={{ width: '100%', padding: '10px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }}
                         >
                             <option value="">Seleccione cuenta...</option>
                             {cuentas.filter(c => c.tipo === 'banco').map(c => (
@@ -201,7 +201,7 @@ export default function PaymentPanel({
                         <select
                             value={selectedAccountId}
                             onChange={(e) => setSelectedAccountId(e.target.value)}
-                            style={{ width: '100%', padding: '10px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px', marginBottom: '8px' }}
+                            style={{ width: '100%', padding: '10px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px', marginBottom: '8px' }}
                         >
                             {cuentas.filter(c => c.tipo === 'caja').map(c => (
                                 <option key={c.id} value={c.id}>{c.nombre}</option>
@@ -216,11 +216,11 @@ export default function PaymentPanel({
                                 const raw = e.target.value.replace(/[^\d]/g, '');
                                 setCashGiven(raw);
                             }}
-                            style={{ width: '100%', padding: '10px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                            style={{ width: '100%', padding: '10px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }}
                             placeholder="$0"
                         />
                         {parseCurrency(cashGiven) >= total && parseCurrency(cashGiven) > 0 && (
-                            <div style={{ marginTop: '8px', padding: '10px', backgroundColor: '#DCFCE7', borderRadius: '8px', fontSize: '14px', fontWeight: 700, color: '#16A34A', textAlign: 'center' }}>
+                            <div style={{ marginTop: '8px', padding: '10px', backgroundColor: '#EAF7EE', borderRadius: '8px', fontSize: '14px', fontWeight: 700, color: '#16A34A', textAlign: 'center' }}>
                                 CAMBIO: {formatPesos(parseCurrency(cashGiven) - total)}
                             </div>
                         )}
@@ -229,7 +229,7 @@ export default function PaymentPanel({
 
                 {/* Credit Fields */}
                 {(paymentMethod === 'credito' || (paymentMethod === 'multiple' && multiplePayments.some(p => p.metodo === 'credito'))) && (
-                    <div style={{ marginBottom: '12px', padding: '12px', backgroundColor: '#F9FAFB', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+                    <div style={{ marginBottom: '12px', padding: '12px', backgroundColor: '#F9FAFB', borderRadius: '8px', border: '1px solid #ECECEC' }}>
                         <div style={{ marginBottom: '8px' }}>
                             <label style={{ display: 'block', fontSize: '13px', marginBottom: '4px', fontWeight: 600 }}>Cliente para crédito</label>
                             <div style={{ position: 'relative' }}>
@@ -241,10 +241,10 @@ export default function PaymentPanel({
                                         setClientSearch(e.target.value);
                                         setShowClientDropdown(e.target.value.length >= 3);
                                     }}
-                                    style={{ width: '100%', padding: '10px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                                    style={{ width: '100%', padding: '10px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }}
                                 />
                                 {showClientDropdown && clientSearch.length >= 3 && filteredClients.length > 0 && (
-                                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #E5E7EB', borderRadius: '6px', maxHeight: '200px', overflow: 'auto', zIndex: 10, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+                                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #ECECEC', borderRadius: '6px', maxHeight: '200px', overflow: 'auto', zIndex: 10, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
                                         {filteredClients.map(client => (
                                             <div
                                                 key={client.id}
@@ -272,7 +272,7 @@ export default function PaymentPanel({
                                     type="date"
                                     value={creditDueDate}
                                     onChange={(e) => setCreditDueDate(e.target.value)}
-                                    style={{ width: '100%', padding: '10px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                                    style={{ width: '100%', padding: '10px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }}
                                 />
                                 <div style={{ display: 'flex', gap: '6px' }}>
                                     {[30, 60, 90].map(days => (
@@ -288,8 +288,8 @@ export default function PaymentPanel({
                                                 padding: '6px',
                                                 fontSize: '11px',
                                                 backgroundColor: '#F3F4F6',
-                                                color: '#374151',
-                                                border: '1px solid #E5E7EB',
+                                                color: '#6B7280',
+                                                border: '1px solid #ECECEC',
                                                 borderRadius: '4px',
                                                 cursor: 'pointer',
                                                 fontWeight: 600
@@ -318,10 +318,10 @@ export default function PaymentPanel({
                                         setAnticipoSearch(e.target.value);
                                         setShowAnticipoDropdown(e.target.value.length >= 2);
                                     }}
-                                    style={{ width: '100%', padding: '10px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                                    style={{ width: '100%', padding: '10px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }}
                                 />
                                 {showAnticipoDropdown && anticipoSearch.length >= 2 && filteredAnticipoClients.length > 0 && (
-                                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #E5E7EB', borderRadius: '6px', maxHeight: '200px', overflow: 'auto', zIndex: 10, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+                                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #ECECEC', borderRadius: '6px', maxHeight: '200px', overflow: 'auto', zIndex: 10, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
                                         {filteredAnticipoClients.map(client => (
                                             <div
                                                 key={client.clienteId}
@@ -333,11 +333,11 @@ export default function PaymentPanel({
                                                     setClientSearch(client.clienteNombre);
                                                 }}
                                                 style={{ padding: '8px 12px', cursor: 'pointer', borderBottom: '1px solid #F3F4F6' }}
-                                                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#F5F3FF'}
+                                                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#EFF4FF'}
                                                 onMouseLeave={e => e.currentTarget.style.backgroundColor = '#fff'}
                                             >
                                                 <div style={{ fontSize: '13px', fontWeight: 500 }}>{client.clienteNombre}</div>
-                                                <div style={{ fontSize: '12px', color: '#7C3AED', fontWeight: 600 }}>
+                                                <div style={{ fontSize: '12px', color: '#2563EB', fontWeight: 600 }}>
                                                     Saldo: {formatPesos(client.saldo)}
                                                 </div>
                                             </div>
@@ -351,14 +351,14 @@ export default function PaymentPanel({
                             if (!selected) return null;
                             return (
                                 <div style={{
-                                    padding: '10px', backgroundColor: '#F5F3FF', borderRadius: '6px',
-                                    border: '1px solid #C4B5FD', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                                    padding: '10px', backgroundColor: '#EFF4FF', borderRadius: '6px',
+                                    border: '1px solid rgba(37,99,235,0.25)', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                                 }}>
                                     <div>
-                                        <div style={{ fontSize: '13px', fontWeight: 600, color: '#7C3AED' }}>{selected.clienteNombre}</div>
+                                        <div style={{ fontSize: '13px', fontWeight: 600, color: '#2563EB' }}>{selected.clienteNombre}</div>
                                         <div style={{ fontSize: '11px', color: '#6B7280' }}>Saldo disponible</div>
                                     </div>
-                                    <div style={{ fontSize: '18px', fontWeight: 700, color: '#7C3AED' }}>
+                                    <div style={{ fontSize: '18px', fontWeight: 700, color: '#2563EB' }}>
                                         {formatPesos(selected.saldo)}
                                     </div>
                                 </div>
@@ -368,7 +368,7 @@ export default function PaymentPanel({
                             const selected = (anticipoClients || []).find(c => c.clienteId === anticipoClientId);
                             if (!selected || total > selected.saldo) {
                                 return (
-                                    <div style={{ marginTop: '8px', padding: '8px', backgroundColor: '#FEF2F2', borderRadius: '6px', fontSize: '12px', color: '#DC2626', fontWeight: 600, textAlign: 'center' }}>
+                                    <div style={{ marginTop: '8px', padding: '8px', backgroundColor: '#FDECEC', borderRadius: '6px', fontSize: '12px', color: '#DC2626', fontWeight: 600, textAlign: 'center' }}>
                                         {!selected ? 'Seleccione un cliente' : `Saldo insuficiente. Necesita ${formatPesos(total)} pero tiene ${formatPesos(selected.saldo)}`}
                                     </div>
                                 );
@@ -388,7 +388,7 @@ export default function PaymentPanel({
                         padding: '16px',
                         backgroundColor: '#F9FAFB',
                         borderRadius: '8px',
-                        border: '1px solid #E5E7EB',
+                        border: '1px solid #ECECEC',
                         boxSizing: 'border-box'
                     }}>
                         <div style={{
@@ -404,7 +404,7 @@ export default function PaymentPanel({
                             <div style={{
                                 fontSize: '13px',
                                 fontWeight: 600,
-                                color: calculatePaymentsTotal(multiplePayments) >= total ? '#10B981' : '#EF4444',
+                                color: calculatePaymentsTotal(multiplePayments) >= total ? '#16A34A' : '#DC2626',
                                 whiteSpace: 'nowrap',
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
@@ -445,7 +445,7 @@ export default function PaymentPanel({
                                                     minWidth: 0,
                                                     maxWidth: '120px',
                                                     padding: '8px',
-                                                    border: '1px solid #E5E7EB',
+                                                    border: '1px solid #ECECEC',
                                                     borderRadius: '6px',
                                                     fontSize: '13px',
                                                     boxSizing: 'border-box'
@@ -465,7 +465,7 @@ export default function PaymentPanel({
                                                         minWidth: 0,
                                                         maxWidth: '160px',
                                                         padding: '8px',
-                                                        border: '1px solid #E5E7EB',
+                                                        border: '1px solid #ECECEC',
                                                         borderRadius: '6px',
                                                         fontSize: '13px',
                                                         boxSizing: 'border-box',
@@ -555,10 +555,10 @@ export default function PaymentPanel({
                                                     minWidth: 0,
                                                     maxWidth: '120px',
                                                     padding: '8px',
-                                                    border: hasError ? '2px solid #EF4444' : '1px solid #E5E7EB',
+                                                    border: hasError ? '2px solid #DC2626' : '1px solid #ECECEC',
                                                     borderRadius: '6px',
                                                     fontSize: '13px',
-                                                    backgroundColor: hasError ? '#FEF2F2' : '#fff',
+                                                    backgroundColor: hasError ? '#FDECEC' : '#fff',
                                                     boxSizing: 'border-box'
                                                 }}
                                             />
@@ -575,7 +575,7 @@ export default function PaymentPanel({
                                                 style={{
                                                     flex: '0 0 auto',
                                                     padding: '8px',
-                                                    color: '#EF4444',
+                                                    color: '#DC2626',
                                                     background: 'none',
                                                     border: 'none',
                                                     cursor: 'pointer',
@@ -587,7 +587,7 @@ export default function PaymentPanel({
                                             </button>
                                         </div>
                                         {hasError && (
-                                            <div style={{ color: '#EF4444', fontSize: '11px', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                            <div style={{ color: '#DC2626', fontSize: '11px', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                 <AlertCircle size={12} />
                                                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hasError}</span>
                                             </div>
@@ -630,8 +630,8 @@ export default function PaymentPanel({
                                 padding: '8px 12px',
                                 fontSize: '12px',
                                 fontWeight: 600,
-                                color: canAddMorePayments(total, multiplePayments) ? '#4F46E5' : '#9CA3AF',
-                                backgroundColor: canAddMorePayments(total, multiplePayments) ? '#EEF2FF' : '#F3F4F6',
+                                color: canAddMorePayments(total, multiplePayments) ? '#2563EB' : '#9CA3AF',
+                                backgroundColor: canAddMorePayments(total, multiplePayments) ? '#EFF4FF' : '#F3F4F6',
                                 border: 'none',
                                 borderRadius: '6px',
                                 cursor: canAddMorePayments(total, multiplePayments) ? 'pointer' : 'not-allowed',
@@ -659,10 +659,10 @@ export default function PaymentPanel({
                                     setClientSearch(e.target.value);
                                     setShowClientDropdown(e.target.value.length >= 2);
                                 }}
-                                style={{ width: '100%', padding: '10px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                                style={{ width: '100%', padding: '10px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }}
                             />
                             {showClientDropdown && clientSearch.length >= 2 && filteredClients.length > 0 && (
-                                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #E5E7EB', borderRadius: '6px', maxHeight: '200px', overflow: 'auto', zIndex: 10, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+                                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #ECECEC', borderRadius: '6px', maxHeight: '200px', overflow: 'auto', zIndex: 10, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
                                     {filteredClients.map(client => (
                                         <div
                                             key={client.id}
@@ -689,18 +689,18 @@ export default function PaymentPanel({
                                 width: '38px',
                                 height: '38px',
                                 borderRadius: '6px',
-                                border: '1px solid #D1D5DB',
+                                border: '1px solid #ECECEC',
                                 backgroundColor: '#fff',
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                color: '#4F46E5',
+                                color: '#2563EB',
                                 flexShrink: 0,
                                 transition: 'all 0.2s'
                             }}
-                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#EEF2FF'; e.currentTarget.style.borderColor = '#4F46E5'; }}
-                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.borderColor = '#D1D5DB'; }}
+                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#EFF4FF'; e.currentTarget.style.borderColor = '#2563EB'; }}
+                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.borderColor = '#ECECEC'; }}
                         >
                             <Plus size={16} />
                         </button>
@@ -714,9 +714,9 @@ export default function PaymentPanel({
                                     marginTop: '8px',
                                     width: '100%',
                                     padding: '10px',
-                                    backgroundColor: '#EEF2FF',
-                                    color: '#4F46E5',
-                                    border: '1px solid #C7D2FE',
+                                    backgroundColor: '#EFF4FF',
+                                    color: '#2563EB',
+                                    border: '1px solid rgba(37,99,235,0.25)',
                                     borderRadius: '6px',
                                     fontSize: '13px',
                                     fontWeight: 600,
@@ -757,7 +757,7 @@ export default function PaymentPanel({
                                 <span>IVA (19%):</span>
                                 <span>{formatPesos(iva)}</span>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '18px', fontWeight: 700, borderTop: '1px solid #E5E7EB', paddingTop: '8px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '18px', fontWeight: 700, borderTop: '1px solid #ECECEC', paddingTop: '8px' }}>
                                 <span>Total:</span>
                                 <span>{formatPesos(total)}</span>
                             </div>
@@ -776,23 +776,23 @@ export default function PaymentPanel({
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minWidth: '400px' }}>
                         <div>
                             <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Nombre *</label>
-                            <input type="text" value={newClient.nombre} onChange={e => setNewClient(prev => ({ ...prev, nombre: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="Nombre completo" />
+                            <input type="text" value={newClient.nombre} onChange={e => setNewClient(prev => ({ ...prev, nombre: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }} placeholder="Nombre completo" />
                         </div>
                         <div>
                             <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Documento *</label>
-                            <input type="text" value={newClient.documento} onChange={e => setNewClient(prev => ({ ...prev, documento: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="Número de documento" />
+                            <input type="text" value={newClient.documento} onChange={e => setNewClient(prev => ({ ...prev, documento: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }} placeholder="Número de documento" />
                         </div>
                         <div>
                             <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Teléfono</label>
-                            <input type="text" value={newClient.telefono} onChange={e => setNewClient(prev => ({ ...prev, telefono: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="Número de teléfono" />
+                            <input type="text" value={newClient.telefono} onChange={e => setNewClient(prev => ({ ...prev, telefono: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }} placeholder="Número de teléfono" />
                         </div>
                         <div>
                             <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Email</label>
-                            <input type="email" value={newClient.email} onChange={e => setNewClient(prev => ({ ...prev, email: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="correo@ejemplo.com" />
+                            <input type="email" value={newClient.email} onChange={e => setNewClient(prev => ({ ...prev, email: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }} placeholder="correo@ejemplo.com" />
                         </div>
                         <div>
                             <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Dirección</label>
-                            <input type="text" value={newClient.direccion} onChange={e => setNewClient(prev => ({ ...prev, direccion: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }} placeholder="Dirección" />
+                            <input type="text" value={newClient.direccion} onChange={e => setNewClient(prev => ({ ...prev, direccion: e.target.value }))} style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }} placeholder="Dirección" />
                         </div>
                         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
                             <Button variant="secondary" onClick={() => setShowNewClient(false)}>Cancelar</Button>

@@ -315,7 +315,7 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
                         <ArrowLeft size={20} color="#6B7280" />
                     </button>
                     <div>
-                        <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#1A1A2E' }}>
+                        <h1 style={{ fontSize: '20px', fontWeight: 600, color: '#111827' }}>
                             {isEditing ? 'Editar Cotización' : 'Nueva Cotización'}
                         </h1>
                         <p style={{ fontSize: '13px', color: '#6B7280', marginTop: '2px' }}>
@@ -337,11 +337,11 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
             </div>
 
             {/* Form Header */}
-            <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #E5E7EB' }}>
+            <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #ECECEC' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     {/* Cliente */}
                     <div>
-                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>Cliente <span style={{ color: '#EF4444' }}>*</span></label>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>Cliente <span style={{ color: '#DC2626' }}>*</span></label>
                         <div style={{ display: 'flex', gap: '8px' }}>
                             <div style={{ position: 'relative', flex: 1 }}>
                                 <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }} />
@@ -352,7 +352,7 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
                                     onChange={e => { setClienteSearch(e.target.value); setClienteId(''); setShowClienteDropdown(e.target.value.length >= 2); }}
                                     onFocus={() => { if (clienteSearch.length >= 2) setShowClienteDropdown(true); }}
                                     onBlur={() => setTimeout(() => setShowClienteDropdown(false), 200)}
-                                    style={{ width: '100%', padding: '10px 30px 10px 32px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
+                                    style={{ width: '100%', padding: '10px 30px 10px 32px', border: '1px solid #ECECEC', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
                                 />
                             {clienteId && (
                                 <button onClick={() => { setClienteId(''); setClienteSearch(''); }} style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF' }}>
@@ -360,7 +360,7 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
                                 </button>
                             )}
                             {showClienteDropdown && !clienteId && (
-                                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #E5E7EB', borderRadius: '8px', marginTop: '2px', maxHeight: '200px', overflowY: 'auto', zIndex: 20, boxShadow: '0 4px 10px rgba(0,0,0,0.15)' }}>
+                                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #ECECEC', borderRadius: '8px', marginTop: '2px', maxHeight: '200px', overflowY: 'auto', zIndex: 20, boxShadow: '0 4px 10px rgba(0,0,0,0.15)' }}>
                                     {clientes.filter(c => c.nombre.toLowerCase().includes(clienteSearch.toLowerCase()) || (c.documento || '').includes(clienteSearch)).map(c => (
                                         <div key={c.id} onMouseDown={e => { e.preventDefault(); setClienteId(c.id); setClienteSearch(c.nombre); setShowClienteDropdown(false); if (c.telefono) { const t = c.telefono.replace(/\D/g, ''); setWaPhone(t.startsWith('57') ? t : '57' + t); } }}
                                             style={{ padding: '10px 12px', cursor: 'pointer', fontSize: '13px', borderBottom: '1px solid #F3F4F6' }}
@@ -383,35 +383,35 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
                     </div>
                     {/* Válida hasta */}
                     <div>
-                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>Válida hasta <span style={{ color: '#EF4444' }}>*</span></label>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>Válida hasta <span style={{ color: '#DC2626' }}>*</span></label>
                         <input
                             type="date"
                             value={validaHasta}
                             min={new Date().toISOString().split('T')[0]}
                             onChange={e => setValidaHasta(e.target.value)}
-                            style={{ width: '100%', padding: '10px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
+                            style={{ width: '100%', padding: '10px', border: '1px solid #ECECEC', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
                         />
                     </div>
                 </div>
             </div>
 
             {/* Encabezado */}
-            <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #E5E7EB' }}>
+            <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #ECECEC' }}>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>Encabezado</label>
                 <textarea
                     value={encabezado}
                     onChange={e => setEncabezado(e.target.value)}
                     placeholder="Texto de presentación para la cotización..."
                     rows={4}
-                    style={{ width: '100%', padding: '10px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '14px', resize: 'vertical', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
+                    style={{ width: '100%', padding: '10px', border: '1px solid #ECECEC', borderRadius: '8px', fontSize: '14px', resize: 'vertical', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
                 />
             </div>
 
             {/* Items Table */}
-            <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #E5E7EB', overflowX: 'auto' }}>
+            <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #ECECEC', overflowX: 'auto' }}>
                 <table style={{ width: '100%', minWidth: '800px', borderCollapse: 'collapse', fontSize: '12px' }}>
                     <thead>
-                        <tr style={{ borderBottom: '2px solid #E5E7EB', color: '#1F2937', fontWeight: 600 }}>
+                        <tr style={{ borderBottom: '2px solid #ECECEC', color: '#111827', fontWeight: 600 }}>
                             <th style={{ padding: '8px', textAlign: 'left', width: '40px' }}>#</th>
                             <th style={{ padding: '8px', textAlign: 'left', minWidth: '220px' }}>Ítem</th>
                             <th style={{ padding: '8px', textAlign: 'left', minWidth: '150px' }}>Descripción</th>
@@ -435,7 +435,7 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
                                             onChange={e => handleItemChange(item.id, 'productoSearch', e.target.value)}
                                             onClick={() => handleItemChange(item.id, 'showProductoDropdown', true)}
                                             onBlur={() => setTimeout(() => handleItemChange(item.id, 'showProductoDropdown', false), 200)}
-                                            style={{ width: '100%', padding: '6px 24px 6px 8px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
+                                            style={{ width: '100%', padding: '6px 24px 6px 8px', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }}
                                         />
                                         {(item.productoId || item.servicioId) && (
                                             <button onClick={() => { handleItemChange(item.id, 'productoSearch', ''); }}
@@ -444,14 +444,14 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
                                             </button>
                                         )}
                                         {item.showProductoDropdown && !item.productoId && !item.servicioId && (
-                                            <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #D1D5DB', borderRadius: '4px', marginTop: '2px', maxHeight: '200px', overflowY: 'auto', zIndex: 30, boxShadow: '0 4px 10px rgba(0,0,0,0.15)' }}>
+                                            <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #ECECEC', borderRadius: '4px', marginTop: '2px', maxHeight: '200px', overflowY: 'auto', zIndex: 30, boxShadow: '0 4px 10px rgba(0,0,0,0.15)' }}>
                                                 {catalogoItems.filter(c => !item.productoSearch || c.nombre.toLowerCase().includes((item.productoSearch || '').toLowerCase()) || (c.codigo || '').toLowerCase().includes((item.productoSearch || '').toLowerCase())).map(c => (
                                                     <div key={`${c.tipo}-${c.id}`} onMouseDown={e => { e.preventDefault(); handleItemChange(item.id, 'catalogoSelect', `${c.tipo}-${c.id}`); }}
                                                         style={{ padding: '8px 10px', cursor: 'pointer', fontSize: '12px', borderBottom: '1px solid #F3F4F6' }}
                                                         onMouseOver={e => e.target.style.backgroundColor = '#F3F4F6'} onMouseOut={e => e.target.style.backgroundColor = 'transparent'}>
                                                         <div style={{ fontWeight: 600, color: '#111827', pointerEvents: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                                             {c.nombre}
-                                                            <span style={{ fontSize: '9px', padding: '1px 5px', borderRadius: '3px', fontWeight: 700, backgroundColor: c.tipo === 'servicio' ? '#DBEAFE' : '#F3F4F6', color: c.tipo === 'servicio' ? '#1D4ED8' : '#6B7280' }}>
+                                                            <span style={{ fontSize: '9px', padding: '1px 5px', borderRadius: '3px', fontWeight: 700, backgroundColor: c.tipo === 'servicio' ? '#EFF4FF' : '#F3F4F6', color: c.tipo === 'servicio' ? '#2563EB' : '#6B7280' }}>
                                                                 {c.tipo === 'servicio' ? 'SERVICIO' : 'PRODUCTO'}
                                                             </span>
                                                         </div>
@@ -464,25 +464,25 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
                                 </td>
                                 <td style={{ padding: '4px' }}>
                                     <input type="text" value={item.descripcion} onChange={e => handleItemChange(item.id, 'descripcion', e.target.value)}
-                                        style={{ width: '100%', padding: '6px 8px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }} />
+                                        style={{ width: '100%', padding: '6px 8px', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '12px', outline: 'none', boxSizing: 'border-box' }} />
                                 </td>
                                 <td style={{ padding: '4px' }}>
                                     <input type="text" inputMode="decimal" value={item.cantidad} onChange={e => { let v = e.target.value.replace(',', '.'); if (v === '' || /^\d*\.?\d*$/.test(v)) handleItemChange(item.id, 'cantidad', v); }} onBlur={e => { const val = parseFloat(e.target.value); handleItemChange(item.id, 'cantidad', val > 0 ? String(val) : '1'); }}
-                                        style={{ width: '100%', padding: '6px 8px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '12px', textAlign: 'right', outline: 'none', boxSizing: 'border-box' }} />
+                                        style={{ width: '100%', padding: '6px 8px', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '12px', textAlign: 'right', outline: 'none', boxSizing: 'border-box' }} />
                                 </td>
                                 <td style={{ padding: '4px' }}>
                                     <input type="text" value={item.precioUnit ? formatPesos(item.precioUnit) : ''} onChange={e => { const num = parseCurrency(e.target.value); handleItemChange(item.id, 'precioUnit', num); }}
-                                        style={{ width: '100%', padding: '6px 8px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '12px', textAlign: 'right', outline: 'none', boxSizing: 'border-box' }} />
+                                        style={{ width: '100%', padding: '6px 8px', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '12px', textAlign: 'right', outline: 'none', boxSizing: 'border-box' }} />
                                 </td>
                                 <td style={{ padding: '4px' }}>
                                     <input type="number" min="0" value={item.descuento || ''} onChange={e => handleItemChange(item.id, 'descuento', e.target.value)}
-                                        style={{ width: '100%', padding: '6px 8px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '12px', textAlign: 'right', outline: 'none', boxSizing: 'border-box' }} placeholder="0" />
+                                        style={{ width: '100%', padding: '6px 8px', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '12px', textAlign: 'right', outline: 'none', boxSizing: 'border-box' }} placeholder="0" />
                                 </td>
                                 <td style={{ padding: '8px', textAlign: 'right', fontWeight: 600, color: '#111827' }}>
                                     {formatPesos(item.valor)}
                                 </td>
                                 <td style={{ padding: '4px', textAlign: 'center' }}>
-                                    <button onClick={() => removeRow(item.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#EF4444', padding: '4px' }}>
+                                    <button onClick={() => removeRow(item.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#DC2626', padding: '4px' }}>
                                         <Trash2 size={14} />
                                     </button>
                                 </td>
@@ -538,23 +538,23 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
                             <span style={{ color: '#6B7280' }}>IVA ({ivaTasa}%):</span>
                             <span style={{ fontWeight: 600 }}>{formatPesos(totales.iva)}</span>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '40px', marginTop: '8px', paddingTop: '8px', borderTop: '2px solid #1A1A2E' }}>
-                            <span style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A2E' }}>Total:</span>
-                            <span style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A2E' }}>{formatPesos(totales.neto)}</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '40px', marginTop: '8px', paddingTop: '8px', borderTop: '2px solid #111827' }}>
+                            <span style={{ fontSize: '16px', fontWeight: 700, color: '#111827' }}>Total:</span>
+                            <span style={{ fontSize: '16px', fontWeight: 700, color: '#111827' }}>{formatPesos(totales.neto)}</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Condiciones Comerciales */}
-            <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #E5E7EB' }}>
+            <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #ECECEC' }}>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>Condiciones Comerciales</label>
                 <textarea
                     value={condiciones}
                     onChange={e => setCondiciones(e.target.value)}
                     placeholder="Términos y condiciones de la cotización..."
                     rows={4}
-                    style={{ width: '100%', padding: '10px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '14px', resize: 'vertical', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
+                    style={{ width: '100%', padding: '10px', border: '1px solid #ECECEC', borderRadius: '8px', fontSize: '14px', resize: 'vertical', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
                 />
             </div>
 
@@ -563,7 +563,7 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
                 <div>
                     <div id="cotizacion-pdf-content" style={{ padding: '30px', backgroundColor: '#fff', fontFamily: 'Arial, sans-serif', color: '#000', maxWidth: '700px', margin: '0 auto' }}>
                         {/* Header */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', borderBottom: '2px solid #1A1A2E', paddingBottom: '15px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', borderBottom: '2px solid #111827', paddingBottom: '15px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                 <img src={logoSrc} alt="Logo" style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover' }} />
                                 <div>
@@ -574,7 +574,7 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
                                 </div>
                             </div>
                             <div style={{ textAlign: 'right' }}>
-                                <h3 style={{ fontSize: '18px', fontWeight: 700, margin: 0, color: '#1A1A2E' }}>COTIZACIÓN</h3>
+                                <h3 style={{ fontSize: '18px', fontWeight: 700, margin: 0, color: '#111827' }}>COTIZACIÓN</h3>
                                 {isEditing && <p style={{ fontSize: '12px', margin: '4px 0', color: '#444' }}>No. COT-{editId?.toString().padStart(4, '0')}</p>}
                                 <p style={{ fontSize: '12px', margin: '4px 0', color: '#444' }}>Fecha: {new Date().toLocaleDateString('es-CO')}</p>
                                 {validaHasta && <p style={{ fontSize: '12px', margin: '4px 0', color: '#444' }}>Válida hasta: {new Date(validaHasta + 'T12:00:00').toLocaleDateString('es-CO')}</p>}
@@ -601,7 +601,7 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
                         {/* Items table */}
                         <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '15px', fontSize: '12px' }}>
                             <thead>
-                                <tr style={{ backgroundColor: '#1A1A2E', color: '#fff' }}>
+                                <tr style={{ backgroundColor: '#111827', color: '#fff' }}>
                                     <th style={{ padding: '8px', textAlign: 'left' }}>#</th>
                                     <th style={{ padding: '8px', textAlign: 'left' }}>Descripción</th>
                                     <th style={{ padding: '8px', textAlign: 'right' }}>Cant.</th>
@@ -612,7 +612,7 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
                             </thead>
                             <tbody>
                                 {items.filter(i => i.productoId || i.servicioId).map((item, idx) => (
-                                    <tr key={idx} style={{ borderBottom: '1px solid #E5E7EB' }}>
+                                    <tr key={idx} style={{ borderBottom: '1px solid #ECECEC' }}>
                                         <td style={{ padding: '8px' }}>{idx + 1}</td>
                                         <td style={{ padding: '8px' }}>{item.descripcion || item.productoSearch}</td>
                                         <td style={{ padding: '8px', textAlign: 'right' }}>{item.cantidad}</td>
@@ -645,7 +645,7 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
                                         <span>IVA ({ivaTasa}%):</span><span>{formatPesos(totales.iva)}</span>
                                     </div>
                                 )}
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', fontSize: '16px', fontWeight: 700, borderTop: '2px solid #1A1A2E', marginTop: '4px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', fontSize: '16px', fontWeight: 700, borderTop: '2px solid #111827', marginTop: '4px' }}>
                                     <span>TOTAL:</span><span>{formatPesos(totales.neto)}</span>
                                 </div>
                             </div>
@@ -653,7 +653,7 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
 
                         {/* Condiciones */}
                         {condiciones && (
-                            <div style={{ borderTop: '1px solid #E5E7EB', paddingTop: '12px', fontSize: '12px' }}>
+                            <div style={{ borderTop: '1px solid #ECECEC', paddingTop: '12px', fontSize: '12px' }}>
                                 <div style={{ fontWeight: 700, marginBottom: '6px' }}>Condiciones Comerciales:</div>
                                 {condiciones.split('\n').map((line, i) => (
                                     <div key={i} style={{ lineHeight: '1.6', minHeight: '14px' }}>{line}</div>
@@ -664,7 +664,7 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
 
                     {/* Actions */}
                     <div style={{ padding: '16px 20px', display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
-                        <Button onClick={handleDownloadPDF} style={{ backgroundColor: '#10B981', color: '#fff', borderColor: '#10B981' }}>
+                        <Button onClick={handleDownloadPDF} style={{ backgroundColor: '#16A34A', color: '#fff', borderColor: '#16A34A' }}>
                             <Download size={14} style={{ marginRight: '6px' }} />Descargar PDF
                         </Button>
                         {waConnected && (
@@ -674,7 +674,7 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
                                     value={waPhone}
                                     onChange={e => setWaPhone(e.target.value.replace(/\D/g, ''))}
                                     placeholder="573001234567"
-                                    style={{ padding: '8px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '13px', width: '160px' }}
+                                    style={{ padding: '8px 12px', border: '1px solid #ECECEC', borderRadius: '8px', fontSize: '13px', width: '160px' }}
                                 />
                                 <Button onClick={handleSendWhatsApp} disabled={waSending || !waPhone.trim()} style={{ backgroundColor: '#25D366', color: '#fff', borderColor: '#25D366' }}>
                                     <Send size={14} style={{ marginRight: '6px' }} />{waSending ? 'Enviando...' : 'WhatsApp'}
@@ -692,27 +692,27 @@ Esta sujeto a verificación de precios, plazo máximo 15 días.`);
                     <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Nombre *</label>
                         <input type="text" value={newClient.nombre} onChange={e => setNewClient(prev => ({ ...prev, nombre: e.target.value }))}
-                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px', boxSizing: 'border-box' }} placeholder="Nombre completo" />
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px', boxSizing: 'border-box' }} placeholder="Nombre completo" />
                     </div>
                     <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Documento *</label>
                         <input type="text" value={newClient.documento} onChange={e => setNewClient(prev => ({ ...prev, documento: e.target.value }))}
-                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px', boxSizing: 'border-box' }} placeholder="Número de documento" />
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px', boxSizing: 'border-box' }} placeholder="Número de documento" />
                     </div>
                     <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Teléfono</label>
                         <input type="text" value={newClient.telefono} onChange={e => setNewClient(prev => ({ ...prev, telefono: e.target.value }))}
-                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px', boxSizing: 'border-box' }} placeholder="Número de teléfono" />
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px', boxSizing: 'border-box' }} placeholder="Número de teléfono" />
                     </div>
                     <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Email</label>
                         <input type="email" value={newClient.email} onChange={e => setNewClient(prev => ({ ...prev, email: e.target.value }))}
-                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px', boxSizing: 'border-box' }} placeholder="correo@ejemplo.com" />
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px', boxSizing: 'border-box' }} placeholder="correo@ejemplo.com" />
                     </div>
                     <div>
                         <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Dirección</label>
                         <input type="text" value={newClient.direccion} onChange={e => setNewClient(prev => ({ ...prev, direccion: e.target.value }))}
-                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px', boxSizing: 'border-box' }} placeholder="Dirección" />
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px', boxSizing: 'border-box' }} placeholder="Dirección" />
                     </div>
                     <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
                         <Button variant="secondary" onClick={() => setShowNewClient(false)}>Cancelar</Button>

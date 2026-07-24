@@ -6,10 +6,10 @@ import api from '../api/client';
 import '../styles/usuarios-mobile.css';
 
 const roleColors = {
-    admin: { bg: '#DBEAFE', text: '#1E40AF' },
-    cajero: { bg: '#DCFCE7', text: '#16A34A' },
-    bodega: { bg: '#FEF3C7', text: '#D97706' },
-    contador: { bg: '#F3E8FF', text: '#7C3AED' },
+    admin: { bg: '#EFF4FF', text: '#2563EB' },
+    cajero: { bg: '#EAF7EE', text: '#16A34A' },
+    bodega: { bg: '#FFF9E6', text: '#D69A00' },
+    contador: { bg: '#F3F4F6', text: '#6B7280' },
 };
 
 // Modules that can be toggled per role
@@ -43,7 +43,7 @@ function Toggle({ on, onClick }) {
             style={{
                 width: '44px', height: '24px', borderRadius: '12px',
                 display: 'flex', alignItems: 'center', cursor: 'pointer',
-                backgroundColor: on ? '#F2A900' : '#D1D5DB',
+                backgroundColor: on ? '#F5B400' : '#ECECEC',
                 justifyContent: on ? 'flex-end' : 'flex-start',
                 padding: '2px', transition: 'all 200ms ease',
                 flexShrink: 0
@@ -274,10 +274,10 @@ export default function Usuarios() {
 
     const tabStyle = (active) => ({
         padding: '10px 24px', fontSize: '14px', fontWeight: active ? 600 : 500,
-        color: active ? '#F2A900' : '#6B7280', cursor: 'pointer',
-        borderBottom: active ? '2px solid #F2A900' : '2px solid transparent',
+        color: active ? '#D69A00' : '#6B7280', cursor: 'pointer',
+        borderBottom: active ? '2px solid #F5B400' : '2px solid transparent',
         backgroundColor: 'transparent', border: 'none', borderBottomWidth: '2px',
-        borderBottomStyle: 'solid', borderBottomColor: active ? '#F2A900' : 'transparent',
+        borderBottomStyle: 'solid', borderBottomColor: active ? '#F5B400' : 'transparent',
         transition: 'all 150ms'
     });
 
@@ -286,7 +286,7 @@ export default function Usuarios() {
             {/* Header */}
             <div id="usuarios-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
-                    <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#1A1A2E' }}>Usuarios y Roles</h1>
+                    <h1 style={{ fontSize: '20px', fontWeight: 600, color: '#111827' }}>Usuarios y Roles</h1>
                     <p style={{ fontSize: '13px', color: '#6B7280', marginTop: '4px' }}>Gestión de usuarios, roles y permisos del sistema</p>
                 </div>
                 {tab === 'usuarios' ? (
@@ -297,7 +297,7 @@ export default function Usuarios() {
             </div>
 
             {/* Tabs */}
-            <div id="usuarios-tabs" style={{ display: 'flex', borderBottom: '1px solid #E2E5EA', gap: '0' }}>
+            <div id="usuarios-tabs" style={{ display: 'flex', borderBottom: '1px solid #ECECEC', gap: '0' }}>
                 <button style={tabStyle(tab === 'usuarios')} onClick={() => setTab('usuarios')}>
                     <Users size={15} style={{ marginRight: '6px', verticalAlign: 'middle' }} />Usuarios
                 </button>
@@ -308,10 +308,10 @@ export default function Usuarios() {
 
             {/* ═══ USUARIOS TAB ═══ */}
             {tab === 'usuarios' && (
-                <div id="usuarios-table" style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E5EA', borderRadius: '10px', overflow: 'hidden' }}>
+                <div id="usuarios-table" style={{ backgroundColor: '#FFFFFF', border: '1px solid #ECECEC', borderRadius: '10px', overflow: 'hidden' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
-                            <tr style={{ backgroundColor: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
+                            <tr style={{ backgroundColor: '#F9FAFB', borderBottom: '1px solid #ECECEC' }}>
                                 {['#', 'Usuario', 'Rol', 'Estado', 'Creado', 'Acciones'].map(h => (
                                     <th key={h} style={{ padding: '12px 20px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>{h}</th>
                                 ))}
@@ -323,13 +323,13 @@ export default function Usuarios() {
                             ) : usuarios.length === 0 ? (
                                 <tr><td colSpan={6} style={{ padding: '24px', textAlign: 'center', color: '#6B7280', fontSize: '14px' }}>No hay usuarios registrados.</td></tr>
                             ) : usuarios.map((u, idx) => {
-                                const rc = roleColors[u.role] || { bg: '#F3F4F6', text: '#4B5563' };
+                                const rc = roleColors[u.role] || { bg: '#F3F4F6', text: '#6B7280' };
                                 return (
-                                    <tr key={u.id} style={{ borderBottom: idx < usuarios.length - 1 ? '1px solid #F0F2F5' : 'none', transition: 'background 100ms' }}
+                                    <tr key={u.id} style={{ borderBottom: idx < usuarios.length - 1 ? '1px solid #F8F9FB' : 'none', transition: 'background 100ms' }}
                                         onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FAFBFC'}
                                         onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                                         <td data-label="#" style={{ padding: '14px 20px', fontSize: '13px', color: '#6B7280', fontWeight: 500 }}>{u.id}</td>
-                                        <td data-label="Usuario" style={{ padding: '14px 20px', fontSize: '13px', fontWeight: 500, color: '#1A1A2E' }}>{u.username}</td>
+                                        <td data-label="Usuario" style={{ padding: '14px 20px', fontSize: '13px', fontWeight: 500, color: '#111827' }}>{u.username}</td>
                                         <td data-label="Rol" style={{ padding: '14px 20px' }}>
                                             <span style={{ fontSize: '11px', fontWeight: 600, padding: '4px 10px', borderRadius: '4px', backgroundColor: rc.bg, color: rc.text, textTransform: 'capitalize' }}>
                                                 {u.role}
@@ -338,7 +338,7 @@ export default function Usuarios() {
                                         <td data-label="Estado" style={{ padding: '14px 20px' }}>
                                             <span style={{
                                                 fontSize: '11px', fontWeight: 600, padding: '4px 10px', borderRadius: '4px',
-                                                backgroundColor: u.activo ? '#DCFCE7' : '#FEE2E2',
+                                                backgroundColor: u.activo ? '#EAF7EE' : '#FDECEC',
                                                 color: u.activo ? '#16A34A' : '#DC2626'
                                             }}>
                                                 {u.activo ? 'Activo' : 'Inactivo'}
@@ -350,21 +350,21 @@ export default function Usuarios() {
                                         <td data-label="Acciones" style={{ padding: '14px 20px' }}>
                                             <div style={{ display: 'flex', gap: '8px' }}>
                                                 <button onClick={() => openEditUser(u)} title="Editar"
-                                                    style={{ padding: '6px', borderRadius: '6px', border: '1px solid #D1D5DB', backgroundColor: '#fff', cursor: 'pointer', color: '#4F46E5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#EEF2FF'; e.currentTarget.style.borderColor = '#4F46E5'; }}
-                                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.borderColor = '#D1D5DB'; }}>
+                                                    style={{ padding: '6px', borderRadius: '6px', border: '1px solid #ECECEC', backgroundColor: '#fff', cursor: 'pointer', color: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#EFF4FF'; e.currentTarget.style.borderColor = '#2563EB'; }}
+                                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.borderColor = '#ECECEC'; }}>
                                                     <Pencil size={14} />
                                                 </button>
                                                 <button onClick={() => handleToggleActive(u)} title={u.activo ? 'Desactivar' : 'Activar'}
-                                                    style={{ padding: '6px', borderRadius: '6px', border: '1px solid #D1D5DB', backgroundColor: '#fff', cursor: 'pointer', color: u.activo ? '#D97706' : '#16A34A', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = u.activo ? '#FEF3C7' : '#DCFCE7'; e.currentTarget.style.borderColor = u.activo ? '#D97706' : '#16A34A'; }}
-                                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.borderColor = '#D1D5DB'; }}>
+                                                    style={{ padding: '6px', borderRadius: '6px', border: '1px solid #ECECEC', backgroundColor: '#fff', cursor: 'pointer', color: u.activo ? '#D69A00' : '#16A34A', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = u.activo ? '#FFF9E6' : '#EAF7EE'; e.currentTarget.style.borderColor = u.activo ? '#D69A00' : '#16A34A'; }}
+                                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.borderColor = '#ECECEC'; }}>
                                                     {u.activo ? <UserX size={14} /> : <UserCheck size={14} />}
                                                 </button>
                                                 <button onClick={() => setDeleteUserId(u.id)} title="Desactivar"
-                                                    style={{ padding: '6px', borderRadius: '6px', border: '1px solid #D1D5DB', backgroundColor: '#fff', cursor: 'pointer', color: '#EF4444', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#FEF2F2'; e.currentTarget.style.borderColor = '#EF4444'; }}
-                                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.borderColor = '#D1D5DB'; }}>
+                                                    style={{ padding: '6px', borderRadius: '6px', border: '1px solid #ECECEC', backgroundColor: '#fff', cursor: 'pointer', color: '#DC2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#FDECEC'; e.currentTarget.style.borderColor = '#DC2626'; }}
+                                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.borderColor = '#ECECEC'; }}>
                                                     <Trash2 size={14} />
                                                 </button>
                                             </div>
@@ -381,25 +381,25 @@ export default function Usuarios() {
             {tab === 'roles' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     {/* Admin note */}
-                    <div style={{ padding: '12px 16px', backgroundColor: '#DBEAFE', borderRadius: '8px', fontSize: '13px', color: '#1E40AF' }}>
+                    <div style={{ padding: '12px 16px', backgroundColor: '#EFF4FF', borderRadius: '8px', fontSize: '13px', color: '#2563EB' }}>
                         <strong>Admin</strong> siempre tiene acceso total al sistema. Los permisos configurados aquí aplican a los demás roles.
                     </div>
 
                     {loading ? (
                         <div style={{ padding: '24px', textAlign: 'center', color: '#6B7280' }}>Cargando roles...</div>
                     ) : roles.length === 0 ? (
-                        <div style={{ padding: '24px', textAlign: 'center', color: '#6B7280', backgroundColor: '#FFFFFF', border: '1px solid #E2E5EA', borderRadius: '10px' }}>
+                        <div style={{ padding: '24px', textAlign: 'center', color: '#6B7280', backgroundColor: '#FFFFFF', border: '1px solid #ECECEC', borderRadius: '10px' }}>
                             No hay roles creados. Crea un rol para asignar permisos.
                         </div>
                     ) : roles.map(role => {
                         let permisos = [];
                         try { permisos = JSON.parse(role.permisos || '[]'); } catch { permisos = []; }
-                        const rc = roleColors[role.nombre.toLowerCase()] || { bg: '#F3F4F6', text: '#4B5563' };
+                        const rc = roleColors[role.nombre.toLowerCase()] || { bg: '#F3F4F6', text: '#6B7280' };
 
                         return (
-                            <div key={role.id} style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E5EA', borderRadius: '10px', overflow: 'hidden' }}>
+                            <div key={role.id} style={{ backgroundColor: '#FFFFFF', border: '1px solid #ECECEC', borderRadius: '10px', overflow: 'hidden' }}>
                                 {/* Role header */}
-                                <div style={{ padding: '16px 20px', borderBottom: '1px solid #E2E5EA', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div style={{ padding: '16px 20px', borderBottom: '1px solid #ECECEC', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                         <span style={{ fontSize: '13px', fontWeight: 600, padding: '4px 12px', borderRadius: '4px', backgroundColor: rc.bg, color: rc.text, textTransform: 'capitalize' }}>
                                             {role.nombre}
@@ -411,15 +411,15 @@ export default function Usuarios() {
                                     </div>
                                     <div style={{ display: 'flex', gap: '8px' }}>
                                         <button onClick={() => openEditRole(role)} title="Editar permisos"
-                                            style={{ padding: '6px', borderRadius: '6px', border: '1px solid #D1D5DB', backgroundColor: '#fff', cursor: 'pointer', color: '#4F46E5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#EEF2FF'; e.currentTarget.style.borderColor = '#4F46E5'; }}
-                                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.borderColor = '#D1D5DB'; }}>
+                                            style={{ padding: '6px', borderRadius: '6px', border: '1px solid #ECECEC', backgroundColor: '#fff', cursor: 'pointer', color: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#EFF4FF'; e.currentTarget.style.borderColor = '#2563EB'; }}
+                                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.borderColor = '#ECECEC'; }}>
                                             <Pencil size={14} />
                                         </button>
                                         <button onClick={() => setDeleteRoleId(role.id)} title="Eliminar rol"
-                                            style={{ padding: '6px', borderRadius: '6px', border: '1px solid #D1D5DB', backgroundColor: '#fff', cursor: 'pointer', color: '#EF4444', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#FEF2F2'; e.currentTarget.style.borderColor = '#EF4444'; }}
-                                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.borderColor = '#D1D5DB'; }}>
+                                            style={{ padding: '6px', borderRadius: '6px', border: '1px solid #ECECEC', backgroundColor: '#fff', cursor: 'pointer', color: '#DC2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#FDECEC'; e.currentTarget.style.borderColor = '#DC2626'; }}
+                                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.borderColor = '#ECECEC'; }}>
                                             <Trash2 size={14} />
                                         </button>
                                     </div>
@@ -429,17 +429,17 @@ export default function Usuarios() {
                                     {MODULES.map((mod, idx) => (
                                         <div key={mod.key} style={{
                                             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                                            padding: '12px 20px', borderBottom: '1px solid #F0F2F5',
-                                            borderRight: '1px solid #F0F2F5',
-                                            backgroundColor: permisos.includes(mod.key) ? '#F0FDF4' : 'transparent'
+                                            padding: '12px 20px', borderBottom: '1px solid #F8F9FB',
+                                            borderRight: '1px solid #F8F9FB',
+                                            backgroundColor: permisos.includes(mod.key) ? '#EAF7EE' : 'transparent'
                                         }}>
                                             <div>
-                                                <p style={{ fontSize: '13px', fontWeight: 500, color: permisos.includes(mod.key) ? '#1A1A2E' : '#9CA3AF' }}>{mod.label}</p>
+                                                <p style={{ fontSize: '13px', fontWeight: 500, color: permisos.includes(mod.key) ? '#111827' : '#9CA3AF' }}>{mod.label}</p>
                                                 <p style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '2px' }}>{mod.desc}</p>
                                             </div>
                                             <span style={{
                                                 fontSize: '10px', fontWeight: 600, padding: '3px 8px', borderRadius: '4px',
-                                                backgroundColor: permisos.includes(mod.key) ? '#DCFCE7' : '#FEE2E2',
+                                                backgroundColor: permisos.includes(mod.key) ? '#EAF7EE' : '#FDECEC',
                                                 color: permisos.includes(mod.key) ? '#16A34A' : '#DC2626'
                                             }}>
                                                 {permisos.includes(mod.key) ? 'SI' : 'NO'}
@@ -460,21 +460,21 @@ export default function Usuarios() {
                         {/* Left: User data */}
                         <div style={{ flex: '0 0 260px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                             <div>
-                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#374151', marginBottom: '6px' }}>Usuario</label>
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#6B7280', marginBottom: '6px' }}>Usuario</label>
                                 <input type="text" value={userForm.username}
                                     onChange={e => setUserForm(f => ({ ...f, username: e.target.value }))}
                                     placeholder="Ej: juan.perez"
-                                    style={{ width: '100%', padding: '10px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
+                                    style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
                             </div>
                             <div>
-                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#374151', marginBottom: '6px' }}>
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#6B7280', marginBottom: '6px' }}>
                                     Contraseña {editUserId && <span style={{ color: '#9CA3AF', fontWeight: 400 }}>(opcional)</span>}
                                 </label>
                                 <div style={{ position: 'relative' }}>
                                     <input type={showPassword ? 'text' : 'password'} value={userForm.password}
                                         onChange={e => setUserForm(f => ({ ...f, password: e.target.value }))}
                                         placeholder={editUserId ? 'Nueva contraseña' : 'Contraseña'}
-                                        style={{ width: '100%', padding: '10px 40px 10px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
+                                        style={{ width: '100%', padding: '10px 40px 10px 12px', border: '1px solid #ECECEC', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
                                     <button type="button" onClick={() => setShowPassword(!showPassword)}
                                         style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', display: 'flex' }}>
                                         {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -482,10 +482,10 @@ export default function Usuarios() {
                                 </div>
                             </div>
                             <div>
-                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#374151', marginBottom: '6px' }}>Rol</label>
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#6B7280', marginBottom: '6px' }}>Rol</label>
                                 <select value={userForm.role}
                                     onChange={e => handleUserRoleChange(e.target.value)}
-                                    style={{ width: '100%', padding: '10px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box', backgroundColor: '#fff' }}>
+                                    style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box', backgroundColor: '#fff' }}>
                                     {uniqueRoles.map(r => (
                                         <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>
                                     ))}
@@ -493,7 +493,7 @@ export default function Usuarios() {
                             </div>
 
                             {userForm.role === 'admin' && (
-                                <div style={{ padding: '12px 14px', backgroundColor: '#DBEAFE', borderRadius: '8px', fontSize: '12px', color: '#1E40AF' }}>
+                                <div style={{ padding: '12px 14px', backgroundColor: '#EFF4FF', borderRadius: '8px', fontSize: '12px', color: '#2563EB' }}>
                                     <strong>Admin</strong> tiene acceso total a todos los módulos.
                                 </div>
                             )}
@@ -508,11 +508,11 @@ export default function Usuarios() {
 
                         {/* Right: Permission toggles */}
                         {userForm.role !== 'admin' && (
-                            <div style={{ flex: 1, borderLeft: '1px solid #E2E5EA', paddingLeft: '20px', display: 'flex', flexDirection: 'column' }}>
-                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '10px' }}>
+                            <div style={{ flex: 1, borderLeft: '1px solid #ECECEC', paddingLeft: '20px', display: 'flex', flexDirection: 'column' }}>
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#6B7280', marginBottom: '10px' }}>
                                     Permisos <span style={{ fontWeight: 400, color: '#9CA3AF' }}>({userForm.permisos.length}/{MODULES.length})</span>
                                 </label>
-                                <div style={{ border: '1px solid #E2E5EA', borderRadius: '8px', overflow: 'hidden', overflowY: 'auto', flex: 1 }}>
+                                <div style={{ border: '1px solid #ECECEC', borderRadius: '8px', overflow: 'hidden', overflowY: 'auto', flex: 1 }}>
                                     {MODULES.map((mod, idx) => {
                                         const on = userForm.permisos.includes(mod.key);
                                         return (
@@ -520,11 +520,11 @@ export default function Usuarios() {
                                                 <div style={{
                                                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                                                     padding: '9px 14px',
-                                                    borderBottom: (idx < MODULES.length - 1 || (on && mod.children)) ? '1px solid #F0F2F5' : 'none',
-                                                    backgroundColor: on ? '#F0FDF4' : 'transparent',
+                                                    borderBottom: (idx < MODULES.length - 1 || (on && mod.children)) ? '1px solid #F8F9FB' : 'none',
+                                                    backgroundColor: on ? '#EAF7EE' : 'transparent',
                                                     transition: 'background 150ms'
                                                 }}>
-                                                    <p style={{ fontSize: '13px', fontWeight: 500, color: on ? '#1A1A2E' : '#6B7280' }}>{mod.label}</p>
+                                                    <p style={{ fontSize: '13px', fontWeight: 500, color: on ? '#111827' : '#6B7280' }}>{mod.label}</p>
                                                     <Toggle on={on} onClick={() => toggleUserPermission(mod.key)} />
                                                 </div>
                                                 {on && mod.children && mod.children.map(child => {
@@ -533,11 +533,11 @@ export default function Usuarios() {
                                                         <div key={child.key} style={{
                                                             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                                                             padding: '7px 14px 7px 32px',
-                                                            borderBottom: '1px solid #F0F2F5',
-                                                            backgroundColor: childOn ? '#EFF6FF' : '#F9FAFB',
+                                                            borderBottom: '1px solid #F8F9FB',
+                                                            backgroundColor: childOn ? '#EFF4FF' : '#F9FAFB',
                                                             transition: 'background 150ms'
                                                         }}>
-                                                            <p style={{ fontSize: '12px', fontWeight: 500, color: childOn ? '#F2A900' : '#9CA3AF' }}>↳ {child.label}</p>
+                                                            <p style={{ fontSize: '12px', fontWeight: 500, color: childOn ? '#D69A00' : '#9CA3AF' }}>↳ {child.label}</p>
                                                             <Toggle on={childOn} onClick={() => toggleUserPermission(child.key)} />
                                                         </div>
                                                     );
@@ -558,31 +558,31 @@ export default function Usuarios() {
                     <div style={{ minWidth: '500px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                         <div style={{ display: 'flex', gap: '12px' }}>
                             <div style={{ flex: 1 }}>
-                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#374151', marginBottom: '6px' }}>Nombre del rol</label>
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#6B7280', marginBottom: '6px' }}>Nombre del rol</label>
                                 <input type="text" value={roleForm.nombre}
                                     onChange={e => setRoleForm(f => ({ ...f, nombre: e.target.value }))}
                                     placeholder="Ej: cajero, bodega, contador"
-                                    style={{ width: '100%', padding: '10px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
+                                    style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
                             </div>
                             <div style={{ flex: 1 }}>
-                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#374151', marginBottom: '6px' }}>Descripción</label>
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: '#6B7280', marginBottom: '6px' }}>Descripción</label>
                                 <input type="text" value={roleForm.descripcion}
                                     onChange={e => setRoleForm(f => ({ ...f, descripcion: e.target.value }))}
                                     placeholder="Ej: Acceso a punto de venta"
-                                    style={{ width: '100%', padding: '10px 12px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
+                                    style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
                             </div>
                         </div>
 
                         {/* Permission toggles */}
                         <div>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                                <label style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>Módulos permitidos</label>
+                                <label style={{ fontSize: '13px', fontWeight: 600, color: '#6B7280' }}>Módulos permitidos</label>
                                 <button onClick={toggleAll}
-                                    style={{ fontSize: '12px', color: '#F2A900', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 500, textDecoration: 'underline' }}>
+                                    style={{ fontSize: '12px', color: '#D69A00', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 500, textDecoration: 'underline' }}>
                                     {roleForm.permisos.length === MODULES.length ? 'Desmarcar todos' : 'Marcar todos'}
                                 </button>
                             </div>
-                            <div style={{ border: '1px solid #E2E5EA', borderRadius: '8px', overflow: 'hidden' }}>
+                            <div style={{ border: '1px solid #ECECEC', borderRadius: '8px', overflow: 'hidden' }}>
                                 {MODULES.map((mod, idx) => {
                                     const on = roleForm.permisos.includes(mod.key);
                                     return (
@@ -590,12 +590,12 @@ export default function Usuarios() {
                                             <div style={{
                                                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                                                 padding: '12px 16px',
-                                                borderBottom: (idx < MODULES.length - 1 || (on && mod.children)) ? '1px solid #F0F2F5' : 'none',
-                                                backgroundColor: on ? '#F0FDF4' : 'transparent',
+                                                borderBottom: (idx < MODULES.length - 1 || (on && mod.children)) ? '1px solid #F8F9FB' : 'none',
+                                                backgroundColor: on ? '#EAF7EE' : 'transparent',
                                                 transition: 'background 150ms'
                                             }}>
                                                 <div>
-                                                    <p style={{ fontSize: '13px', fontWeight: 500, color: on ? '#1A1A2E' : '#6B7280' }}>{mod.label}</p>
+                                                    <p style={{ fontSize: '13px', fontWeight: 500, color: on ? '#111827' : '#6B7280' }}>{mod.label}</p>
                                                     <p style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '1px' }}>{mod.desc}</p>
                                                 </div>
                                                 <Toggle on={on} onClick={() => togglePermission(mod.key)} />
@@ -606,12 +606,12 @@ export default function Usuarios() {
                                                     <div key={child.key} style={{
                                                         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                                                         padding: '10px 16px 10px 36px',
-                                                        borderBottom: '1px solid #F0F2F5',
-                                                        backgroundColor: childOn ? '#EFF6FF' : '#F9FAFB',
+                                                        borderBottom: '1px solid #F8F9FB',
+                                                        backgroundColor: childOn ? '#EFF4FF' : '#F9FAFB',
                                                         transition: 'background 150ms'
                                                     }}>
                                                         <div>
-                                                            <p style={{ fontSize: '12px', fontWeight: 500, color: childOn ? '#F2A900' : '#9CA3AF' }}>↳ {child.label}</p>
+                                                            <p style={{ fontSize: '12px', fontWeight: 500, color: childOn ? '#D69A00' : '#9CA3AF' }}>↳ {child.label}</p>
                                                             <p style={{ fontSize: '10px', color: '#9CA3AF', marginTop: '1px' }}>{child.desc}</p>
                                                         </div>
                                                         <Toggle on={childOn} onClick={() => togglePermission(child.key)} />
@@ -638,12 +638,12 @@ export default function Usuarios() {
             {deleteUserId && (
                 <Modal isOpen={true} onClose={() => setDeleteUserId(null)} title="Desactivar Usuario">
                     <div style={{ minWidth: '400px' }}>
-                        <p style={{ fontSize: '14px', color: '#374151', marginBottom: '20px' }}>
+                        <p style={{ fontSize: '14px', color: '#6B7280', marginBottom: '20px' }}>
                             ¿Está seguro de desactivar este usuario? No podrá iniciar sesión hasta que se reactive.
                         </p>
                         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
                             <Button variant="secondary" onClick={() => setDeleteUserId(null)}>Cancelar</Button>
-                            <Button onClick={handleDeleteUser} disabled={deletingUser} style={{ backgroundColor: '#EF4444', borderColor: '#EF4444' }}>
+                            <Button onClick={handleDeleteUser} disabled={deletingUser} style={{ backgroundColor: '#DC2626', borderColor: '#DC2626' }}>
                                 {deletingUser ? 'Desactivando...' : 'Desactivar'}
                             </Button>
                         </div>
@@ -655,12 +655,12 @@ export default function Usuarios() {
             {deleteRoleId && (
                 <Modal isOpen={true} onClose={() => setDeleteRoleId(null)} title="Eliminar Rol">
                     <div style={{ minWidth: '400px' }}>
-                        <p style={{ fontSize: '14px', color: '#374151', marginBottom: '20px' }}>
+                        <p style={{ fontSize: '14px', color: '#6B7280', marginBottom: '20px' }}>
                             ¿Está seguro de eliminar este rol? Los usuarios con este rol perderán sus permisos.
                         </p>
                         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
                             <Button variant="secondary" onClick={() => setDeleteRoleId(null)}>Cancelar</Button>
-                            <Button onClick={handleDeleteRole} disabled={deletingRole} style={{ backgroundColor: '#EF4444', borderColor: '#EF4444' }}>
+                            <Button onClick={handleDeleteRole} disabled={deletingRole} style={{ backgroundColor: '#DC2626', borderColor: '#DC2626' }}>
                                 {deletingRole ? 'Eliminando...' : 'Eliminar'}
                             </Button>
                         </div>

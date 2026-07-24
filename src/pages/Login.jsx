@@ -35,26 +35,34 @@ export default function Login() {
     return (
         <div style={{
             minHeight: '100vh',
+            position: 'relative',
             display: 'flex',
             backgroundColor: '#0F172A',
-            fontFamily: "'Inter', system-ui, sans-serif"
+            fontFamily: "'Inter', system-ui, sans-serif",
+            overflow: 'hidden'
         }}>
-            {/* Panel izquierdo - Imagen de marca */}
-            <div className="login-brand-panel" style={{
-                flex: '1.15',
-                position: 'relative',
-                overflow: 'hidden',
+            {/* Imagen de fondo a pantalla completa, para que se transparente detrás del formulario */}
+            <div style={{
+                position: 'absolute',
+                inset: 0,
                 backgroundImage: `url(${backLoginSrc})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'right center',
-            }}>
-                {/* Degradado sutil para profundidad y legibilidad de los elementos flotantes */}
-                <div style={{
-                    position: 'absolute',
-                    inset: 0,
-                    background: 'linear-gradient(180deg, rgba(15,23,42,0.45) 0%, rgba(15,23,42,0) 28%, rgba(15,23,42,0) 62%, rgba(15,23,42,0.6) 100%)'
-                }} />
+                zIndex: 0
+            }} />
+            <div style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'linear-gradient(180deg, rgba(15,23,42,0.45) 0%, rgba(15,23,42,0) 28%, rgba(15,23,42,0) 62%, rgba(15,23,42,0.6) 100%)',
+                zIndex: 0
+            }} />
 
+            {/* Panel izquierdo - Contenido de marca sobre la imagen */}
+            <div className="login-brand-panel" style={{
+                flex: '1.15',
+                position: 'relative',
+                zIndex: 1
+            }}>
                 {/* Emblema del logo, arriba a la izquierda para no tapar el texto de la imagen */}
                 <div style={{ position: 'absolute', top: '32px', left: '32px', zIndex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{
@@ -62,7 +70,7 @@ export default function Login() {
                         height: '46px',
                         borderRadius: '50%',
                         overflow: 'hidden',
-                        border: '2px solid rgba(242,169,0,0.6)',
+                        border: '2px solid rgba(245,180,0,0.6)',
                         boxShadow: '0 4px 16px rgba(0,0,0,0.45)',
                         flexShrink: 0
                     }}>
@@ -70,7 +78,7 @@ export default function Login() {
                     </div>
                     <div style={{ lineHeight: 1.25 }}>
                         <div style={{ color: '#fff', fontWeight: 800, fontSize: '13px', letterSpacing: '0.5px', textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>LA ESQUINA</div>
-                        <div style={{ color: '#F2A900', fontWeight: 600, fontSize: '11px', letterSpacing: '1.5px', textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>DEL PROGRESO</div>
+                        <div style={{ color: '#F5B400', fontWeight: 600, fontSize: '11px', letterSpacing: '1.5px', textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>DEL PROGRESO</div>
                     </div>
                 </div>
 
@@ -88,27 +96,29 @@ export default function Login() {
                     backdropFilter: 'blur(8px)',
                     WebkitBackdropFilter: 'blur(8px)',
                     borderRadius: '30px',
-                    border: '1px solid rgba(242,169,0,0.25)'
+                    border: '1px solid rgba(245,180,0,0.25)'
                 }}>
-                    <Wrench size={14} color="#F2A900" />
-                    <span style={{ fontSize: '12px', color: '#E2E8F0', fontWeight: 500, letterSpacing: '0.3px' }}>
+                    <Wrench size={14} color="#F5B400" />
+                    <span style={{ fontSize: '12px', color: '#ECECEC', fontWeight: 500, letterSpacing: '0.3px' }}>
                         Sistema de Gestión Integral &bull; Algarrobo, Colombia
                     </span>
                 </div>
             </div>
 
-            {/* Panel derecho - Formulario (hoja flotante con bordes suaves) */}
+            {/* Panel derecho - Formulario (hoja flotante translúcida tipo vidrio esmerilado) */}
             <div className="login-form-panel" style={{
                 flex: '1',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: '#FFFFFF',
+                backgroundColor: 'rgba(255,255,255,0.7)',
+                backdropFilter: 'blur(22px) saturate(150%)',
+                WebkitBackdropFilter: 'blur(22px) saturate(150%)',
                 padding: '40px',
                 position: 'relative',
                 borderRadius: '48px 0 0 48px',
-                boxShadow: '-28px 0 60px rgba(15,23,42,0.22)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), -28px 0 60px rgba(15,23,42,0.25)',
                 zIndex: 2
             }}>
                 <div style={{ width: '100%', maxWidth: '380px' }}>
@@ -116,13 +126,13 @@ export default function Login() {
                     <div className="login-mobile-logo" style={{ display: 'none', textAlign: 'center', marginBottom: '24px' }}>
                         <img src={logoSrc} alt="Logo" style={{
                             width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover',
-                            border: '2px solid #F2A900', margin: '0 auto 12px auto', display: 'block'
+                            border: '2px solid #F5B400', margin: '0 auto 12px auto', display: 'block'
                         }} />
-                        <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#1A1A2E', margin: 0 }}>LA ESQUINA DEL PROGRESO</h2>
+                        <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#111827', margin: 0 }}>LA ESQUINA DEL PROGRESO</h2>
                     </div>
 
                     <div style={{ marginBottom: '32px' }}>
-                        <h2 style={{ fontSize: '26px', fontWeight: 700, color: '#1A1A2E', margin: '0 0 8px 0' }}>
+                        <h2 style={{ fontSize: '26px', fontWeight: 700, color: '#111827', margin: '0 0 8px 0' }}>
                             Bienvenido
                         </h2>
                         <p style={{ fontSize: '14px', color: '#6B7280', margin: 0 }}>
@@ -132,8 +142,8 @@ export default function Login() {
 
                     {error && (
                         <div style={{
-                            backgroundColor: '#FEF2F2',
-                            border: '1px solid #FECACA',
+                            backgroundColor: '#FDECEC',
+                            border: '1px solid rgba(220,38,38,0.35)',
                             borderRadius: '14px',
                             padding: '12px 16px',
                             marginBottom: '24px',
@@ -151,7 +161,7 @@ export default function Login() {
 
                     <form onSubmit={handleLogin} method="post" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                         <div>
-                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '8px' }}>
+                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#6B7280', marginBottom: '8px' }}>
                                 Usuario
                             </label>
                             <div style={{ position: 'relative' }}>
@@ -171,21 +181,21 @@ export default function Login() {
                                     style={{
                                         width: '100%',
                                         padding: '13px 14px 13px 44px',
-                                        border: '2px solid #E5E7EB',
+                                        border: '2px solid #ECECEC',
                                         borderRadius: '14px',
                                         fontSize: '14px',
                                         outline: 'none',
                                         transition: 'all 0.2s ease',
                                         backgroundColor: '#F9FAFB',
-                                        color: '#1A1A2E'
+                                        color: '#111827'
                                     }}
                                     onFocus={(e) => {
-                                        e.target.style.borderColor = '#F2A900';
-                                        e.target.style.boxShadow = '0 0 0 4px rgba(242,169,0,0.1)';
+                                        e.target.style.borderColor = '#F5B400';
+                                        e.target.style.boxShadow = '0 0 0 4px rgba(245,180,0,0.1)';
                                         e.target.style.backgroundColor = '#FFFFFF';
                                     }}
                                     onBlur={(e) => {
-                                        e.target.style.borderColor = '#E5E7EB';
+                                        e.target.style.borderColor = '#ECECEC';
                                         e.target.style.boxShadow = 'none';
                                         e.target.style.backgroundColor = '#F9FAFB';
                                     }}
@@ -194,7 +204,7 @@ export default function Login() {
                         </div>
 
                         <div>
-                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '8px' }}>
+                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#6B7280', marginBottom: '8px' }}>
                                 Contraseña
                             </label>
                             <div style={{ position: 'relative' }}>
@@ -214,21 +224,21 @@ export default function Login() {
                                     style={{
                                         width: '100%',
                                         padding: '13px 14px 13px 44px',
-                                        border: '2px solid #E5E7EB',
+                                        border: '2px solid #ECECEC',
                                         borderRadius: '14px',
                                         fontSize: '14px',
                                         outline: 'none',
                                         transition: 'all 0.2s ease',
                                         backgroundColor: '#F9FAFB',
-                                        color: '#1A1A2E'
+                                        color: '#111827'
                                     }}
                                     onFocus={(e) => {
-                                        e.target.style.borderColor = '#F2A900';
-                                        e.target.style.boxShadow = '0 0 0 4px rgba(242,169,0,0.1)';
+                                        e.target.style.borderColor = '#F5B400';
+                                        e.target.style.boxShadow = '0 0 0 4px rgba(245,180,0,0.1)';
                                         e.target.style.backgroundColor = '#FFFFFF';
                                     }}
                                     onBlur={(e) => {
-                                        e.target.style.borderColor = '#E5E7EB';
+                                        e.target.style.borderColor = '#ECECEC';
                                         e.target.style.boxShadow = 'none';
                                         e.target.style.backgroundColor = '#F9FAFB';
                                     }}
@@ -242,10 +252,10 @@ export default function Login() {
                             style={{
                                 marginTop: '8px',
                                 background: (loading || !username || !password)
-                                    ? '#D1D5DB'
-                                    : 'linear-gradient(135deg, #F2A900 0%, #D4950A 100%)',
-                                backgroundColor: (loading || !username || !password) ? '#D1D5DB' : '#F2A900',
-                                color: 'white',
+                                    ? '#ECECEC'
+                                    : 'linear-gradient(135deg, #F5B400 0%, #D69A00 100%)',
+                                backgroundColor: (loading || !username || !password) ? '#ECECEC' : '#F5B400',
+                                color: (loading || !username || !password) ? 'white' : '#111827',
                                 padding: '14px',
                                 borderRadius: '14px',
                                 fontSize: '15px',
@@ -257,17 +267,17 @@ export default function Login() {
                                 justifyContent: 'center',
                                 gap: '8px',
                                 transition: 'all 0.2s ease',
-                                boxShadow: (loading || !username || !password) ? 'none' : '0 4px 12px rgba(242,169,0,0.3)',
+                                boxShadow: (loading || !username || !password) ? 'none' : '0 4px 12px rgba(245,180,0,0.3)',
                                 letterSpacing: '0.3px'
                             }}
                             onMouseEnter={(e) => {
                                 if (!loading && username && password) {
-                                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(242,169,0,0.4)';
+                                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(245,180,0,0.4)';
                                     e.currentTarget.style.transform = 'translateY(-1px)';
                                 }
                             }}
                             onMouseLeave={(e) => {
-                                e.currentTarget.style.boxShadow = (loading || !username || !password) ? 'none' : '0 4px 12px rgba(242,169,0,0.3)';
+                                e.currentTarget.style.boxShadow = (loading || !username || !password) ? 'none' : '0 4px 12px rgba(245,180,0,0.3)';
                                 e.currentTarget.style.transform = 'translateY(0)';
                             }}
                             onMouseDown={(e) => { if (!loading && username && password) e.currentTarget.style.transform = 'scale(0.98)'; }}
@@ -300,9 +310,9 @@ export default function Login() {
                         gap: '12px',
                         marginTop: '32px'
                     }}>
-                        <div style={{ flex: 1, height: '1px', backgroundColor: '#E5E7EB' }} />
-                        <Wrench size={14} color="#D1D5DB" />
-                        <div style={{ flex: 1, height: '1px', backgroundColor: '#E5E7EB' }} />
+                        <div style={{ flex: 1, height: '1px', backgroundColor: '#ECECEC' }} />
+                        <Wrench size={14} color="#ECECEC" />
+                        <div style={{ flex: 1, height: '1px', backgroundColor: '#ECECEC' }} />
                     </div>
 
                     <p style={{

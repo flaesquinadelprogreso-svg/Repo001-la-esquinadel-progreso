@@ -188,11 +188,11 @@ export default function ReceiptModal({ sale, onClose, onDownloadPDF }) {
                     <div style={{
                         margin: '16px 20px 0',
                         padding: '14px',
-                        backgroundColor: '#F0FDF4',
+                        backgroundColor: '#EAF7EE',
                         border: '1px solid rgba(22,163,74,0.2)',
-                        borderRadius: '10px'
+                        borderRadius: '12px'
                     }}>
-                        <p style={{ fontSize: '13px', fontWeight: 700, color: '#15803D', margin: '0 0 10px 0' }}>
+                        <p style={{ fontSize: '13px', fontWeight: 700, color: '#16A34A', margin: '0 0 10px 0' }}>
                             Enviar recibo por WhatsApp
                         </p>
                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -206,8 +206,8 @@ export default function ReceiptModal({ sale, onClose, onDownloadPDF }) {
                                     style={{
                                         width: '100%',
                                         padding: '8px 10px 8px 30px',
-                                        border: '1px solid #D1D5DB',
-                                        borderRadius: '8px',
+                                        border: '1px solid #ECECEC',
+                                        borderRadius: '14px',
                                         fontSize: '13px',
                                         outline: 'none',
                                         boxSizing: 'border-box'
@@ -248,7 +248,7 @@ export default function ReceiptModal({ sale, onClose, onDownloadPDF }) {
                 )}
 
                 <div style={{ marginTop: '16px', display: 'flex', gap: '10px', padding: '0 20px', paddingBottom: '20px' }}>
-                    <Button onClick={onDownloadPDF} style={{ flex: 1, backgroundColor: '#10B981', color: '#fff', borderColor: '#10B981' }}>
+                    <Button onClick={onDownloadPDF} style={{ flex: 1, backgroundColor: '#16A34A', color: '#fff', borderColor: '#16A34A' }}>
                         Descargar PDF
                     </Button>
                     <Button onClick={onClose} style={{ flex: 1 }} variant="secondary">Cerrar</Button>

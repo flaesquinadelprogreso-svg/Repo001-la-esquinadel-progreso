@@ -9,9 +9,9 @@ import api from '../api/client';
 import '../styles/compras-mobile.css';
 
 const statusColors = {
-    recibida: { bg: '#DCFCE7', text: '#16A34A' },
-    pagada: { bg: '#DBEAFE', text: '#1E40AF' },
-    anulada: { bg: '#FEE2E2', text: '#DC2626' }
+    recibida: { bg: '#EAF7EE', text: '#16A34A' },
+    pagada: { bg: '#EFF4FF', text: '#2563EB' },
+    anulada: { bg: '#FDECEC', text: '#DC2626' }
 };
 
 export default function Compras() {
@@ -46,17 +46,17 @@ export default function Compras() {
         <div id="compras-root" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div id="compras-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
-                    <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#1A1A2E' }}>Compras</h1>
+                    <h1 style={{ fontSize: '20px', fontWeight: 600, color: '#111827' }}>Compras</h1>
                     <p style={{ fontSize: '13px', color: '#6B7280', marginTop: '4px' }}>Registro y seguimiento de compras</p>
                 </div>
                 <Button onClick={() => navigate('/nueva-compra')}><Plus size={16} style={{ marginRight: '6px' }} />Nueva Compra</Button>
             </div>
 
             {/* Purchases table */}
-            <div id="compras-table-container" style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E5EA', borderRadius: '10px', overflow: 'hidden' }}>
+            <div id="compras-table-container" style={{ backgroundColor: '#FFFFFF', border: '1px solid #ECECEC', borderRadius: '10px', overflow: 'hidden' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
-                        <tr style={{ backgroundColor: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
+                        <tr style={{ backgroundColor: '#F9FAFB', borderBottom: '1px solid #ECECEC' }}>
                             {['#', 'Proveedor', 'Fecha', 'Total', 'Estado', 'Registrado por', 'Acciones'].map(h => (
                                 <th key={h} style={{ padding: '12px 20px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>{h}</th>
                             ))}
@@ -64,21 +64,21 @@ export default function Compras() {
                     </thead>
                     <tbody>
                         {compras.length > 0 ? compras.map((p, idx) => {
-                            const sc = statusColors[p.estado] || { bg: '#F3F4F6', text: '#4B5563' };
+                            const sc = statusColors[p.estado] || { bg: '#F3F4F6', text: '#6B7280' };
                             return (
-                                <tr key={p.id} style={{ borderBottom: idx < compras.length - 1 ? '1px solid #F0F2F5' : 'none', transition: 'background 100ms' }}
+                                <tr key={p.id} style={{ borderBottom: idx < compras.length - 1 ? '1px solid #F3F3F3' : 'none', transition: 'background 100ms' }}
                                     onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FAFBFC'}
                                     onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
                                     <td data-label="Factura" style={{ padding: '14px 20px', fontSize: '13px', color: '#6B7280', fontWeight: 500 }}>
                                         {p.numeroFactura || `OC-${p.id}`}
                                     </td>
-                                    <td data-label="Proveedor" style={{ padding: '14px 20px', fontSize: '13px', fontWeight: 500, color: '#1A1A2E' }}>
+                                    <td data-label="Proveedor" style={{ padding: '14px 20px', fontSize: '13px', fontWeight: 500, color: '#111827' }}>
                                         {p.proveedor?.nombre || p.contacto || 'Sin Proveedor'}
                                     </td>
                                     <td data-label="Fecha" style={{ padding: '14px 20px', fontSize: '13px', color: '#6B7280' }}>
                                         {new Date(p.createdAt).toLocaleDateString()}
                                     </td>
-                                    <td data-label="Total" style={{ padding: '14px 20px', fontSize: '13px', fontWeight: 600, color: '#F2A900' }}>
+                                    <td data-label="Total" style={{ padding: '14px 20px', fontSize: '13px', fontWeight: 600, color: '#111827' }}>
                                         {formatPesos(p.total)}
                                     </td>
                                     <td data-label="Estado" style={{ padding: '14px 20px' }}>
@@ -86,7 +86,7 @@ export default function Compras() {
                                             {p.estado}
                                         </span>
                                     </td>
-                                    <td data-label="Registrado por" style={{ padding: '14px 20px', fontSize: '13px', color: '#1A1A2E', fontWeight: 500 }}>
+                                    <td data-label="Registrado por" style={{ padding: '14px 20px', fontSize: '13px', color: '#111827', fontWeight: 500 }}>
                                         {p.usuario?.username || '-'}
                                     </td>
                                     <td data-label="Acciones" style={{ padding: '14px 20px' }}>
@@ -94,18 +94,18 @@ export default function Compras() {
                                             <button
                                                 onClick={() => navigate(`/editar-compra/${p.id}`)}
                                                 title="Editar"
-                                                style={{ padding: '6px', borderRadius: '6px', border: '1px solid #D1D5DB', backgroundColor: '#fff', cursor: 'pointer', color: '#4F46E5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#EEF2FF'; e.currentTarget.style.borderColor = '#4F46E5'; }}
-                                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.borderColor = '#D1D5DB'; }}
+                                                style={{ padding: '6px', borderRadius: '8px', border: '1px solid #ECECEC', backgroundColor: '#fff', cursor: 'pointer', color: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#EFF4FF'; e.currentTarget.style.borderColor = '#2563EB'; }}
+                                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.borderColor = '#ECECEC'; }}
                                             >
                                                 <Pencil size={14} />
                                             </button>
                                             <button
                                                 onClick={() => setDeleteId(p.id)}
                                                 title="Eliminar"
-                                                style={{ padding: '6px', borderRadius: '6px', border: '1px solid #D1D5DB', backgroundColor: '#fff', cursor: 'pointer', color: '#EF4444', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#FEF2F2'; e.currentTarget.style.borderColor = '#EF4444'; }}
-                                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.borderColor = '#D1D5DB'; }}
+                                                style={{ padding: '6px', borderRadius: '8px', border: '1px solid #ECECEC', backgroundColor: '#fff', cursor: 'pointer', color: '#DC2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#FDECEC'; e.currentTarget.style.borderColor = '#DC2626'; }}
+                                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.borderColor = '#ECECEC'; }}
                                             >
                                                 <Trash2 size={14} />
                                             </button>
@@ -128,12 +128,12 @@ export default function Compras() {
             {deleteId && (
                 <Modal isOpen={true} onClose={() => setDeleteId(null)} title="Eliminar Compra">
                     <div style={{ minWidth: '400px' }}>
-                        <p style={{ fontSize: '14px', color: '#374151', marginBottom: '20px' }}>
+                        <p style={{ fontSize: '14px', color: '#6B7280', marginBottom: '20px' }}>
                             ¿Está seguro de eliminar esta compra? Se revertirán el stock y los movimientos financieros asociados. Esta acción no se puede deshacer.
                         </p>
                         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
                             <Button variant="secondary" onClick={() => setDeleteId(null)}>Cancelar</Button>
-                            <Button onClick={handleDelete} disabled={deleting} style={{ backgroundColor: '#EF4444', borderColor: '#EF4444' }}>
+                            <Button onClick={handleDelete} disabled={deleting} style={{ backgroundColor: '#DC2626', borderColor: '#DC2626' }}>
                                 {deleting ? 'Eliminando...' : 'Eliminar'}
                             </Button>
                         </div>

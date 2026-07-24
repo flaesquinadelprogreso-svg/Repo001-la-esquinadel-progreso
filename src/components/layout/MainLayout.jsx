@@ -26,7 +26,7 @@ export default function MainLayout() {
         <div style={{
             display: 'flex',
             height: '100vh',
-            backgroundColor: '#F0F2F5',
+            backgroundColor: '#F8F9FB',
             overflow: 'hidden'
         }}>
             <Sidebar
@@ -59,7 +59,7 @@ export default function MainLayout() {
                     flex: 1,
                     overflowY: 'auto',
                     overflowX: 'hidden',
-                    padding: isMobile ? '16px 12px' : '32px 40px',
+                    padding: isMobile ? '16px 12px' : '32px 48px',
                     width: '100%',
                     minHeight: 0
                 }}>

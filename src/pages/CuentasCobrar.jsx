@@ -9,7 +9,7 @@ import '../styles/cuentas-mobile.css';
 
 const metodosPago = [
     { id: 'efectivo', label: 'Efectivo', icon: Wallet, color: '#16A34A' },
-    { id: 'banco', label: 'Banco', icon: Building, color: '#F2A900' }
+    { id: 'banco', label: 'Banco', icon: Building, color: '#F5B400' }
 ];
 
 export default function CuentasCobrar() {
@@ -282,7 +282,7 @@ export default function CuentasCobrar() {
         <div id="cuentas-root" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div id="cuentas-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
-                    <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#1A1A2E' }}>Cuentas por Cobrar</h1>
+                    <h1 style={{ fontSize: '20px', fontWeight: 600, color: '#111827' }}>Cuentas por Cobrar</h1>
                     <p style={{ fontSize: '13px', color: '#6B7280', marginTop: '4px' }}>Gestión de cuentas por cobrar y anticipos de clientes</p>
                 </div>
                 <div style={{ display: 'flex', gap: '12px' }}>
@@ -310,7 +310,7 @@ export default function CuentasCobrar() {
             </div>
 
             {/* Tabs */}
-            <div style={{ display: 'flex', gap: '0', borderBottom: '2px solid #E5E7EB' }}>
+            <div style={{ display: 'flex', gap: '0', borderBottom: '2px solid #ECECEC' }}>
                 <button
                     onClick={() => setActiveTab('cuentas')}
                     style={{
@@ -318,9 +318,9 @@ export default function CuentasCobrar() {
                         fontSize: '14px',
                         fontWeight: 600,
                         border: 'none',
-                        borderBottom: activeTab === 'cuentas' ? '2px solid #1A1A2E' : '2px solid transparent',
+                        borderBottom: activeTab === 'cuentas' ? '2px solid #111827' : '2px solid transparent',
                         backgroundColor: 'transparent',
-                        color: activeTab === 'cuentas' ? '#1A1A2E' : '#6B7280',
+                        color: activeTab === 'cuentas' ? '#111827' : '#6B7280',
                         cursor: 'pointer',
                         marginBottom: '-2px',
                         transition: 'all 0.2s'
@@ -336,9 +336,9 @@ export default function CuentasCobrar() {
                         fontSize: '14px',
                         fontWeight: 600,
                         border: 'none',
-                        borderBottom: activeTab === 'anticipos' ? '2px solid #1A1A2E' : '2px solid transparent',
+                        borderBottom: activeTab === 'anticipos' ? '2px solid #111827' : '2px solid transparent',
                         backgroundColor: 'transparent',
-                        color: activeTab === 'anticipos' ? '#1A1A2E' : '#6B7280',
+                        color: activeTab === 'anticipos' ? '#111827' : '#6B7280',
                         cursor: 'pointer',
                         marginBottom: '-2px',
                         transition: 'all 0.2s'
@@ -354,21 +354,21 @@ export default function CuentasCobrar() {
                 <>
                     {/* Resumen */}
                     <div id="cuentas-resumen" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
-                        <div style={{ backgroundColor: '#fff', padding: '14px 16px', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+                        <div style={{ backgroundColor: '#fff', padding: '14px 16px', borderRadius: '8px', border: '1px solid #ECECEC' }}>
                             <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '2px' }}>Total por Cobrar</div>
-                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A2E' }}>{formatPesos(resumen.total)}</div>
+                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#111827' }}>{formatPesos(resumen.total)}</div>
                         </div>
-                        <div style={{ backgroundColor: '#fff', padding: '14px 16px', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+                        <div style={{ backgroundColor: '#fff', padding: '14px 16px', borderRadius: '8px', border: '1px solid #ECECEC' }}>
                             <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '2px' }}>Abonado</div>
-                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A2E' }}>{formatPesos(resumen.abonado)}</div>
+                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#111827' }}>{formatPesos(resumen.abonado)}</div>
                         </div>
-                        <div style={{ backgroundColor: '#fff', padding: '14px 16px', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+                        <div style={{ backgroundColor: '#fff', padding: '14px 16px', borderRadius: '8px', border: '1px solid #ECECEC' }}>
                             <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '2px' }}>Pendiente</div>
-                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A2E' }}>{formatPesos(resumen.pendiente)}</div>
+                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#111827' }}>{formatPesos(resumen.pendiente)}</div>
                         </div>
-                        <div style={{ backgroundColor: '#fff', padding: '14px 16px', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+                        <div style={{ backgroundColor: '#fff', padding: '14px 16px', borderRadius: '8px', border: '1px solid #ECECEC' }}>
                             <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '2px' }}>Vencidas</div>
-                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A2E' }}>{resumen.vencidas}</div>
+                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#111827' }}>{resumen.vencidas}</div>
                         </div>
                     </div>
 
@@ -381,13 +381,13 @@ export default function CuentasCobrar() {
                                 placeholder="Buscar cliente..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                style={{ width: '100%', padding: '10px 12px 10px 40px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '14px', outline: 'none' }}
+                                style={{ width: '100%', padding: '10px 12px 10px 40px', border: '1px solid #ECECEC', borderRadius: '8px', fontSize: '14px', outline: 'none' }}
                             />
                         </div>
                         <select
                             value={filterStatus}
                             onChange={(e) => setFilterStatus(e.target.value)}
-                            style={{ padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '14px', backgroundColor: '#fff' }}
+                            style={{ padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '8px', fontSize: '14px', backgroundColor: '#fff' }}
                         >
                             <option value="todas">Todas</option>
                             <option value="pendientes">Pendientes</option>
@@ -408,9 +408,9 @@ export default function CuentasCobrar() {
                                     key={idx}
                                     onClick={() => setShowDetalleModal(cuenta)}
                                     style={{
-                                        backgroundColor: cuenta.saldoPendiente <= 0 ? '#FAFFF9' : '#fff',
+                                        backgroundColor: cuenta.saldoPendiente <= 0 ? '#EAF7EE' : '#fff',
                                         borderRadius: '8px',
-                                        border: '1px solid #E5E7EB',
+                                        border: '1px solid #ECECEC',
                                         padding: '10px 14px',
                                         display: 'flex',
                                         alignItems: 'center',
@@ -420,17 +420,17 @@ export default function CuentasCobrar() {
                                         opacity: cuenta.saldoPendiente <= 0 ? 0.7 : 1
                                     }}
                                     onMouseEnter={e => e.currentTarget.style.backgroundColor = '#F9FAFB'}
-                                    onMouseLeave={e => e.currentTarget.style.backgroundColor = cuenta.saldoPendiente <= 0 ? '#FAFFF9' : '#fff'}
+                                    onMouseLeave={e => e.currentTarget.style.backgroundColor = cuenta.saldoPendiente <= 0 ? '#EAF7EE' : '#fff'}
                                 >
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
-                                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#F2A900', backgroundColor: '#FFF8E7', padding: '2px 6px', borderRadius: '4px', flexShrink: 0 }}>
+                                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#D69A00', backgroundColor: '#FFF9E6', padding: '2px 6px', borderRadius: '4px', flexShrink: 0 }}>
                                             CXC-{cuenta.id.toString().padStart(4, '0')}
                                         </span>
-                                        <span style={{ fontSize: '13px', fontWeight: 600, color: '#1A1A2E', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                        <span style={{ fontSize: '13px', fontWeight: 600, color: '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                             {cuenta.clienteNombre}
                                         </span>
                                         {cuenta.saldoPendiente <= 0 && (
-                                            <span style={{ fontSize: '9px', color: '#166534', backgroundColor: '#DCFCE7', padding: '1px 4px', borderRadius: '3px', fontWeight: 700, flexShrink: 0 }}>
+                                            <span style={{ fontSize: '9px', color: '#16A34A', backgroundColor: '#EAF7EE', padding: '1px 4px', borderRadius: '3px', fontWeight: 700, flexShrink: 0 }}>
                                                 PAGADA
                                             </span>
                                         )}
@@ -439,10 +439,10 @@ export default function CuentasCobrar() {
                                         </span>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                                        <span style={{ fontSize: '14px', fontWeight: 700, color: '#1A1A2E' }}>
+                                        <span style={{ fontSize: '14px', fontWeight: 700, color: '#111827' }}>
                                             {formatPesos(cuenta.saldoPendiente)}
                                         </span>
-                                        <ChevronRight size={16} color="#D1D5DB" />
+                                        <ChevronRight size={16} color="#ECECEC" />
                                     </div>
                                 </div>
                             ))}
@@ -462,21 +462,21 @@ export default function CuentasCobrar() {
                 <>
                     {/* Resumen Anticipos */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
-                        <div style={{ backgroundColor: '#fff', padding: '14px 16px', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+                        <div style={{ backgroundColor: '#fff', padding: '14px 16px', borderRadius: '8px', border: '1px solid #ECECEC' }}>
                             <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '2px' }}>Total Depositado</div>
-                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A2E' }}>{formatPesos(resumenAnticipos.totalDepositos)}</div>
+                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#111827' }}>{formatPesos(resumenAnticipos.totalDepositos)}</div>
                         </div>
-                        <div style={{ backgroundColor: '#fff', padding: '14px 16px', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+                        <div style={{ backgroundColor: '#fff', padding: '14px 16px', borderRadius: '8px', border: '1px solid #ECECEC' }}>
                             <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '2px' }}>Consumido</div>
-                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A2E' }}>{formatPesos(resumenAnticipos.totalConsumido)}</div>
+                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#111827' }}>{formatPesos(resumenAnticipos.totalConsumido)}</div>
                         </div>
-                        <div style={{ backgroundColor: '#fff', padding: '14px 16px', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+                        <div style={{ backgroundColor: '#fff', padding: '14px 16px', borderRadius: '8px', border: '1px solid #ECECEC' }}>
                             <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '2px' }}>Saldo Disponible</div>
-                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A2E' }}>{formatPesos(resumenAnticipos.totalSaldo)}</div>
+                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#111827' }}>{formatPesos(resumenAnticipos.totalSaldo)}</div>
                         </div>
-                        <div style={{ backgroundColor: '#fff', padding: '14px 16px', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+                        <div style={{ backgroundColor: '#fff', padding: '14px 16px', borderRadius: '8px', border: '1px solid #ECECEC' }}>
                             <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '2px' }}>Clientes con Saldo</div>
-                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A2E' }}>{resumenAnticipos.clientesConSaldo}</div>
+                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#111827' }}>{resumenAnticipos.clientesConSaldo}</div>
                         </div>
                     </div>
 
@@ -488,7 +488,7 @@ export default function CuentasCobrar() {
                             placeholder="Buscar cliente..."
                             value={searchAnticipo}
                             onChange={(e) => setSearchAnticipo(e.target.value)}
-                            style={{ width: '100%', padding: '10px 12px 10px 40px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '14px', outline: 'none' }}
+                            style={{ width: '100%', padding: '10px 12px 10px 40px', border: '1px solid #ECECEC', borderRadius: '8px', fontSize: '14px', outline: 'none' }}
                         />
                     </div>
 
@@ -504,7 +504,7 @@ export default function CuentasCobrar() {
                                     style={{
                                         backgroundColor: '#fff',
                                         borderRadius: '10px',
-                                        border: '1px solid #E5E7EB',
+                                        border: '1px solid #ECECEC',
                                         padding: '14px 16px',
                                         cursor: 'pointer',
                                         transition: 'box-shadow 0.2s, transform 0.1s',
@@ -518,10 +518,10 @@ export default function CuentasCobrar() {
                                             backgroundColor: '#F3F4F6',
                                             display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
                                         }}>
-                                            <User size={16} color={ant.saldo > 0 ? '#1A1A2E' : '#9CA3AF'} />
+                                            <User size={16} color={ant.saldo > 0 ? '#111827' : '#9CA3AF'} />
                                         </div>
                                         <div style={{ flex: 1, minWidth: 0 }}>
-                                            <div style={{ fontSize: '14px', fontWeight: 600, color: '#1A1A2E', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                            <div style={{ fontSize: '14px', fontWeight: 600, color: '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                 {ant.clienteNombre}
                                             </div>
                                             <div style={{ fontSize: '11px', color: '#9CA3AF' }}>{ant.clienteDocumento}</div>
@@ -533,7 +533,7 @@ export default function CuentasCobrar() {
                                                 style={{
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                     width: '28px', height: '28px', borderRadius: '6px',
-                                                    border: '1px solid #FCA5A5', backgroundColor: '#FEF2F2',
+                                                    border: '1px solid rgba(220,38,38,0.35)', backgroundColor: '#FDECEC',
                                                     cursor: 'pointer', flexShrink: 0
                                                 }}
                                             >
@@ -545,11 +545,11 @@ export default function CuentasCobrar() {
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '12px' }}>
                                         <div>
                                             <span style={{ color: '#9CA3AF' }}>Depositado </span>
-                                            <span style={{ fontWeight: 600, color: '#1A1A2E' }}>{formatPesos(ant.depositos)}</span>
+                                            <span style={{ fontWeight: 600, color: '#111827' }}>{formatPesos(ant.depositos)}</span>
                                         </div>
                                         <div>
                                             <span style={{ color: '#9CA3AF' }}>Consumido </span>
-                                            <span style={{ fontWeight: 600, color: '#1A1A2E' }}>{formatPesos(ant.consumido)}</span>
+                                            <span style={{ fontWeight: 600, color: '#111827' }}>{formatPesos(ant.consumido)}</span>
                                         </div>
                                     </div>
 
@@ -587,7 +587,7 @@ export default function CuentasCobrar() {
                         <select
                             value={nuevaCuenta.clienteId}
                             onChange={(e) => setNuevaCuenta(prev => ({ ...prev, clienteId: e.target.value }))}
-                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }}
                         >
                             <option value="">Seleccionar cliente...</option>
                             {clientes.map(c => (
@@ -601,7 +601,7 @@ export default function CuentasCobrar() {
                             type="text"
                             value={nuevaCuenta.descripcion}
                             onChange={(e) => setNuevaCuenta(prev => ({ ...prev, descripcion: e.target.value }))}
-                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }}
                             placeholder="Concepto de la deuda"
                         />
                     </div>
@@ -611,7 +611,7 @@ export default function CuentasCobrar() {
                             type="number"
                             value={nuevaCuenta.monto}
                             onChange={(e) => setNuevaCuenta(prev => ({ ...prev, monto: e.target.value }))}
-                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }}
                             placeholder="0"
                         />
                     </div>
@@ -621,7 +621,7 @@ export default function CuentasCobrar() {
                             type="date"
                             value={nuevaCuenta.fechaVencimiento}
                             onChange={(e) => setNuevaCuenta(prev => ({ ...prev, fechaVencimiento: e.target.value }))}
-                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }}
                         />
                     </div>
                     <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
@@ -639,7 +639,7 @@ export default function CuentasCobrar() {
                         <select
                             value={nuevoAnticipo.clienteId}
                             onChange={(e) => setNuevoAnticipo(prev => ({ ...prev, clienteId: e.target.value }))}
-                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }}
                         >
                             <option value="">Seleccionar cliente...</option>
                             {clientes.map(c => (
@@ -653,7 +653,7 @@ export default function CuentasCobrar() {
                             type="text"
                             value={nuevoAnticipo.descripcion}
                             onChange={(e) => setNuevoAnticipo(prev => ({ ...prev, descripcion: e.target.value }))}
-                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }}
                             placeholder="Concepto del anticipo"
                         />
                     </div>
@@ -667,7 +667,7 @@ export default function CuentasCobrar() {
                                 const raw = e.target.value.replace(/\D/g, '');
                                 setNuevoAnticipo(prev => ({ ...prev, monto: raw }));
                             }}
-                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }}
                             placeholder="$0"
                         />
                     </div>
@@ -681,9 +681,9 @@ export default function CuentasCobrar() {
                                     style={{
                                         flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
                                         padding: '10px', borderRadius: '6px', border: '1px solid',
-                                        borderColor: nuevoAnticipo.metodo === m.id ? '#1A1A2E' : '#D1D5DB',
+                                        borderColor: nuevoAnticipo.metodo === m.id ? '#111827' : '#ECECEC',
                                         backgroundColor: nuevoAnticipo.metodo === m.id ? '#F9FAFB' : '#fff',
-                                        color: nuevoAnticipo.metodo === m.id ? '#1A1A2E' : '#4B5563',
+                                        color: nuevoAnticipo.metodo === m.id ? '#111827' : '#6B7280',
                                         cursor: 'pointer', fontWeight: 600, fontSize: '13px'
                                     }}
                                 >
@@ -700,7 +700,7 @@ export default function CuentasCobrar() {
                         <select
                             value={selectedAccountId}
                             onChange={(e) => setSelectedAccountId(e.target.value)}
-                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }}
                         >
                             <option value="">Seleccionar...</option>
                             {cuentasFinancieras.filter(c => nuevoAnticipo.metodo === 'efectivo' ? c.tipo === 'caja' : c.tipo === 'banco').map(c => (
@@ -710,7 +710,7 @@ export default function CuentasCobrar() {
                     </div>
                     <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
                         <Button variant="secondary" onClick={() => setShowAnticipoModal(false)}>Cancelar</Button>
-                        <Button onClick={handleCrearAnticipo} style={{ backgroundColor: '#1A1A2E' }}>Registrar Anticipo</Button>
+                        <Button onClick={handleCrearAnticipo} style={{ backgroundColor: '#111827' }}>Registrar Anticipo</Button>
                     </div>
                 </div>
             </Modal>
@@ -721,12 +721,12 @@ export default function CuentasCobrar() {
                     <div style={{ padding: '4px' }}>
                         <div style={{ backgroundColor: '#fff', padding: '16px 20px', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             {/* Header */}
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '8px', borderBottom: '1px solid #E5E7EB' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '8px', borderBottom: '1px solid #ECECEC' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                     <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        <User size={18} color="#1A1A2E" />
+                                        <User size={18} color="#111827" />
                                     </div>
-                                    <span style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A2E' }}>
+                                    <span style={{ fontSize: '16px', fontWeight: 700, color: '#111827' }}>
                                         {anticipos.find(a => a.clienteId === showAnticipoDetalle)?.clienteNombre || 'Cliente'}
                                     </span>
                                 </div>
@@ -736,13 +736,13 @@ export default function CuentasCobrar() {
                             <div style={{ display: 'flex', gap: '16px', padding: '8px 12px', backgroundColor: '#F9FAFB', borderRadius: '6px', fontSize: '13px' }}>
                                 <div style={{ flex: 1 }}>
                                     <span style={{ color: '#6B7280', fontSize: '11px' }}>Depositado</span>
-                                    <div style={{ fontWeight: 700, color: '#1A1A2E' }}>{formatPesos(anticipoDetalle.depositos)}</div>
+                                    <div style={{ fontWeight: 700, color: '#111827' }}>{formatPesos(anticipoDetalle.depositos)}</div>
                                 </div>
-                                <div style={{ flex: 1, borderLeft: '1px solid #E5E7EB', paddingLeft: '16px' }}>
+                                <div style={{ flex: 1, borderLeft: '1px solid #ECECEC', paddingLeft: '16px' }}>
                                     <span style={{ color: '#6B7280', fontSize: '11px' }}>Consumido</span>
-                                    <div style={{ fontWeight: 700, color: '#D97706' }}>{formatPesos(anticipoDetalle.consumido)}</div>
+                                    <div style={{ fontWeight: 700, color: '#D69A00' }}>{formatPesos(anticipoDetalle.consumido)}</div>
                                 </div>
-                                <div style={{ flex: 1, borderLeft: '1px solid #E5E7EB', paddingLeft: '16px' }}>
+                                <div style={{ flex: 1, borderLeft: '1px solid #ECECEC', paddingLeft: '16px' }}>
                                     <span style={{ color: '#6B7280', fontSize: '11px' }}>Saldo</span>
                                     <div style={{ fontWeight: 700, color: '#16A34A' }}>{formatPesos(anticipoDetalle.saldo)}</div>
                                 </div>
@@ -753,7 +753,7 @@ export default function CuentasCobrar() {
                                 <div style={{ fontSize: '11px', fontWeight: 700, color: '#6B7280', marginBottom: '6px', textTransform: 'uppercase' }}>Historial de movimientos</div>
                                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                                     <thead>
-                                        <tr style={{ borderBottom: '1px solid #E5E7EB', textAlign: 'left' }}>
+                                        <tr style={{ borderBottom: '1px solid #ECECEC', textAlign: 'left' }}>
                                             <th style={{ padding: '8px 0', fontWeight: 600, color: '#6B7280' }}>Tipo</th>
                                             <th style={{ padding: '8px 0', fontWeight: 600, color: '#6B7280' }}>Descripción</th>
                                             <th style={{ padding: '8px 0', fontWeight: 600, color: '#6B7280' }}>Fecha</th>
@@ -768,19 +768,19 @@ export default function CuentasCobrar() {
                                                         {mov.tipo === 'deposito' ? (
                                                             <ArrowDownCircle size={16} color="#16A34A" />
                                                         ) : (
-                                                            <ArrowUpCircle size={16} color="#D97706" />
+                                                            <ArrowUpCircle size={16} color="#D69A00" />
                                                         )}
                                                         <span style={{
                                                             fontSize: '10px', fontWeight: 700,
-                                                            color: mov.tipo === 'deposito' ? '#166534' : '#92400E',
-                                                            backgroundColor: mov.tipo === 'deposito' ? '#DCFCE7' : '#FEF3C7',
+                                                            color: mov.tipo === 'deposito' ? '#16A34A' : '#D69A00',
+                                                            backgroundColor: mov.tipo === 'deposito' ? '#EAF7EE' : '#FFF9E6',
                                                             padding: '2px 6px', borderRadius: '4px'
                                                         }}>
                                                             {mov.tipo === 'deposito' ? 'DEPÓSITO' : 'CONSUMO'}
                                                         </span>
                                                     </div>
                                                 </td>
-                                                <td style={{ padding: '10px 0', color: '#374151' }}>
+                                                <td style={{ padding: '10px 0', color: '#6B7280' }}>
                                                     {mov.descripcion || '-'}
                                                     {mov.venta && (
                                                         <span style={{ fontSize: '11px', color: '#6B7280', marginLeft: '6px' }}>
@@ -793,7 +793,7 @@ export default function CuentasCobrar() {
                                                 </td>
                                                 <td style={{
                                                     padding: '10px 0', textAlign: 'right', fontWeight: 700,
-                                                    color: mov.tipo === 'deposito' ? '#16A34A' : '#D97706'
+                                                    color: mov.tipo === 'deposito' ? '#16A34A' : '#D69A00'
                                                 }}>
                                                     {mov.tipo === 'deposito' ? '+' : '-'}{formatPesos(mov.monto)}
                                                 </td>
@@ -830,10 +830,10 @@ export default function CuentasCobrar() {
                                 gap: '12px'
                             }}>
                                 {/* Header compacto */}
-                                <div id="cuentas-modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '8px', borderBottom: '1px solid #E5E7EB' }}>
+                                <div id="cuentas-modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '8px', borderBottom: '1px solid #ECECEC' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#F2A900', backgroundColor: '#FFF8E7', padding: '3px 8px', borderRadius: '4px' }}>CXC-{cuentaActiva.id.toString().padStart(4, '0')}</span>
-                                        <span style={{ fontSize: '14px', fontWeight: 700, color: '#1A1A2E' }}>{cuentaActiva.clienteNombre}</span>
+                                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#D69A00', backgroundColor: '#FFF9E6', padding: '3px 8px', borderRadius: '4px' }}>CXC-{cuentaActiva.id.toString().padStart(4, '0')}</span>
+                                        <span style={{ fontSize: '14px', fontWeight: 700, color: '#111827' }}>{cuentaActiva.clienteNombre}</span>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                         <span style={{ fontSize: '11px', color: '#6B7280' }}>Vence: {cuentaActiva.fechaVencimiento ? new Date(cuentaActiva.fechaVencimiento).toLocaleDateString() : 'N/A'}</span>
@@ -844,7 +844,7 @@ export default function CuentasCobrar() {
                                                 style={{
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                     width: '28px', height: '28px', borderRadius: '6px',
-                                                    border: '1px solid #FCA5A5', backgroundColor: '#FEF2F2',
+                                                    border: '1px solid rgba(220,38,38,0.35)', backgroundColor: '#FDECEC',
                                                     cursor: 'pointer', transition: 'all 0.15s'
                                                 }}
                                             >
@@ -860,11 +860,11 @@ export default function CuentasCobrar() {
                                         <span style={{ color: '#6B7280', fontSize: '11px' }}>Deuda</span>
                                         <div style={{ fontWeight: 700 }}>{formatPesos(cuentaActiva.monto)}</div>
                                     </div>
-                                    <div style={{ flex: 1, borderLeft: '1px solid #E5E7EB', paddingLeft: '16px' }}>
+                                    <div style={{ flex: 1, borderLeft: '1px solid #ECECEC', paddingLeft: '16px' }}>
                                         <span style={{ color: '#6B7280', fontSize: '11px' }}>Abonado</span>
                                         <div style={{ fontWeight: 700, color: '#16A34A' }}>{formatPesos((cuentaActiva.abonado || 0) + (parseInt(pagoMonto) || 0))}</div>
                                     </div>
-                                    <div style={{ flex: 1, borderLeft: '1px solid #E5E7EB', paddingLeft: '16px' }}>
+                                    <div style={{ flex: 1, borderLeft: '1px solid #ECECEC', paddingLeft: '16px' }}>
                                         <span style={{ color: '#6B7280', fontSize: '11px' }}>Pendiente</span>
                                         <div style={{ fontWeight: 700, color: '#DC2626' }}>{formatPesos(cuentaActiva.saldoPendiente - (parseInt(pagoMonto) || 0))}</div>
                                     </div>
@@ -875,7 +875,7 @@ export default function CuentasCobrar() {
                                     <div style={{ fontSize: '11px', fontWeight: 700, color: '#6B7280', marginBottom: '6px', textTransform: 'uppercase' }}>Detalle de facturas</div>
                                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                                         <thead>
-                                            <tr style={{ borderBottom: '1px solid #E5E7EB', textAlign: 'left' }}>
+                                            <tr style={{ borderBottom: '1px solid #ECECEC', textAlign: 'left' }}>
                                                 <th style={{ padding: '8px 0', fontWeight: 600, color: '#6B7280' }}>Descripción</th>
                                                 <th style={{ padding: '8px 0', fontWeight: 600, color: '#6B7280' }}>Vence</th>
                                                 <th style={{ padding: '8px 0', fontWeight: 600, color: '#6B7280', textAlign: 'right' }}>Total</th>
@@ -918,19 +918,19 @@ export default function CuentasCobrar() {
 
                                                     return (
                                                         <tr key={idx} style={{
-                                                            backgroundColor: isItemPagada ? '#F0FDF4' : 'transparent',
+                                                            backgroundColor: isItemPagada ? '#EAF7EE' : 'transparent',
                                                             borderBottom: '1px solid #F3F4F6'
                                                         }}>
                                                             <td style={{ padding: '12px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                                 {isItemPagada ? (
-                                                                    <span style={{ fontSize: '10px', color: '#166534', backgroundColor: '#DCFCE7', padding: '2px 6px', borderRadius: '4px', fontWeight: 800 }}>PAGADA</span>
+                                                                    <span style={{ fontSize: '10px', color: '#16A34A', backgroundColor: '#EAF7EE', padding: '2px 6px', borderRadius: '4px', fontWeight: 800 }}>PAGADA</span>
                                                                 ) : (
-                                                                    <span style={{ fontSize: '10px', color: '#F2A900', backgroundColor: '#FFF8E7', padding: '2px 6px', borderRadius: '4px', fontWeight: 800 }}>CXC-{cuentaActiva.id.toString().padStart(4, '0')}</span>
+                                                                    <span style={{ fontSize: '10px', color: '#D69A00', backgroundColor: '#FFF9E6', padding: '2px 6px', borderRadius: '4px', fontWeight: 800 }}>CXC-{cuentaActiva.id.toString().padStart(4, '0')}</span>
                                                                 )}
-                                                                <span style={{ fontWeight: 500, color: isItemPagada ? '#166534' : '#111827' }}>{item.detail}</span>
+                                                                <span style={{ fontWeight: 500, color: isItemPagada ? '#16A34A' : '#111827' }}>{item.detail}</span>
                                                             </td>
-                                                            <td style={{ padding: '12px 0', color: isItemPagada ? '#166534' : '#6B7280' }}>{item.date}</td>
-                                                            <td style={{ padding: '12px 0', textAlign: 'right', fontWeight: 600, color: isItemPagada ? '#166534' : '#111827' }}>{formatPesos(item.itemAmount)}</td>
+                                                            <td style={{ padding: '12px 0', color: isItemPagada ? '#16A34A' : '#6B7280' }}>{item.date}</td>
+                                                            <td style={{ padding: '12px 0', textAlign: 'right', fontWeight: 600, color: isItemPagada ? '#16A34A' : '#111827' }}>{formatPesos(item.itemAmount)}</td>
                                                             <td style={{ padding: '12px 0', textAlign: 'right', fontWeight: 700, color: isItemPagada ? '#16A34A' : '#111827' }}>{formatPesos(pendienteDespues)}</td>
                                                             <td style={{ padding: '12px 0', textAlign: 'right', fontWeight: 700, color: abonarEsteItem > 0 ? '#DC2626' : '#9CA3AF' }}>
                                                                 {abonarEsteItem > 0 ? formatPesos(abonarEsteItem) : '-'}
@@ -945,9 +945,9 @@ export default function CuentasCobrar() {
 
                                 {/* Payment Interface compacto */}
                                 {cuentaActiva.saldoPendiente > 0 ? (
-                                    <div style={{ padding: '10px 12px', backgroundColor: '#F9FAFB', borderRadius: '6px', border: '1px solid #E5E7EB' }}>
+                                    <div style={{ padding: '10px 12px', backgroundColor: '#F9FAFB', borderRadius: '6px', border: '1px solid #ECECEC' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#374151', whiteSpace: 'nowrap' }}>Abonar:</span>
+                                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#6B7280', whiteSpace: 'nowrap' }}>Abonar:</span>
                                             <div style={{ display: 'flex', gap: '4px' }}>
                                                 {metodosPago.map(metodo => (
                                                     <button
@@ -956,9 +956,9 @@ export default function CuentasCobrar() {
                                                         style={{
                                                             display: 'flex', alignItems: 'center', gap: '4px',
                                                             padding: '5px 10px', borderRadius: '4px', border: '1px solid',
-                                                            borderColor: metodoSeleccionado === metodo.id ? '#1A1A2E' : '#D1D5DB',
-                                                            backgroundColor: metodoSeleccionado === metodo.id ? '#1A1A2E' : '#fff',
-                                                            color: metodoSeleccionado === metodo.id ? '#fff' : '#4B5563',
+                                                            borderColor: metodoSeleccionado === metodo.id ? '#111827' : '#ECECEC',
+                                                            backgroundColor: metodoSeleccionado === metodo.id ? '#111827' : '#fff',
+                                                            color: metodoSeleccionado === metodo.id ? '#fff' : '#6B7280',
                                                             cursor: 'pointer', fontWeight: 600, fontSize: '11px', transition: 'all 0.15s'
                                                         }}
                                                     >
@@ -970,7 +970,7 @@ export default function CuentasCobrar() {
                                             <select
                                                 value={selectedAccountId}
                                                 onChange={(e) => setSelectedAccountId(e.target.value)}
-                                                style={{ padding: '5px 8px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '12px', outline: 'none', backgroundColor: '#fff', minWidth: '140px' }}
+                                                style={{ padding: '5px 8px', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '12px', outline: 'none', backgroundColor: '#fff', minWidth: '140px' }}
                                             >
                                                 <option value="">Cuenta...</option>
                                                 {cuentasFinancieras.filter(c => metodoSeleccionado === 'efectivo' ? c.tipo === 'caja' : c.tipo === 'banco').map(c => (
@@ -981,12 +981,12 @@ export default function CuentasCobrar() {
                                                 type="text"
                                                 value={pagoMonto ? formatPesos(pagoMonto) : ''}
                                                 onChange={handleCurrencyInput}
-                                                style={{ width: '130px', padding: '5px 8px', border: '1px solid #D1D5DB', borderRadius: '4px', fontSize: '13px', fontWeight: 700, color: '#1A1A2E' }}
+                                                style={{ width: '130px', padding: '5px 8px', border: '1px solid #ECECEC', borderRadius: '4px', fontSize: '13px', fontWeight: 700, color: '#111827' }}
                                                 placeholder="$ 0"
                                             />
                                             <Button
                                                 onClick={handleRegistrarPago}
-                                                style={{ padding: '5px 16px', height: '30px', fontSize: '12px', fontWeight: 700, backgroundColor: '#1A365D' }}
+                                                style={{ padding: '5px 16px', height: '30px', fontSize: '12px', fontWeight: 700, backgroundColor: '#16A34A' }}
                                                 disabled={!selectedAccountId || !pagoMonto || (!isCajaOpen && metodoSeleccionado === 'efectivo') || isSubmittingPago}
                                             >
                                                 {isSubmittingPago ? 'Procesando...' : (isCajaOpen || metodoSeleccionado !== 'efectivo' ? 'Aplicar' : 'Caja Cerrada')}
@@ -995,7 +995,7 @@ export default function CuentasCobrar() {
                                     </div>
                                 ) : (
                                     <div style={{ textAlign: 'center', padding: '10px 0' }}>
-                                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', backgroundColor: '#F0FDF4', color: '#166534', borderRadius: '6px', fontWeight: 700, fontSize: '13px' }}>
+                                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', backgroundColor: '#EAF7EE', color: '#16A34A', borderRadius: '6px', fontWeight: 700, fontSize: '13px' }}>
                                             <CheckCircle size={16} />
                                             <span>Cuenta pagada en su totalidad</span>
                                         </div>

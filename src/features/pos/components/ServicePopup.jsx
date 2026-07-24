@@ -14,7 +14,7 @@ export default function ServicePopup({ service, editName, editPrice, setEditName
                         type="text"
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
-                        style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                        style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }}
                     />
                 </div>
                 <div>
@@ -25,7 +25,7 @@ export default function ServicePopup({ service, editName, editPrice, setEditName
                             type="text"
                             value={editPrice ? parseInt(editPrice).toLocaleString('es-CO') : ''}
                             onChange={(e) => setEditPrice(e.target.value.replace(/\D/g, ''))}
-                            style={{ width: '100%', padding: '10px 12px 10px 28px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                            style={{ width: '100%', padding: '10px 12px 10px 28px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }}
                             placeholder="0"
                         />
                     </div>

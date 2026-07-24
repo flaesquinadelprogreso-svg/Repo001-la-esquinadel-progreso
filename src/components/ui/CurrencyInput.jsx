@@ -62,6 +62,8 @@ export default function CurrencyInput({
 
     const handleFocus = (e) => {
         setIsFocused(true);
+        e.target.style.borderColor = '#F5B400';
+        e.target.style.boxShadow = '0 0 0 3px rgba(245,180,0,0.18)';
         // Show raw number without formatting while focused
         if (value !== null && value !== undefined && value !== '') {
             const num = Number(value);
@@ -73,6 +75,8 @@ export default function CurrencyInput({
 
     const handleBlur = (e) => {
         setIsFocused(false);
+        e.target.style.borderColor = '#ECECEC';
+        e.target.style.boxShadow = 'none';
         // Format value on blur
         if (value !== null && value !== undefined && value !== '') {
             const num = Number(value);
@@ -85,12 +89,14 @@ export default function CurrencyInput({
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {label && (
                 <label style={{
                     fontSize: '12px',
-                    fontWeight: 500,
-                    color: '#374151'
+                    fontWeight: 600,
+                    color: '#6B7280',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
                 }}>
                     {label} {required && <span style={{ color: '#DC2626' }}>*</span>}
                 </label>
@@ -103,9 +109,9 @@ export default function CurrencyInput({
                 {prefix && (
                     <span style={{
                         position: 'absolute',
-                        left: '12px',
+                        left: '14px',
                         color: '#6B7280',
-                        fontSize: '13px',
+                        fontSize: '14px',
                         pointerEvents: 'none'
                     }}>
                         {prefix}
@@ -123,14 +129,17 @@ export default function CurrencyInput({
                     disabled={disabled}
                     style={{
                         width: '100%',
-                        padding: '10px 12px',
-                        paddingLeft: prefix ? '28px' : '12px',
-                        fontSize: '13px',
+                        height: '48px',
+                        padding: '0 14px',
+                        paddingLeft: prefix ? '30px' : '14px',
+                        fontSize: '14px',
+                        color: '#111827',
                         backgroundColor: disabled ? '#F3F4F6' : 'white',
-                        border: '1px solid #D1D5DB',
-                        borderRadius: '6px',
+                        border: '1px solid #ECECEC',
+                        borderRadius: '14px',
                         outline: 'none',
                         fontFamily: 'inherit',
+                        boxSizing: 'border-box',
                         transition: 'border-color 150ms, box-shadow 150ms',
                         cursor: disabled ? 'not-allowed' : 'text'
                     }}

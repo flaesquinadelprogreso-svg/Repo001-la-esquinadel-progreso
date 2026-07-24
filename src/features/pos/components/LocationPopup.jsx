@@ -7,11 +7,11 @@ import { formatPesos } from '../../../utils/currency';
 // Helper to get color for location
 const ubicacionColor = (name) => {
     const colors = {
-        'Bodega Principal': { bg: '#DBEAFE', fg: '#1D4ED8' },
-        'Mostrador': { bg: '#D1FAE5', fg: '#059669' },
-        'Vitrina': { bg: '#EDE9FE', fg: '#7C3AED' },
+        'Bodega Principal': { bg: '#FFF9E6', fg: '#D69A00' },
+        'Mostrador': { bg: '#EAF7EE', fg: '#16A34A' },
+        'Vitrina': { bg: '#EFF4FF', fg: '#2563EB' },
     };
-    return colors[name] || { bg: '#F0F2F5', fg: '#6B7280' };
+    return colors[name] || { bg: '#F3F4F6', fg: '#6B7280' };
 };
 
 export default function LocationPopup({ product, locationQuantities, setLocationQuantities, onConfirm, onClose }) {
@@ -28,12 +28,12 @@ export default function LocationPopup({ product, locationQuantities, setLocation
         <Modal isOpen={true} onClose={onClose} title="Seleccionar Ubicación">
             <div style={{ minWidth: '380px' }}>
                 {/* Product Header */}
-                <div style={{ display: 'flex', gap: '16px', alignItems: 'center', backgroundColor: '#F9FAFB', padding: '16px', borderRadius: '12px', marginBottom: '20px', border: '1px solid #E5E7EB' }}>
-                    <div style={{ width: '60px', height: '60px', backgroundColor: '#EEF2FF', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'center', backgroundColor: '#F9FAFB', padding: '16px', borderRadius: '12px', marginBottom: '20px', border: '1px solid #ECECEC' }}>
+                    <div style={{ width: '60px', height: '60px', backgroundColor: '#EFF4FF', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {product.imagen ? (
                             <img src={product.imagen} alt={product.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '10px' }} />
                         ) : (
-                            <Package size={32} color="#4F46E5" />
+                            <Package size={32} color="#2563EB" />
                         )}
                     </div>
                     <div style={{ flex: 1 }}>
@@ -42,14 +42,14 @@ export default function LocationPopup({ product, locationQuantities, setLocation
                         </div>
                         <div style={{ fontSize: '13px', color: '#6B7280', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span>Ref: {product.codigo}</span>
-                            <span style={{ fontWeight: 700, color: '#10B981', fontSize: '15px' }}>{formatPesos(precioActual)}</span>
+                            <span style={{ fontWeight: 700, color: '#16A34A', fontSize: '15px' }}>{formatPesos(precioActual)}</span>
                         </div>
                     </div>
                 </div>
 
                 <div style={{ marginBottom: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                        <label style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>
+                        <label style={{ fontSize: '13px', fontWeight: 600, color: '#6B7280' }}>
                             ¿De qué ubicaciones desea extraer el producto?
                         </label>
                         {product.precioMayor && product.precioMayor !== product.precio && (
@@ -59,9 +59,9 @@ export default function LocationPopup({ product, locationQuantities, setLocation
                                 style={{
                                     padding: '4px 10px',
                                     borderRadius: '6px',
-                                    border: `2px solid ${usePrecioMayor ? '#4F46E5' : '#D1D5DB'}`,
-                                    backgroundColor: usePrecioMayor ? '#EEF2FF' : '#fff',
-                                    color: usePrecioMayor ? '#4F46E5' : '#9CA3AF',
+                                    border: `2px solid ${usePrecioMayor ? '#2563EB' : '#ECECEC'}`,
+                                    backgroundColor: usePrecioMayor ? '#EFF4FF' : '#fff',
+                                    color: usePrecioMayor ? '#2563EB' : '#9CA3AF',
                                     fontSize: '11px',
                                     fontWeight: 800,
                                     cursor: 'pointer',
@@ -85,7 +85,7 @@ export default function LocationPopup({ product, locationQuantities, setLocation
                                     padding: '12px 16px',
                                     backgroundColor: '#fff',
                                     borderRadius: '10px',
-                                    border: '1px solid #E5E7EB',
+                                    border: '1px solid #ECECEC',
                                     boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
                                 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -99,7 +99,7 @@ export default function LocationPopup({ product, locationQuantities, setLocation
                                         </div>
                                         <div>
                                             <div style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>{s.ubicacion?.nombre}</div>
-                                            <div style={{ fontSize: '12px', color: '#6B7280' }}>Disponible: <span style={{ fontWeight: 600, color: '#374151' }}>{s.stock % 1 === 0 ? s.stock : s.stock.toFixed(2)}</span></div>
+                                            <div style={{ fontSize: '12px', color: '#6B7280' }}>Disponible: <span style={{ fontWeight: 600, color: '#6B7280' }}>{s.stock % 1 === 0 ? s.stock : s.stock.toFixed(2)}</span></div>
                                         </div>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -115,7 +115,7 @@ export default function LocationPopup({ product, locationQuantities, setLocation
                                                 setLocationQuantities(prev => ({ ...prev, [s.ubicacionId]: raw }));
                                             }}
                                             onBlur={(e) => {
-                                                e.target.style.borderColor = '#D1D5DB';
+                                                e.target.style.borderColor = '#ECECEC';
                                                 const raw = e.target.value;
                                                 if (raw === '' || raw === '.') {
                                                     setLocationQuantities(prev => ({ ...prev, [s.ubicacionId]: '' }));
@@ -127,7 +127,7 @@ export default function LocationPopup({ product, locationQuantities, setLocation
                                             style={{
                                                 width: '80px',
                                                 padding: '8px 12px',
-                                                border: '1px solid #D1D5DB',
+                                                border: '1px solid #ECECEC',
                                                 borderRadius: '8px',
                                                 textAlign: 'center',
                                                 fontSize: '14px',
@@ -135,14 +135,14 @@ export default function LocationPopup({ product, locationQuantities, setLocation
                                                 outline: 'none',
                                                 transition: 'border-color 0.2s'
                                             }}
-                                            onFocus={e => e.target.style.borderColor = '#4F46E5'}
+                                            onFocus={e => e.target.style.borderColor = '#F5B400'}
                                         />
                                     </div>
                                 </div>
                             );
                         })}
                         {(!product.stockUbicaciones || product.stockUbicaciones.filter(s => s.stock > 0).length === 0) && (
-                            <div style={{ textAlign: 'center', color: '#6B7280', padding: '30px 20px', backgroundColor: '#F9FAFB', borderRadius: '12px', border: '1px dashed #E5E7EB' }}>
+                            <div style={{ textAlign: 'center', color: '#6B7280', padding: '30px 20px', backgroundColor: '#F9FAFB', borderRadius: '12px', border: '1px dashed #ECECEC' }}>
                                 <Package size={32} style={{ margin: '0 auto 12px auto', opacity: 0.5 }} />
                                 <p style={{ margin: 0, fontSize: '14px' }}>Este producto no tiene stock disponible en ninguna ubicación.</p>
                             </div>
@@ -153,8 +153,8 @@ export default function LocationPopup({ product, locationQuantities, setLocation
                 {/* Subtotal preview - muestra el cálculo cuando hay cantidad */}
                 {totalQty > 0 && (
                     <div style={{
-                        backgroundColor: '#F0FDF4',
-                        border: '1px solid #BBF7D0',
+                        backgroundColor: '#EAF7EE',
+                        border: '1px solid rgba(22,163,74,0.3)',
                         borderRadius: '10px',
                         padding: '12px 16px',
                         marginBottom: '16px',
@@ -162,16 +162,16 @@ export default function LocationPopup({ product, locationQuantities, setLocation
                         justifyContent: 'space-between',
                         alignItems: 'center'
                     }}>
-                        <span style={{ fontSize: '13px', color: '#166534', fontWeight: 500 }}>
+                        <span style={{ fontSize: '13px', color: '#16A34A', fontWeight: 500 }}>
                             {totalQty % 1 === 0 ? totalQty : totalQty.toFixed(2)} × {formatPesos(precioActual)}
                         </span>
-                        <span style={{ fontSize: '16px', fontWeight: 700, color: '#166534' }}>
+                        <span style={{ fontSize: '16px', fontWeight: 700, color: '#16A34A' }}>
                             = {formatPesos(subtotalCalc)}
                         </span>
                     </div>
                 )}
 
-                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '24px', paddingTop: '16px', borderTop: '1px solid #E5E7EB' }}>
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '24px', paddingTop: '16px', borderTop: '1px solid #ECECEC' }}>
                     <Button variant="secondary" onClick={onClose}>Cancelar</Button>
                     <Button
                         onClick={() => onConfirm(product, locationQuantities, precioActual)}

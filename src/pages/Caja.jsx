@@ -269,7 +269,7 @@ export default function CajaBancos() {
     if (loading) {
         return (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ width: '40px', height: '40px', border: '3px solid #E5E7EB', borderTop: '3px solid #F2A900', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+                <div style={{ width: '40px', height: '40px', border: '3px solid #ECECEC', borderTop: '3px solid #F5B400', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
                 <p style={{ color: '#6B7280', fontSize: '14px', fontWeight: 500 }}>Actualizando saldos y cajas...</p>
                 <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
             </div>
@@ -298,13 +298,13 @@ export default function CajaBancos() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
                         <div style={{
                             width: '42px', height: '42px', borderRadius: '10px',
-                            backgroundColor: '#FFF8E7', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            backgroundColor: '#FFF9E6', display: 'flex', alignItems: 'center', justifyContent: 'center',
                             flexShrink: 0
                         }}>
-                            <Wallet size={22} color="#F2A900" />
+                            <Wallet size={22} color="#F5B400" />
                         </div>
                         <div>
-                            <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#1A1A2E', margin: 0 }}>
+                            <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#111827', margin: 0 }}>
                                 Inicializar Caja Principal
                             </h3>
                             <p style={{ fontSize: '12px', color: '#9CA3AF', margin: 0 }}>
@@ -314,7 +314,7 @@ export default function CajaBancos() {
                     </div>
 
                     <div style={{ marginBottom: '20px' }}>
-                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#374151', marginBottom: '6px' }}>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#6B7280', marginBottom: '6px' }}>
                             Saldo Inicial en Caja
                         </label>
                         <div style={{ position: 'relative' }}>
@@ -330,12 +330,12 @@ export default function CajaBancos() {
                                 autoFocus
                                 style={{
                                     width: '100%', padding: '11px 12px 11px 28px',
-                                    border: '2px solid #E5E7EB', borderRadius: '8px',
+                                    border: '2px solid #ECECEC', borderRadius: '8px',
                                     fontSize: '18px', fontWeight: 700, outline: 'none',
                                     textAlign: 'right', transition: 'border-color 0.2s'
                                 }}
-                                onFocus={(e) => e.target.style.borderColor = '#F2A900'}
-                                onBlur={(e) => e.target.style.borderColor = '#E5E7EB'}
+                                onFocus={(e) => e.target.style.borderColor = '#F5B400'}
+                                onBlur={(e) => e.target.style.borderColor = '#ECECEC'}
                             />
                         </div>
                         <p style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '4px', marginBottom: 0 }}>
@@ -348,14 +348,14 @@ export default function CajaBancos() {
                         disabled={iniciandoCaja}
                         style={{
                             width: '100%', padding: '11px',
-                            background: 'linear-gradient(135deg, #F2A900 0%, #D4950A 100%)',
-                            backgroundColor: '#F2A900',
-                            color: '#fff', fontSize: '14px', fontWeight: 700,
-                            border: 'none', borderRadius: '8px',
+                            background: 'linear-gradient(135deg, #F5B400 0%, #D69A00 100%)',
+                            backgroundColor: '#F5B400',
+                            color: '#111827', fontSize: '14px', fontWeight: 700,
+                            border: 'none', borderRadius: '10px',
                             cursor: iniciandoCaja ? 'not-allowed' : 'pointer',
                             opacity: iniciandoCaja ? 0.7 : 1,
                             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                            boxShadow: '0 4px 12px rgba(242,169,0,0.3)',
+                            boxShadow: '0 4px 12px rgba(245,180,0,0.3)',
                             transition: 'all 0.2s'
                         }}
                     >
@@ -380,11 +380,11 @@ export default function CajaBancos() {
             {/* Header */}
             <div id="caja-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
-                    <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#1A1A2E' }}>Caja y Bancos</h1>
+                    <h1 style={{ fontSize: '20px', fontWeight: 600, color: '#111827' }}>Caja y Bancos</h1>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '8px' }}>
                         <button
                             onClick={() => setViewMode('general')}
-                            style={{ background: 'none', border: 'none', padding: 0, fontSize: '13px', fontWeight: viewMode === 'general' ? 600 : 400, color: viewMode === 'general' ? '#F2A900' : '#6B7280', cursor: 'pointer', borderBottom: viewMode === 'general' ? '2px solid #F2A900' : '2px solid transparent' }}
+                            style={{ background: 'none', border: 'none', padding: 0, fontSize: '13px', fontWeight: viewMode === 'general' ? 600 : 400, color: viewMode === 'general' ? '#D69A00' : '#6B7280', cursor: 'pointer', borderBottom: viewMode === 'general' ? '2px solid #F5B400' : '2px solid transparent' }}
                         >
                             Resumen General
                         </button>
@@ -407,28 +407,28 @@ export default function CajaBancos() {
                 <>
                     {/* Total Highlight */}
                     <div style={{
-                        backgroundColor: '#F2A900',
+                        backgroundColor: '#F5B400',
                         padding: '24px',
-                        borderRadius: '12px',
-                        color: '#fff',
+                        borderRadius: '16px',
+                        color: '#111827',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
+                        boxShadow: '0 1px 2px rgba(17,24,39,0.04), 0 1px 3px rgba(17,24,39,0.06)'
                     }}>
                         <div>
-                            <p style={{ fontSize: '14px', opacity: 0.8, fontWeight: 500 }}>Total Disponible (General)</p>
-                            <p style={{ fontSize: '32px', fontWeight: 800, marginTop: '4px' }}>{formatPesos(totalDisponible)}</p>
+                            <p style={{ fontSize: '14px', opacity: 0.7, fontWeight: 500 }}>Total Disponible (General)</p>
+                            <p style={{ fontSize: '34px', fontWeight: 700, marginTop: '8px' }}>{formatPesos(totalDisponible)}</p>
                         </div>
-                        <div style={{ width: '56px', height: '56px', borderRadius: '56px', backgroundColor: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ width: '56px', height: '56px', borderRadius: '56px', backgroundColor: 'rgba(17,24,39,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <TrendingUp size={28} />
                         </div>
                     </div>
 
                     {/* Cuentas - Minimalist List */}
-                    <div id="caja-cuentas" style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
-                        <div style={{ padding: '10px 20px', borderBottom: '1px solid #E5E7EB', backgroundColor: '#F9FAFB' }}>
-                            <h2 style={{ fontSize: '13px', fontWeight: 700, color: '#4B5563', textTransform: 'uppercase' }}>Mis Cuentas</h2>
+                    <div id="caja-cuentas" style={{ backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #ECECEC', overflow: 'hidden' }}>
+                        <div style={{ padding: '10px 20px', borderBottom: '1px solid #ECECEC', backgroundColor: '#F9FAFB' }}>
+                            <h2 style={{ fontSize: '13px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase' }}>Mis Cuentas</h2>
                         </div>
                         <div>
                             {cuentas.map((cuenta, idx) => (
@@ -455,22 +455,22 @@ export default function CajaBancos() {
                                             width: '32px',
                                             height: '32px',
                                             borderRadius: '6px',
-                                            backgroundColor: cuenta.tipo === 'caja' ? '#F3F4F6' : '#EEF2FF',
+                                            backgroundColor: cuenta.tipo === 'caja' ? '#F3F4F6' : '#EFF4FF',
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center'
                                         }}>
-                                            {cuenta.tipo === 'caja' ? <Wallet size={16} color="#6B7280" /> : <Landmark size={16} color="#F2A900" />}
+                                            {cuenta.tipo === 'caja' ? <Wallet size={16} color="#6B7280" /> : <Landmark size={16} color="#2563EB" />}
                                         </div>
                                         <div>
-                                            <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#1A1A2E' }}>{cuenta.nombre}{cuenta.tipo === 'banco' && cuenta.numeroCuenta ? ` ****${cuenta.numeroCuenta}` : ''}</h3>
+                                            <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>{cuenta.nombre}{cuenta.tipo === 'banco' && cuenta.numeroCuenta ? ` ****${cuenta.numeroCuenta}` : ''}</h3>
                                             <p style={{ fontSize: '10px', color: '#9CA3AF', textTransform: 'uppercase' }}>
                                                 {cuenta.tipo}
                                             </p>
                                         </div>
                                     </div>
                                     <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                        <p style={{ fontSize: '15px', fontWeight: 700, color: '#1A1A2E' }}>{formatPesos(cuenta.saldoActual)}</p>
+                                        <p style={{ fontSize: '15px', fontWeight: 700, color: '#111827' }}>{formatPesos(cuenta.saldoActual)}</p>
                                         {cuenta.id !== cajaPrincipalId && cuenta.saldoActual === 0 && (
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); handleDeleteAccount(cuenta.id); }}
@@ -480,7 +480,7 @@ export default function CajaBancos() {
                                                 <Trash2 size={14} color="#DC2626" />
                                             </button>
                                         )}
-                                        <ChevronRight size={14} color="#D1D5DB" />
+                                        <ChevronRight size={14} color="#ECECEC" />
                                     </div>
                                 </div>
                             ))}
@@ -488,21 +488,21 @@ export default function CajaBancos() {
                     </div>
                 </>
             ) : (
-                <div id="caja-cuenta-detalle" style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', padding: '24px', position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div id="caja-cuenta-detalle" style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #ECECEC', padding: '24px', position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
                         <div style={{
                             width: '56px',
                             height: '56px',
                             borderRadius: '12px',
-                            backgroundColor: cuentas.find(c => c.id.toString() === selectedCuentaId)?.tipo === 'caja' ? '#F3F4F6' : '#EEF2FF',
+                            backgroundColor: cuentas.find(c => c.id.toString() === selectedCuentaId)?.tipo === 'caja' ? '#F3F4F6' : '#EFF4FF',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center'
                         }}>
-                            {cuentas.find(c => c.id.toString() === selectedCuentaId)?.tipo === 'caja' ? <Wallet size={28} color="#6B7280" /> : <Landmark size={28} color="#F2A900" />}
+                            {cuentas.find(c => c.id.toString() === selectedCuentaId)?.tipo === 'caja' ? <Wallet size={28} color="#6B7280" /> : <Landmark size={28} color="#2563EB" />}
                         </div>
                         <div>
-                            <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#1A1A2E' }}>{cuentas.find(c => c.id.toString() === selectedCuentaId)?.nombre}</h2>
+                            <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#111827' }}>{cuentas.find(c => c.id.toString() === selectedCuentaId)?.nombre}</h2>
                             <p style={{ fontSize: '12px', color: '#6B7280', textTransform: 'uppercase', fontWeight: 600 }}>
                                 {cuentas.find(c => c.id.toString() === selectedCuentaId)?.tipo} {cuentas.find(c => c.id.toString() === selectedCuentaId)?.numeroCuenta ? `| #${cuentas.find(c => c.id.toString() === selectedCuentaId)?.numeroCuenta}` : ''}
                             </p>
@@ -510,12 +510,12 @@ export default function CajaBancos() {
                     </div>
                     <div style={{ textAlign: 'right' }}>
                         <p style={{ fontSize: '12px', color: '#6B7280', fontWeight: 500 }}>SALDO ACTUAL</p>
-                        <p style={{ fontSize: '28px', fontWeight: 800, color: '#1A1A2E' }}>
+                        <p style={{ fontSize: '28px', fontWeight: 800, color: '#111827' }}>
                             {formatPesos(cuentas.find(c => String(c.id) === String(selectedCuentaId))?.saldoActual || 0)}
                         </p>
                         <button
                             onClick={() => { setViewMode('general'); setSelectedCuentaId(''); }}
-                            style={{ marginTop: '8px', color: '#F2A900', fontSize: '13px', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                            style={{ marginTop: '8px', color: '#D69A00', fontSize: '13px', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
                         >
                             &larr; Volver a todas las cuentas
                         </button>
@@ -525,9 +525,9 @@ export default function CajaBancos() {
 
             {/* History Table & Filters */}
             {(viewMode === 'general' || viewMode === 'account') && (
-                <div id="caja-history" style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
-                    <div id="caja-filters" style={{ padding: '16px 20px', borderBottom: '1px solid #E5E7EB', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-                        <h2 style={{ fontSize: '15px', fontWeight: 600, color: '#1A1A2E' }}>
+                <div id="caja-history" style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #ECECEC', overflow: 'hidden' }}>
+                    <div id="caja-filters" style={{ padding: '16px 20px', borderBottom: '1px solid #ECECEC', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                        <h2 style={{ fontSize: '15px', fontWeight: 600, color: '#111827' }}>
                             {viewMode === 'account' ? 'Historial Detallado' : (selectedCuentaId ? `Filtrado por: ${cuentas.find(c => c.id.toString() === selectedCuentaId)?.nombre}` : 'Todos los Movimientos Recientes')}
                         </h2>
 
@@ -538,7 +538,7 @@ export default function CajaBancos() {
                                     type="date"
                                     value={startDate}
                                     onChange={(e) => setStartDate(e.target.value)}
-                                    style={{ padding: '6px 10px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '12px' }}
+                                    style={{ padding: '6px 10px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '12px' }}
                                 />
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -547,7 +547,7 @@ export default function CajaBancos() {
                                     type="date"
                                     value={endDate}
                                     onChange={(e) => setEndDate(e.target.value)}
-                                    style={{ padding: '6px 10px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '12px' }}
+                                    style={{ padding: '6px 10px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '12px' }}
                                 />
                             </div>
                             {(startDate || endDate || (viewMode === 'general' && selectedCuentaId)) && (
@@ -559,7 +559,7 @@ export default function CajaBancos() {
                                         setStartDate('');
                                         setEndDate('');
                                     }}
-                                    style={{ backgroundColor: '#FEF2F2', color: '#EF4444', borderColor: '#FEE2E2' }}
+                                    style={{ backgroundColor: '#FDECEC', color: '#DC2626', borderColor: '#FDECEC' }}
                                 >
                                     <X size={14} style={{ marginRight: '6px' }} />Limpiar Filtros
                                 </Button>
@@ -568,7 +568,7 @@ export default function CajaBancos() {
                                 variant="secondary"
                                 size="sm"
                                 onClick={handleExportExcel}
-                                style={(startDate || endDate) ? { backgroundColor: '#F2A900', color: '#fff', borderColor: '#F2A900' } : {}}
+                                style={(startDate || endDate) ? { backgroundColor: '#F5B400', color: '#111827', borderColor: '#F5B400' } : {}}
                             >
                                 <FileText size={14} style={{ marginRight: '6px' }} />{(startDate || endDate) ? 'Descargar Historial Filtrado' : 'Exportar Excel'}
                             </Button>
@@ -577,12 +577,12 @@ export default function CajaBancos() {
                     <div style={{ overflowX: 'auto', position: 'relative', minHeight: '200px' }}>
                         {loading && (
                             <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10 }}>
-                                <div style={{ color: '#F2A900', fontWeight: 600 }}>Cargando movimientos...</div>
+                                <div style={{ color: '#D69A00', fontWeight: 600 }}>Cargando movimientos...</div>
                             </div>
                         )}
                         <table style={{ width: '100%', borderCollapse: 'collapse', opacity: loading ? 0.5 : 1 }}>
                             <thead>
-                                <tr style={{ backgroundColor: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
+                                <tr style={{ borderBottom: '1px solid #ECECEC' }}>
                                     <th style={{ padding: '12px 20px', textAlign: 'left', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Fecha/Hora</th>
                                     <th style={{ padding: '12px 20px', textAlign: 'left', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Cuenta</th>
                                     <th style={{ padding: '12px 20px', textAlign: 'left', fontSize: '12px', color: '#6B7280', textTransform: 'uppercase' }}>Categoría</th>
@@ -597,17 +597,17 @@ export default function CajaBancos() {
                                 {movimientos.map(mov => (
                                     <tr key={mov.id} style={{ borderBottom: '1px solid #F3F4F6' }}>
                                         <td style={{ padding: '14px 20px', fontSize: '13px' }}>
-                                            <div style={{ color: '#1A1A2E', fontWeight: 500 }}>{new Date(mov.fecha).toLocaleDateString()}</div>
+                                            <div style={{ color: '#111827', fontWeight: 500 }}>{new Date(mov.fecha).toLocaleDateString()}</div>
                                             <div style={{ fontSize: '11px', color: '#9CA3AF' }}>{mov.hora}</div>
                                         </td>
                                         <td style={{ padding: '14px 20px', fontSize: '13px' }}>
-                                            <span style={{ fontWeight: 500, color: '#374151' }}>{mov.cuenta?.nombre}</span>
+                                            <span style={{ fontWeight: 500, color: '#6B7280' }}>{mov.cuenta?.nombre}</span>
                                         </td>
                                         <td style={{ padding: '14px 20px', fontSize: '13px', color: '#6B7280' }}>{mov.categoria}</td>
                                         <td style={{ padding: '14px 20px', fontSize: '13px', color: '#6B7280' }}>
                                             <div>{mov.descripcion || '-'}</div>
                                             {mov.referencia && (
-                                                <div style={{ fontSize: '11px', color: '#4F46E5', fontWeight: 600, marginTop: '2px' }}>
+                                                <div style={{ fontSize: '11px', color: '#2563EB', fontWeight: 600, marginTop: '2px' }}>
                                                     {mov.referencia}
                                                 </div>
                                             )}
@@ -616,7 +616,7 @@ export default function CajaBancos() {
                                         <td style={{ padding: '14px 20px', textAlign: 'right', fontSize: '14px', fontWeight: 700, color: mov.tipo === 'entrada' ? '#16A34A' : '#DC2626' }}>
                                             {mov.tipo === 'entrada' ? '+' : '-'} {formatPesos(mov.monto)}
                                         </td>
-                                        <td style={{ padding: '14px 20px', textAlign: 'right', fontSize: '14px', fontWeight: 600, color: '#1A1A2E' }}>
+                                        <td style={{ padding: '14px 20px', textAlign: 'right', fontSize: '14px', fontWeight: 600, color: '#111827' }}>
                                             {mov.saldoDespues != null ? formatPesos(mov.saldoDespues) : '-'}
                                         </td>
                                         <td style={{ padding: '14px 10px', textAlign: 'center' }}>
@@ -627,7 +627,7 @@ export default function CajaBancos() {
                                                     style={{
                                                         display: 'inline-flex', alignItems: 'center', gap: '3px',
                                                         padding: '4px 8px', borderRadius: '6px',
-                                                        border: '1px solid #FCA5A5', backgroundColor: '#FEF2F2',
+                                                        border: '1px solid rgba(220,38,38,0.35)', backgroundColor: '#FDECEC',
                                                         cursor: 'pointer', fontSize: '11px', color: '#DC2626', fontWeight: 600
                                                     }}
                                                 >
@@ -641,7 +641,7 @@ export default function CajaBancos() {
                                                     style={{
                                                         display: 'inline-flex', alignItems: 'center', gap: '3px',
                                                         padding: '4px 8px', borderRadius: '6px',
-                                                        border: '1px solid #FCA5A5', backgroundColor: '#FEF2F2',
+                                                        border: '1px solid rgba(220,38,38,0.35)', backgroundColor: '#FDECEC',
                                                         cursor: 'pointer', fontSize: '11px', color: '#DC2626', fontWeight: 600
                                                     }}
                                                 >
@@ -655,7 +655,7 @@ export default function CajaBancos() {
                                                     style={{
                                                         display: 'inline-flex', alignItems: 'center', gap: '3px',
                                                         padding: '4px 8px', borderRadius: '6px',
-                                                        border: '1px solid #FCA5A5', backgroundColor: '#FEF2F2',
+                                                        border: '1px solid rgba(220,38,38,0.35)', backgroundColor: '#FDECEC',
                                                         cursor: 'pointer', fontSize: '11px', color: '#DC2626', fontWeight: 600
                                                     }}
                                                 >
@@ -682,7 +682,7 @@ export default function CajaBancos() {
                     {totalPages > 1 && (
                         <div style={{
                             padding: '12px 20px',
-                            borderTop: '1px solid #E5E7EB',
+                            borderTop: '1px solid #ECECEC',
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',
@@ -696,9 +696,9 @@ export default function CajaBancos() {
                                     onClick={() => fetchData(1)}
                                     disabled={currentPage === 1}
                                     style={{
-                                        padding: '6px 10px', borderRadius: '6px', border: '1px solid #E5E7EB',
+                                        padding: '6px 10px', borderRadius: '6px', border: '1px solid #ECECEC',
                                         backgroundColor: currentPage === 1 ? '#F3F4F6' : '#fff',
-                                        color: currentPage === 1 ? '#D1D5DB' : '#374151',
+                                        color: currentPage === 1 ? '#ECECEC' : '#6B7280',
                                         cursor: currentPage === 1 ? 'default' : 'pointer',
                                         fontSize: '12px', fontWeight: 600
                                     }}
@@ -709,9 +709,9 @@ export default function CajaBancos() {
                                     onClick={() => fetchData(currentPage - 1)}
                                     disabled={currentPage === 1}
                                     style={{
-                                        padding: '6px 10px', borderRadius: '6px', border: '1px solid #E5E7EB',
+                                        padding: '6px 10px', borderRadius: '6px', border: '1px solid #ECECEC',
                                         backgroundColor: currentPage === 1 ? '#F3F4F6' : '#fff',
-                                        color: currentPage === 1 ? '#D1D5DB' : '#374151',
+                                        color: currentPage === 1 ? '#ECECEC' : '#6B7280',
                                         cursor: currentPage === 1 ? 'default' : 'pointer',
                                         display: 'flex', alignItems: 'center'
                                     }}
@@ -735,9 +735,9 @@ export default function CajaBancos() {
                                                 onClick={() => fetchData(p)}
                                                 style={{
                                                     padding: '6px 12px', borderRadius: '6px',
-                                                    border: p === currentPage ? '1px solid #F2A900' : '1px solid #E5E7EB',
-                                                    backgroundColor: p === currentPage ? '#FFF8E1' : '#fff',
-                                                    color: p === currentPage ? '#F2A900' : '#374151',
+                                                    border: p === currentPage ? '1px solid #F5B400' : '1px solid #ECECEC',
+                                                    backgroundColor: p === currentPage ? '#FFF9E6' : '#fff',
+                                                    color: p === currentPage ? '#D69A00' : '#6B7280',
                                                     fontWeight: p === currentPage ? 700 : 500,
                                                     cursor: 'pointer', fontSize: '13px'
                                                 }}
@@ -751,9 +751,9 @@ export default function CajaBancos() {
                                     onClick={() => fetchData(currentPage + 1)}
                                     disabled={currentPage === totalPages}
                                     style={{
-                                        padding: '6px 10px', borderRadius: '6px', border: '1px solid #E5E7EB',
+                                        padding: '6px 10px', borderRadius: '6px', border: '1px solid #ECECEC',
                                         backgroundColor: currentPage === totalPages ? '#F3F4F6' : '#fff',
-                                        color: currentPage === totalPages ? '#D1D5DB' : '#374151',
+                                        color: currentPage === totalPages ? '#ECECEC' : '#6B7280',
                                         cursor: currentPage === totalPages ? 'default' : 'pointer',
                                         display: 'flex', alignItems: 'center'
                                     }}
@@ -764,9 +764,9 @@ export default function CajaBancos() {
                                     onClick={() => fetchData(totalPages)}
                                     disabled={currentPage === totalPages}
                                     style={{
-                                        padding: '6px 10px', borderRadius: '6px', border: '1px solid #E5E7EB',
+                                        padding: '6px 10px', borderRadius: '6px', border: '1px solid #ECECEC',
                                         backgroundColor: currentPage === totalPages ? '#F3F4F6' : '#fff',
-                                        color: currentPage === totalPages ? '#D1D5DB' : '#374151',
+                                        color: currentPage === totalPages ? '#ECECEC' : '#6B7280',
                                         cursor: currentPage === totalPages ? 'default' : 'pointer',
                                         fontSize: '12px', fontWeight: 600
                                     }}
@@ -789,7 +789,7 @@ export default function CajaBancos() {
                             type="text"
                             value={nuevaCuenta.nombre}
                             onChange={(e) => setNuevaCuenta({ ...nuevaCuenta, nombre: e.target.value })}
-                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px' }}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px' }}
                             placeholder="Ej: Banco Bancolombia"
                         />
                     </div>
@@ -798,7 +798,7 @@ export default function CajaBancos() {
                         <select
                             value={nuevaCuenta.tipo}
                             onChange={(e) => setNuevaCuenta({ ...nuevaCuenta, tipo: e.target.value })}
-                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px' }}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px' }}
                         >
                             <option value="banco">Banco</option>
                             <option value="caja">Caja (Efectivo)</option>
@@ -812,7 +812,7 @@ export default function CajaBancos() {
                                 maxLength={4}
                                 value={nuevaCuenta.numeroCuenta}
                                 onChange={(e) => setNuevaCuenta({ ...nuevaCuenta, numeroCuenta: e.target.value.replace(/\D/g, '') })}
-                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px' }}
+                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px' }}
                                 placeholder="Ej: 4532"
                             />
                         </div>
@@ -828,7 +828,7 @@ export default function CajaBancos() {
                                     const raw = e.target.value.replace(/\D/g, '');
                                     setNuevaCuenta({ ...nuevaCuenta, saldoInicial: raw });
                                 }}
-                                style={{ width: '100%', padding: '10px 12px 10px 28px', border: '1px solid #E5E7EB', borderRadius: '6px' }}
+                                style={{ width: '100%', padding: '10px 12px 10px 28px', border: '1px solid #ECECEC', borderRadius: '14px' }}
                                 placeholder="0"
                             />
                         </div>
@@ -849,7 +849,7 @@ export default function CajaBancos() {
                         <select
                             value={nuevoMov.cuentaId}
                             onChange={(e) => setNuevoMov({ ...nuevoMov, cuentaId: e.target.value })}
-                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px' }}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px' }}
                         >
                             <option value="">Seleccione cuenta (Efectivo / Banco)...</option>
                             {cuentas.map(c => <option key={c.id} value={c.id}>{c.nombre}{c.tipo === 'banco' && c.numeroCuenta ? ` ****${c.numeroCuenta}` : ''} ({c.tipo === 'caja' ? 'Efectivo' : 'Banco'})</option>)}
@@ -861,7 +861,7 @@ export default function CajaBancos() {
                             <select
                                 value={nuevoMov.categoria}
                                 onChange={(e) => setNuevoMov({ ...nuevoMov, categoria: e.target.value })}
-                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px' }}
+                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px' }}
                             >
                                 <option value="">Seleccione...</option>
                                 <option value="Acueducto">Acueducto</option>
@@ -901,7 +901,7 @@ export default function CajaBancos() {
                                     const raw = e.target.value.replace(/\D/g, '');
                                     setNuevoMov({ ...nuevoMov, monto: raw });
                                 }}
-                                style={{ width: '100%', padding: '10px 12px 10px 28px', border: '1px solid #E5E7EB', borderRadius: '6px' }}
+                                style={{ width: '100%', padding: '10px 12px 10px 28px', border: '1px solid #ECECEC', borderRadius: '14px' }}
                                 placeholder="0"
                             />
                         </div>
@@ -911,7 +911,7 @@ export default function CajaBancos() {
                         <textarea
                             value={nuevoMov.descripcion}
                             onChange={(e) => setNuevoMov({ ...nuevoMov, descripcion: e.target.value })}
-                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', minHeight: '80px' }}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px', minHeight: '80px' }}
                         />
                     </div>
                     <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '10px' }}>
@@ -930,7 +930,7 @@ export default function CajaBancos() {
                             <select
                                 value={nuevoTraslado.origenId}
                                 onChange={(e) => setNuevoTraslado({ ...nuevoTraslado, origenId: e.target.value })}
-                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px' }}
+                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px' }}
                             >
                                 <option value="">Seleccione...</option>
                                 {cuentas.map(c => <option key={`orig-${c.id}`} value={c.id}>{c.nombre}{c.tipo === 'banco' && c.numeroCuenta ? ` ****${c.numeroCuenta}` : ''} — {formatPesos(c.saldoActual)}</option>)}
@@ -945,7 +945,7 @@ export default function CajaBancos() {
                             <select
                                 value={nuevoTraslado.destinoId}
                                 onChange={(e) => setNuevoTraslado({ ...nuevoTraslado, destinoId: e.target.value })}
-                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px' }}
+                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px' }}
                             >
                                 <option value="">Seleccione...</option>
                                 {cuentas.map(c => <option key={`dest-${c.id}`} value={c.id}>{c.nombre}{c.tipo === 'banco' && c.numeroCuenta ? ` ****${c.numeroCuenta}` : ''} — {formatPesos(c.saldoActual)}</option>)}
@@ -964,7 +964,7 @@ export default function CajaBancos() {
                                     const raw = e.target.value.replace(/\D/g, '');
                                     setNuevoTraslado({ ...nuevoTraslado, monto: raw });
                                 }}
-                                style={{ width: '100%', padding: '10px 12px 10px 28px', border: '1px solid #E5E7EB', borderRadius: '6px' }}
+                                style={{ width: '100%', padding: '10px 12px 10px 28px', border: '1px solid #ECECEC', borderRadius: '14px' }}
                                 placeholder="0"
                             />
                         </div>
@@ -975,7 +975,7 @@ export default function CajaBancos() {
                             value={nuevoTraslado.descripcion}
                             onChange={(e) => setNuevoTraslado({ ...nuevoTraslado, descripcion: e.target.value })}
                             placeholder="Ej: Consignación a banco del cierre de caja"
-                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', minHeight: '60px' }}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px', minHeight: '60px' }}
                         />
                     </div>
                     <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '10px' }}>
@@ -1001,7 +1001,7 @@ export default function CajaBancos() {
                                 type="text"
                                 value={reversarMonto}
                                 onChange={(e) => setReversarMonto(handleCurrencyChange(e.target.value))}
-                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '14px', fontSize: '14px' }}
                             />
                             <div style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '4px' }}>
                                 Máximo: {formatPesos(showReversarModal.monto)} (total) — puede reversar parcial

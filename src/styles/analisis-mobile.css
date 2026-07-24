@@ -101,7 +101,7 @@
 
     .analisis-table-container>table>tbody>tr {
         background-color: #fff !important;
-        border: 1px solid #E5E7EB !important;
+        border: 1px solid #ECECEC !important;
         border-radius: 8px !important;
         margin-bottom: 12px !important;
         padding: 16px !important;
@@ -134,7 +134,7 @@
         width: 45% !important;
         text-align: left !important;
         font-weight: 600 !important;
-        color: #4B5563 !important;
+        color: #6B7280 !important;
         white-space: nowrap !important;
         font-size: 13px !important;
     }

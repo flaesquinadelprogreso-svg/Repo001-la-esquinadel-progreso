@@ -60,10 +60,9 @@ export default function Topbar({ isMobile, onMenuToggle }) {
             height: '60px',
             minHeight: '60px',
             backgroundColor: '#FFFFFF',
-            borderBottom: '1px solid #E2E5EA',
+            borderBottom: '1px solid #ECECEC',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
             padding: isMobile ? '0 12px' : '0 28px',
             flexShrink: 0,
             width: '100%',
@@ -75,49 +74,49 @@ export default function Topbar({ isMobile, onMenuToggle }) {
                 <button
                     onClick={onMenuToggle}
                     style={{
-                        padding: '8px', borderRadius: '8px',
+                        padding: '8px', borderRadius: '10px',
                         border: 'none', background: 'transparent',
-                        cursor: 'pointer', color: '#F2A900',
+                        cursor: 'pointer', color: '#F5B400',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         flexShrink: 0
                     }}
                 >
-                    <Menu size={22} />
+                    <Menu size={22} strokeWidth={2} />
                 </button>
             )}
 
             {/* Navbar Branding */}
-            <div style={{ display: 'none', lg: 'block', marginRight: 'auto', marginLeft: '20px' }} className="topbar-branding">
-                <span style={{ fontSize: '18px', fontWeight: 800, color: '#F2A900', letterSpacing: '0.5px' }}>
+            <div style={{ display: 'none', lg: 'block' }} className="topbar-branding">
+                <span style={{ fontSize: '18px', fontWeight: 700, color: '#111827', letterSpacing: '0.2px' }}>
                     LA ESQUINA DEL PROGRESO
                 </span>
             </div>
 
-            {/* Right side */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '20px' }}>
+            {/* Left side: Caja + Notificaciones */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: isMobile ? undefined : '20px' }}>
                 <button style={{
                     display: 'flex', alignItems: 'center', gap: '6px',
-                    padding: '7px 14px', fontSize: '12px', fontWeight: 600,
-                    color: 'white', backgroundColor: '#F2A900',
-                    borderRadius: '8px', border: 'none', cursor: 'pointer',
+                    padding: '9px 16px', fontSize: '13px', fontWeight: 600,
+                    color: '#111827', backgroundColor: '#F5B400',
+                    borderRadius: '10px', border: 'none', cursor: 'pointer',
                     transition: 'background 150ms'
                 }}
-                    onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FFBF00'}
-                    onMouseLeave={e => e.currentTarget.style.backgroundColor = '#F2A900'}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = '#E6A800'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = '#F5B400'}
                 >
-                    <Wallet size={14} /><span>Caja</span>
+                    <Wallet size={16} strokeWidth={2} /><span>Caja</span>
                 </button>
 
                 <Dropdown trigger={
                     <button style={{
-                        position: 'relative', padding: '8px', borderRadius: '8px',
+                        position: 'relative', padding: '8px', borderRadius: '10px',
                         border: 'none', background: 'transparent', cursor: 'pointer',
                         color: '#6B7280', transition: 'all 150ms'
                     }}
-                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FFF8E7'}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#F3F4F6'}
                         onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
-                        <Bell size={18} />
+                        <Bell size={20} strokeWidth={2} />
                         {notifications.length > 0 && (
                             <span style={{
                                 position: 'absolute', top: '4px', right: '4px',
@@ -126,66 +125,69 @@ export default function Topbar({ isMobile, onMenuToggle }) {
                             }} />
                         )}
                     </button>
-                }>
+                } align="left">
                     {(close) => (
                         <div style={{ width: '300px' }}>
-                            <div style={{ padding: '12px 16px', borderBottom: '1px solid #E2E5EA', backgroundColor: '#FFF8E7' }}>
-                                <h4 style={{ fontSize: '12px', fontWeight: 600, color: '#F2A900', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Notificaciones</h4>
+                            <div style={{ padding: '14px 16px', borderBottom: '1px solid #ECECEC' }}>
+                                <h4 style={{ fontSize: '12px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Notificaciones</h4>
                             </div>
                             {notifications.length === 0 ? (
-                                <div style={{ padding: '20px', textAlign: 'center', color: '#9CA3AF', fontSize: '13px' }}>
+                                <div style={{ padding: '24px', textAlign: 'center', color: '#9CA3AF', fontSize: '13px' }}>
                                     No hay notificaciones nuevas
                                 </div>
                             ) : (
                                 notifications.map(n => (
-                                    <div key={n.id} onClick={close} style={{ padding: '12px 16px', cursor: 'pointer', borderBottom: '1px solid #F0F2F5', transition: 'background 100ms' }}
-                                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FFF8E7'}
+                                    <div key={n.id} onClick={close} style={{ padding: '12px 16px', cursor: 'pointer', borderBottom: '1px solid #F3F3F3', transition: 'background 100ms' }}
+                                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FAFAFA'}
                                         onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                                     >
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                                            <p style={{ fontSize: '13px', fontWeight: 600, color: n.type === 'danger' ? '#DC2626' : '#1A1A2E' }}>{n.title}</p>
+                                            <p style={{ fontSize: '13px', fontWeight: 600, color: n.type === 'danger' ? '#DC2626' : '#111827' }}>{n.title}</p>
                                             <span style={{ fontSize: '10px', color: '#9CA3AF' }}>{n.time}</span>
                                         </div>
-                                        <p style={{ fontSize: '11px', color: '#6B7280', marginTop: '2px' }}>{n.message}</p>
+                                        <p style={{ fontSize: '12px', color: '#6B7280', marginTop: '2px' }}>{n.message}</p>
                                     </div>
                                 ))
                             )}
                         </div>
                     )}
                 </Dropdown>
+            </div>
 
+            {/* Right side: Admin */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
                 <Dropdown trigger={
                     <button style={{
                         display: 'flex', alignItems: 'center', gap: '10px',
-                        padding: '6px 10px', borderRadius: '8px',
+                        padding: '6px 10px', borderRadius: '10px',
                         border: 'none', background: 'transparent', cursor: 'pointer',
                         transition: 'all 150ms'
                     }}
-                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FFF8E7'}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#F3F4F6'}
                         onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
                         <div style={{
                             width: '32px', height: '32px', borderRadius: '8px',
-                            backgroundColor: '#F2A900', display: 'flex',
+                            backgroundColor: '#F5B400', display: 'flex',
                             alignItems: 'center', justifyContent: 'center'
                         }}>
-                            <span style={{ fontSize: '11px', fontWeight: 700, color: 'white' }}>
+                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#111827' }}>
                                 {userInitials}
                             </span>
                         </div>
                         {!isMobile && (
                             <div style={{ textAlign: 'left' }}>
-                                <p style={{ fontSize: '12px', fontWeight: 600, color: '#1A1A2E' }}>{currentUser.name}</p>
-                                <p style={{ fontSize: '10px', color: '#9CA3AF' }}>{currentUser.role}</p>
+                                <p style={{ fontSize: '12px', fontWeight: 600, color: '#111827' }}>{currentUser.name}</p>
+                                <p style={{ fontSize: '11px', color: '#9CA3AF' }}>{currentUser.role}</p>
                             </div>
                         )}
-                        {!isMobile && <ChevronDown size={12} style={{ color: '#9CA3AF' }} />}
+                        {!isMobile && <ChevronDown size={14} strokeWidth={2} style={{ color: '#9CA3AF' }} />}
                     </button>
                 }>
                     {(close) => (
                         <>
                             <DropdownItem icon={Settings} onClick={() => { close(); navigate('/configuracion'); }}>Configuración</DropdownItem>
-                            <div style={{ borderTop: '1px solid #E2E5EA', margin: '4px 0' }} />
+                            <div style={{ borderTop: '1px solid #ECECEC', margin: '4px 0' }} />
                             <DropdownItem icon={LogOut} danger onClick={() => { close(); handleLogout(); }}>Cerrar Sesión</DropdownItem>
                         </>
                     )}

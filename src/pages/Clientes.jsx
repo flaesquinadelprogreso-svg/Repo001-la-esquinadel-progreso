@@ -101,7 +101,7 @@ export default function Clientes() {
         <div id="dir-root" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div id="dir-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
-                    <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#1A1A2E' }}>Clientes</h1>
+                    <h1 style={{ fontSize: '20px', fontWeight: 600, color: '#111827' }}>Clientes</h1>
                     <p style={{ fontSize: '13px', color: '#6B7280', marginTop: '4px' }}>Gestión de clientes y contactos</p>
                 </div>
                 <Button onClick={() => setShowNew(true)}><Plus size={16} style={{ marginRight: '6px' }} />Nuevo Cliente</Button>
@@ -118,7 +118,7 @@ export default function Clientes() {
                     style={{
                         width: '100%',
                         padding: '10px 12px 10px 40px',
-                        border: '1px solid #E5E7EB',
+                        border: '1px solid #ECECEC',
                         borderRadius: '8px',
                         fontSize: '14px',
                         outline: 'none'
@@ -130,7 +130,7 @@ export default function Clientes() {
             <div id="dir-table" style={{
                 backgroundColor: '#fff',
                 borderRadius: '12px',
-                border: '1px solid #E5E7EB',
+                border: '1px solid #ECECEC',
                 overflow: 'hidden'
             }}>
                 {loading ? (
@@ -140,7 +140,7 @@ export default function Clientes() {
                 ) : (
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
-                            <tr style={{ backgroundColor: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
+                            <tr style={{ backgroundColor: '#F9FAFB', borderBottom: '1px solid #ECECEC' }}>
                                 <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#6B7280' }}>Nombre</th>
                                 <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#6B7280' }}>Documento</th>
                                 <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: '#6B7280' }}>Teléfono</th>
@@ -168,7 +168,7 @@ export default function Clientes() {
                                         </button>
                                         <button
                                             onClick={(e) => { e.stopPropagation(); handleDeleteClient(client.id); }}
-                                            style={{ padding: '6px', background: 'none', border: 'none', cursor: 'pointer', color: '#EF4444' }}
+                                            style={{ padding: '6px', background: 'none', border: 'none', cursor: 'pointer', color: '#DC2626' }}
                                         >
                                             <Trash2 size={16} />
                                         </button>
@@ -195,7 +195,7 @@ export default function Clientes() {
                             type="text"
                             value={newClient.nombre}
                             onChange={(e) => setNewClient(prev => ({ ...prev, nombre: e.target.value }))}
-                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }}
                             placeholder="Nombre completo"
                         />
                     </div>
@@ -205,7 +205,7 @@ export default function Clientes() {
                             type="text"
                             value={newClient.documento}
                             onChange={(e) => setNewClient(prev => ({ ...prev, documento: e.target.value }))}
-                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }}
                             placeholder="Número de documento"
                         />
                     </div>
@@ -215,7 +215,7 @@ export default function Clientes() {
                             type="text"
                             value={newClient.telefono}
                             onChange={(e) => setNewClient(prev => ({ ...prev, telefono: e.target.value }))}
-                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }}
                             placeholder="Número de teléfono"
                         />
                     </div>
@@ -225,7 +225,7 @@ export default function Clientes() {
                             type="email"
                             value={newClient.email}
                             onChange={(e) => setNewClient(prev => ({ ...prev, email: e.target.value }))}
-                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }}
                             placeholder="correo@ejemplo.com"
                         />
                     </div>
@@ -235,7 +235,7 @@ export default function Clientes() {
                             type="text"
                             value={newClient.direccion}
                             onChange={(e) => setNewClient(prev => ({ ...prev, direccion: e.target.value }))}
-                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                            style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }}
                             placeholder="Dirección"
                         />
                     </div>
@@ -256,7 +256,7 @@ export default function Clientes() {
                                 type="text"
                                 value={selected.nombre || ''}
                                 onChange={(e) => setSelected(prev => ({ ...prev, nombre: e.target.value }))}
-                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }}
                             />
                         </div>
                         <div>
@@ -265,7 +265,7 @@ export default function Clientes() {
                                 type="text"
                                 value={selected.documento || ''}
                                 onChange={(e) => setSelected(prev => ({ ...prev, documento: e.target.value }))}
-                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }}
                             />
                         </div>
                         <div>
@@ -274,7 +274,7 @@ export default function Clientes() {
                                 type="text"
                                 value={selected.telefono || ''}
                                 onChange={(e) => setSelected(prev => ({ ...prev, telefono: e.target.value }))}
-                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }}
                             />
                         </div>
                         <div>
@@ -283,7 +283,7 @@ export default function Clientes() {
                                 type="email"
                                 value={selected.email || ''}
                                 onChange={(e) => setSelected(prev => ({ ...prev, email: e.target.value }))}
-                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }}
                             />
                         </div>
                         <div>
@@ -292,7 +292,7 @@ export default function Clientes() {
                                 type="text"
                                 value={selected.direccion || ''}
                                 onChange={(e) => setSelected(prev => ({ ...prev, direccion: e.target.value }))}
-                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '14px' }}
+                                style={{ width: '100%', padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '6px', fontSize: '14px' }}
                             />
                         </div>
                         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '8px' }}>
@@ -308,7 +308,7 @@ export default function Clientes() {
                 {selected && (
                     <div style={{ minWidth: '400px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
-                            <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#E5E7EB', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#ECECEC', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <Users size={24} color="#6B7280" />
                             </div>
                             <div>

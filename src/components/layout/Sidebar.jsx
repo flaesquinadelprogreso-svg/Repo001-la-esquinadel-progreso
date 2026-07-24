@@ -74,10 +74,10 @@ export default function Sidebar({ collapsed, onToggle, isMobile, mobileOpen, onM
     const sidebarStyle = {
         position: 'fixed', left: 0, top: 0, height: '100vh',
         width: isMobile ? '250px' : `${width}px`, backgroundColor: '#FFFFFF',
-        borderRight: '1px solid #E2E5EA',
+        borderRight: '1px solid #ECECEC',
         display: 'flex', flexDirection: 'column',
         zIndex: 100, transition: 'all 300ms ease',
-        boxShadow: showSidebar ? '2px 0 8px rgba(0,0,0,0.08)' : '2px 0 8px rgba(0,0,0,0.04)',
+        boxShadow: showSidebar ? '2px 0 8px rgba(17,24,39,0.06)' : '2px 0 8px rgba(17,24,39,0.03)',
         transform: isMobile ? (mobileOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
         visibility: isMobile ? (mobileOpen ? 'visible' : 'hidden') : 'visible'
     };
@@ -90,7 +90,7 @@ export default function Sidebar({ collapsed, onToggle, isMobile, mobileOpen, onM
                 onClick={onMobileClose}
                 style={{
                     position: 'fixed', inset: 0,
-                    backgroundColor: 'rgba(0,0,0,0.4)',
+                    backgroundColor: 'rgba(17,24,39,0.4)',
                     zIndex: 99, transition: 'opacity 300ms ease'
                 }}
             />
@@ -98,31 +98,31 @@ export default function Sidebar({ collapsed, onToggle, isMobile, mobileOpen, onM
         <aside style={sidebarStyle}>
             {/* Logo */}
             <div style={{
-                display: 'flex', alignItems: 'center', gap: '12px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
                 padding: '0 16px', height: '60px',
-                borderBottom: '1px solid #E2E5EA', flexShrink: 0
+                borderBottom: '1px solid #ECECEC', flexShrink: 0
             }}>
                 <div style={{
                     width: '36px', height: '36px', borderRadius: '50%',
-                    backgroundColor: '#fff', border: '1px solid #EEF2FF',
+                    backgroundColor: '#fff', border: '1.5px solid rgba(245,180,0,0.4)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     flexShrink: 0, overflow: 'hidden'
                 }}>
                     <img src={logo} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
                 {!collapsed && (
-                    <div style={{ overflow: 'hidden' }}>
-                        <h1 style={{ fontSize: '14px', fontWeight: 700, color: '#1A1A2E', whiteSpace: 'nowrap' }}>
+                    <div style={{ overflow: 'hidden', textAlign: 'center' }}>
+                        <h1 style={{ fontSize: '17px', fontWeight: 700, color: '#F5B400', whiteSpace: 'nowrap', lineHeight: 1.2 }}>
                             LA ESQUINA
                         </h1>
-                        <p style={{ fontSize: '11px', color: '#9CA3AF', whiteSpace: 'nowrap', fontWeight: 500 }}>DEL PROGRESO</p>
+                        <p style={{ fontSize: '14px', color: '#111827', whiteSpace: 'nowrap', fontWeight: 700, lineHeight: 1.2 }}>DEL PROGRESO</p>
                     </div>
                 )}
             </div>
 
             {/* Navigation */}
-            <nav style={{ flex: 1, overflowY: 'auto', padding: '12px 10px' }}>
-                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '4px', margin: 0, padding: 0 }}>
+            <nav style={{ flex: 1, overflowY: 'auto', padding: '16px 12px' }}>
+                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px', margin: 0, padding: 0 }}>
                     {filteredNavItems.map(({ path, label, icon: Icon }) => {
                         const isActive = path === '/analisis-financiero' ? location.pathname === '/analisis-financiero' || location.pathname === '/' : location.pathname.startsWith(path);
                         return (
@@ -133,18 +133,18 @@ export default function Sidebar({ collapsed, onToggle, isMobile, mobileOpen, onM
                                     title={collapsed ? label : undefined}
                                     style={{
                                         display: 'flex', alignItems: 'center', gap: '12px',
-                                        padding: collapsed ? '10px' : '10px 14px',
+                                        padding: collapsed ? '11px' : '11px 14px',
                                         justifyContent: collapsed ? 'center' : 'flex-start',
-                                        borderRadius: '8px', textDecoration: 'none',
+                                        borderRadius: '10px', textDecoration: 'none',
                                         fontSize: '13px', fontWeight: isActive ? 600 : 500,
-                                        backgroundColor: isActive ? '#F2A900' : 'transparent',
-                                        color: isActive ? '#FFFFFF' : '#6B7280',
+                                        backgroundColor: isActive ? '#F5B400' : 'transparent',
+                                        color: isActive ? '#111827' : '#6B7280',
                                         transition: 'all 150ms ease'
                                     }}
                                     onMouseEnter={e => {
                                         if (!isActive) {
-                                            e.currentTarget.style.backgroundColor = '#FFF8E7';
-                                            e.currentTarget.style.color = '#1A1A2E';
+                                            e.currentTarget.style.backgroundColor = '#F3F4F6';
+                                            e.currentTarget.style.color = '#111827';
                                         }
                                     }}
                                     onMouseLeave={e => {
@@ -154,7 +154,7 @@ export default function Sidebar({ collapsed, onToggle, isMobile, mobileOpen, onM
                                         }
                                     }}
                                 >
-                                    <Icon size={20} style={{ flexShrink: 0, color: isActive ? '#FFFFFF' : '#9CA3AF' }} />
+                                    <Icon size={20} strokeWidth={2} style={{ flexShrink: 0, color: isActive ? '#111827' : '#6B7280' }} />
                                     {!collapsed && <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>}
                                 </NavLink>
                             </li>
@@ -164,26 +164,26 @@ export default function Sidebar({ collapsed, onToggle, isMobile, mobileOpen, onM
             </nav>
 
             {/* User */}
-            <div style={{ padding: '10px', borderTop: '1px solid #E2E5EA', flexShrink: 0 }}>
+            <div style={{ padding: '12px', borderTop: '1px solid #ECECEC', flexShrink: 0 }}>
                 <div style={{
                     display: 'flex', alignItems: 'center', gap: '10px',
-                    padding: '10px 12px', borderRadius: '8px',
-                    backgroundColor: '#FFF8E7',
+                    padding: '10px 12px', borderRadius: '10px',
+                    backgroundColor: '#F8F9FB', border: '1px solid #ECECEC',
                     justifyContent: collapsed ? 'center' : 'flex-start'
                 }}>
                     <div style={{
                         width: '32px', height: '32px', borderRadius: '8px',
-                        backgroundColor: '#F2A900', display: 'flex',
+                        backgroundColor: '#F5B400', display: 'flex',
                         alignItems: 'center', justifyContent: 'center', flexShrink: 0
                     }}>
-                        <span style={{ fontSize: '11px', fontWeight: 700, color: 'white' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#111827' }}>
                             {userInitials}
                         </span>
                     </div>
                     {!collapsed && (
                         <div style={{ overflow: 'hidden' }}>
-                            <p style={{ fontSize: '12px', fontWeight: 600, color: '#1A1A2E', whiteSpace: 'nowrap' }}>{currentUser.name}</p>
-                            <p style={{ fontSize: '10px', color: '#9CA3AF', whiteSpace: 'nowrap' }}>{currentUser.role}</p>
+                            <p style={{ fontSize: '12px', fontWeight: 600, color: '#111827', whiteSpace: 'nowrap' }}>{currentUser.name}</p>
+                            <p style={{ fontSize: '11px', color: '#9CA3AF', whiteSpace: 'nowrap' }}>{currentUser.role}</p>
                         </div>
                     )}
                 </div>
@@ -196,16 +196,16 @@ export default function Sidebar({ collapsed, onToggle, isMobile, mobileOpen, onM
                     style={{
                         position: 'absolute', right: '-12px', top: '72px',
                         width: '24px', height: '24px', borderRadius: '50%',
-                        backgroundColor: '#FFFFFF', border: '1px solid #E2E5EA',
+                        backgroundColor: '#FFFFFF', border: '1px solid #ECECEC',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         cursor: 'pointer', zIndex: 40,
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                        boxShadow: '0 1px 3px rgba(17,24,39,0.1)',
                         transition: 'all 150ms ease'
                     }}
-                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#FFF8E7'; }}
+                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#F3F4F6'; }}
                     onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#FFFFFF'; }}
                 >
-                    <ChevronLeft size={14} style={{ color: '#9CA3AF', transform: collapsed ? 'rotate(180deg)' : 'none', transition: 'transform 300ms ease' }} />
+                    <ChevronLeft size={14} strokeWidth={2} style={{ color: '#6B7280', transform: collapsed ? 'rotate(180deg)' : 'none', transition: 'transform 300ms ease' }} />
                 </button>
             )}
         </aside>

@@ -7,9 +7,9 @@ import api from '../api/client';
 
 const estadoConfig = {
     borrador: { label: 'Borrador', color: '#6B7280', bg: '#F3F4F6' },
-    enviada: { label: 'Enviada', color: '#2563EB', bg: '#EFF6FF' },
-    aceptada: { label: 'Aceptada', color: '#16A34A', bg: '#F0FDF4' },
-    rechazada: { label: 'Rechazada', color: '#DC2626', bg: '#FEF2F2' }
+    enviada: { label: 'Enviada', color: '#2563EB', bg: '#EFF4FF' },
+    aceptada: { label: 'Aceptada', color: '#16A34A', bg: '#EAF7EE' },
+    rechazada: { label: 'Rechazada', color: '#DC2626', bg: '#FDECEC' }
 };
 
 export default function Cotizaciones() {
@@ -75,7 +75,7 @@ export default function Cotizaciones() {
             {/* Header */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
-                    <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#1A1A2E' }}>Cotizaciones</h1>
+                    <h1 style={{ fontSize: '20px', fontWeight: 600, color: '#111827' }}>Cotizaciones</h1>
                     <p style={{ fontSize: '13px', color: '#6B7280', marginTop: '4px' }}>Gestión de presupuestos y cotizaciones</p>
                 </div>
                 <Button onClick={() => navigate('/nueva-cotizacion')}>
@@ -86,12 +86,12 @@ export default function Cotizaciones() {
             {/* Summary Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
                 {[
-                    { label: 'Total', value: resumen.total, color: '#1A1A2E' },
+                    { label: 'Total', value: resumen.total, color: '#111827' },
                     { label: 'Borradores', value: resumen.borrador, color: '#6B7280' },
                     { label: 'Enviadas', value: resumen.enviada, color: '#2563EB' },
                     { label: 'Aceptadas', value: resumen.aceptada, color: '#16A34A' }
                 ].map((card, i) => (
-                    <div key={i} style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #E5E7EB' }}>
+                    <div key={i} style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '12px', border: '1px solid #ECECEC' }}>
                         <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '4px' }}>{card.label}</div>
                         <div style={{ fontSize: '24px', fontWeight: 700, color: card.color }}>{card.value}</div>
                     </div>
@@ -107,13 +107,13 @@ export default function Cotizaciones() {
                         placeholder="Buscar por cliente o número..."
                         value={search}
                         onChange={e => setSearch(e.target.value)}
-                        style={{ width: '100%', padding: '10px 12px 10px 40px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '14px', outline: 'none' }}
+                        style={{ width: '100%', padding: '10px 12px 10px 40px', border: '1px solid #ECECEC', borderRadius: '8px', fontSize: '14px', outline: 'none' }}
                     />
                 </div>
                 <select
                     value={filterEstado}
                     onChange={e => setFilterEstado(e.target.value)}
-                    style={{ padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '14px', backgroundColor: '#fff' }}
+                    style={{ padding: '10px 12px', border: '1px solid #ECECEC', borderRadius: '8px', fontSize: '14px', backgroundColor: '#fff' }}
                 >
                     <option value="todas">Todas</option>
                     <option value="borrador">Borrador</option>
@@ -127,17 +127,17 @@ export default function Cotizaciones() {
             {loading ? (
                 <div style={{ padding: '60px', textAlign: 'center', color: '#6B7280' }}>Cargando...</div>
             ) : (
-                <div style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
+                <div style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #ECECEC', overflow: 'hidden' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                         <thead>
-                            <tr style={{ borderBottom: '2px solid #E5E7EB', backgroundColor: '#F9FAFB' }}>
-                                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>#</th>
-                                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Cliente</th>
-                                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Fecha</th>
-                                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Válida hasta</th>
-                                <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, color: '#374151' }}>Total</th>
-                                <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, color: '#374151' }}>Estado</th>
-                                <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, color: '#374151' }}>Acciones</th>
+                            <tr style={{ borderBottom: '2px solid #ECECEC', backgroundColor: '#F9FAFB' }}>
+                                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#6B7280' }}>#</th>
+                                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#6B7280' }}>Cliente</th>
+                                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#6B7280' }}>Fecha</th>
+                                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#6B7280' }}>Válida hasta</th>
+                                <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 600, color: '#6B7280' }}>Total</th>
+                                <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, color: '#6B7280' }}>Estado</th>
+                                <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, color: '#6B7280' }}>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -148,7 +148,7 @@ export default function Cotizaciones() {
                                         onClick={() => navigate(`/editar-cotizacion/${cot.id}`)}
                                         onMouseOver={e => e.currentTarget.style.backgroundColor = '#F9FAFB'}
                                         onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                        <td style={{ padding: '12px 16px', fontWeight: 600, color: '#F2A900' }}>{cot.numeroCotizacion}</td>
+                                        <td style={{ padding: '12px 16px', fontWeight: 600, color: '#F5B400' }}>{cot.numeroCotizacion}</td>
                                         <td style={{ padding: '12px 16px' }}>{cot.cliente?.nombre || 'Sin cliente'}</td>
                                         <td style={{ padding: '12px 16px', color: '#6B7280' }}>{new Date(cot.createdAt).toLocaleDateString('es-CO')}</td>
                                         <td style={{ padding: '12px 16px', color: '#6B7280' }}>{cot.validaHasta ? new Date(cot.validaHasta + 'T12:00:00').toLocaleDateString('es-CO') : '-'}</td>
@@ -180,7 +180,7 @@ export default function Cotizaciones() {
                                                 )}
                                                 {isAdmin && (
                                                     <button onClick={() => handleDelete(cot.id)} title="Eliminar"
-                                                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#EF4444', padding: '4px' }}>
+                                                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#DC2626', padding: '4px' }}>
                                                         <Trash2 size={14} />
                                                     </button>
                                                 )}
