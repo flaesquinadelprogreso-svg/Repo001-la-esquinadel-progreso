@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { User, LogIn, AlertCircle, Lock, Wrench } from 'lucide-react';
 import api from '../api/client';
 import logoSrc from '../Logo/Logo1.jpg';
+import backLoginSrc from '../Logo/backlogin.png';
 
 export default function Login() {
     const [username, setUsername] = useState('');
@@ -38,125 +39,65 @@ export default function Login() {
             backgroundColor: '#0F172A',
             fontFamily: "'Inter', system-ui, sans-serif"
         }}>
-            {/* Panel izquierdo - Branding */}
+            {/* Panel izquierdo - Imagen de marca */}
             <div className="login-brand-panel" style={{
-                flex: '1',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'linear-gradient(135deg, #1A1A2E 0%, #0F172A 50%, #1E293B 100%)',
+                flex: '1.15',
                 position: 'relative',
                 overflow: 'hidden',
-                padding: '40px'
+                backgroundImage: `url(${backLoginSrc})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'right center',
             }}>
-                {/* Decorative elements */}
+                {/* Degradado sutil para profundidad y legibilidad de los elementos flotantes */}
                 <div style={{
                     position: 'absolute',
-                    top: '-80px',
-                    right: '-80px',
-                    width: '300px',
-                    height: '300px',
-                    borderRadius: '50%',
-                    background: 'radial-gradient(circle, rgba(242,169,0,0.15) 0%, transparent 70%)',
-                }} />
-                <div style={{
-                    position: 'absolute',
-                    bottom: '-60px',
-                    left: '-60px',
-                    width: '250px',
-                    height: '250px',
-                    borderRadius: '50%',
-                    background: 'radial-gradient(circle, rgba(242,169,0,0.1) 0%, transparent 70%)',
-                }} />
-                <div style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: '400px',
-                    height: '400px',
-                    borderRadius: '50%',
-                    border: '1px solid rgba(242,169,0,0.08)',
+                    inset: 0,
+                    background: 'linear-gradient(180deg, rgba(15,23,42,0.45) 0%, rgba(15,23,42,0) 28%, rgba(15,23,42,0) 62%, rgba(15,23,42,0.6) 100%)'
                 }} />
 
-                {/* Logo grande */}
-                <div style={{
-                    position: 'relative',
-                    zIndex: 1,
-                    textAlign: 'center'
-                }}>
+                {/* Emblema del logo, arriba a la izquierda para no tapar el texto de la imagen */}
+                <div style={{ position: 'absolute', top: '32px', left: '32px', zIndex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{
-                        width: '120px',
-                        height: '120px',
+                        width: '46px',
+                        height: '46px',
                         borderRadius: '50%',
                         overflow: 'hidden',
-                        margin: '0 auto 28px auto',
-                        border: '3px solid rgba(242,169,0,0.4)',
-                        boxShadow: '0 0 40px rgba(242,169,0,0.2), 0 0 80px rgba(242,169,0,0.1)',
+                        border: '2px solid rgba(242,169,0,0.6)',
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.45)',
+                        flexShrink: 0
                     }}>
                         <img src={logoSrc} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </div>
-
-                    <h1 style={{
-                        fontSize: '28px',
-                        fontWeight: 800,
-                        color: '#F2A900',
-                        margin: '0 0 6px 0',
-                        letterSpacing: '1px',
-                        textShadow: '0 2px 10px rgba(242,169,0,0.3)'
-                    }}>
-                        LA ESQUINA
-                    </h1>
-                    <p style={{
-                        fontSize: '16px',
-                        color: '#F2A900',
-                        margin: '0 0 8px 0',
-                        fontWeight: 600,
-                        letterSpacing: '3px',
-                        opacity: 0.8
-                    }}>
-                        DEL PROGRESO
-                    </p>
-
-                    <div style={{
-                        width: '60px',
-                        height: '2px',
-                        background: 'linear-gradient(90deg, transparent, #F2A900, transparent)',
-                        margin: '20px auto',
-                    }} />
-
-                    <p style={{
-                        fontSize: '13px',
-                        color: '#94A3B8',
-                        margin: 0,
-                        fontWeight: 400,
-                        letterSpacing: '0.5px',
-                        lineHeight: '1.6'
-                    }}>
-                        Ferreteria &bull; Algarrobo, Colombia
-                    </p>
-
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '8px',
-                        marginTop: '32px',
-                        padding: '10px 20px',
-                        backgroundColor: 'rgba(242,169,0,0.08)',
-                        borderRadius: '30px',
-                        border: '1px solid rgba(242,169,0,0.15)',
-                    }}>
-                        <Wrench size={14} color="#F2A900" />
-                        <span style={{ fontSize: '11px', color: '#CBD5E1', fontWeight: 500, letterSpacing: '0.5px' }}>
-                            Sistema de Gestión Integral
-                        </span>
+                    <div style={{ lineHeight: 1.25 }}>
+                        <div style={{ color: '#fff', fontWeight: 800, fontSize: '13px', letterSpacing: '0.5px', textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>LA ESQUINA</div>
+                        <div style={{ color: '#F2A900', fontWeight: 600, fontSize: '11px', letterSpacing: '1.5px', textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>DEL PROGRESO</div>
                     </div>
+                </div>
+
+                {/* Badge inferior, alejado del texto principal de la imagen */}
+                <div style={{
+                    position: 'absolute',
+                    bottom: '32px',
+                    left: '32px',
+                    zIndex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '10px 18px',
+                    backgroundColor: 'rgba(15,23,42,0.55)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    borderRadius: '30px',
+                    border: '1px solid rgba(242,169,0,0.25)'
+                }}>
+                    <Wrench size={14} color="#F2A900" />
+                    <span style={{ fontSize: '12px', color: '#E2E8F0', fontWeight: 500, letterSpacing: '0.3px' }}>
+                        Sistema de Gestión Integral &bull; Algarrobo, Colombia
+                    </span>
                 </div>
             </div>
 
-            {/* Panel derecho - Formulario */}
+            {/* Panel derecho - Formulario (hoja flotante con bordes suaves) */}
             <div className="login-form-panel" style={{
                 flex: '1',
                 display: 'flex',
@@ -165,7 +106,10 @@ export default function Login() {
                 justifyContent: 'center',
                 backgroundColor: '#FFFFFF',
                 padding: '40px',
-                position: 'relative'
+                position: 'relative',
+                borderRadius: '48px 0 0 48px',
+                boxShadow: '-28px 0 60px rgba(15,23,42,0.22)',
+                zIndex: 2
             }}>
                 <div style={{ width: '100%', maxWidth: '380px' }}>
                     {/* Mobile logo (hidden on desktop) */}
@@ -190,7 +134,7 @@ export default function Login() {
                         <div style={{
                             backgroundColor: '#FEF2F2',
                             border: '1px solid #FECACA',
-                            borderRadius: '10px',
+                            borderRadius: '14px',
                             padding: '12px 16px',
                             marginBottom: '24px',
                             display: 'flex',
@@ -228,7 +172,7 @@ export default function Login() {
                                         width: '100%',
                                         padding: '13px 14px 13px 44px',
                                         border: '2px solid #E5E7EB',
-                                        borderRadius: '10px',
+                                        borderRadius: '14px',
                                         fontSize: '14px',
                                         outline: 'none',
                                         transition: 'all 0.2s ease',
@@ -271,7 +215,7 @@ export default function Login() {
                                         width: '100%',
                                         padding: '13px 14px 13px 44px',
                                         border: '2px solid #E5E7EB',
-                                        borderRadius: '10px',
+                                        borderRadius: '14px',
                                         fontSize: '14px',
                                         outline: 'none',
                                         transition: 'all 0.2s ease',
@@ -303,7 +247,7 @@ export default function Login() {
                                 backgroundColor: (loading || !username || !password) ? '#D1D5DB' : '#F2A900',
                                 color: 'white',
                                 padding: '14px',
-                                borderRadius: '10px',
+                                borderRadius: '14px',
                                 fontSize: '15px',
                                 fontWeight: 700,
                                 border: 'none',
@@ -379,7 +323,13 @@ export default function Login() {
                 }
                 @media (max-width: 768px) {
                     .login-brand-panel { display: none !important; }
-                    .login-form-panel { flex: unset !important; width: 100% !important; min-height: 100vh !important; }
+                    .login-form-panel {
+                        flex: unset !important;
+                        width: 100% !important;
+                        min-height: 100vh !important;
+                        border-radius: 0 !important;
+                        box-shadow: none !important;
+                    }
                     .login-mobile-logo { display: block !important; }
                 }
             `}</style>
